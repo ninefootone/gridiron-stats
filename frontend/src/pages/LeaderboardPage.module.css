@@ -1,0 +1,98 @@
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.statSelector {
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.catLabel {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.statPill {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-300);
+  text-transform: none;
+  letter-spacing: 0;
+  transition: all 0.15s;
+  margin-bottom: 3px;
+}
+.statPill:hover { background: rgba(255,255,255,0.06); color: var(--white); }
+.activeStatPill { background: rgba(245,166,35,0.15); color: var(--gold); border-color: rgba(245,166,35,0.3); }
+
+.board {
+  background: rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.boardTitle {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+  color: var(--gold);
+}
+
+.leaderRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.leaderRow:hover { background: rgba(255,255,255,0.08); border-color: rgba(245,166,35,0.3); }
+.first {
+  background: rgba(245,166,35,0.08);
+  border-color: rgba(245,166,35,0.25);
+}
+
+.rank { font-size: 1.2rem; width: 28px; text-align: center; flex-shrink: 0; }
+.playerNum { font-family: var(--font-display); font-size: 1.2rem; font-weight: 900; color: var(--gold); width: 38px; flex-shrink: 0; }
+.leaderInfo { flex: 1; display: flex; align-items: center; gap: 8px; }
+.leaderName { font-weight: 700; font-size: 1rem; }
+
+.leaderTotal {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}

@@ -1,0 +1,118 @@
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.teamInfo { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+.record {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0,0,0,0.25);
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  text-align: center;
+}
+.recordNum {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+.recordSep { font-size: 1.4rem; color: var(--gray-500); margin: 0 2px; }
+.recordLabel { font-size: 0.7rem; color: var(--gray-300); text-transform: uppercase; letter-spacing: 0.06em; margin-left: 6px; }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 0;
+}
+.tab {
+  padding: 10px 18px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+  color: var(--gray-300);
+  border-bottom: 3px solid transparent;
+  border-radius: var(--radius) var(--radius) 0 0;
+  transition: all 0.15s;
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--white); }
+.activeTab { color: var(--gold); border-bottom-color: var(--gold); }
+
+.playerGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.playerCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.playerCard:hover { background: rgba(255,255,255,0.09); border-color: var(--gold); }
+
+.playerNum {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--gold);
+  width: 44px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.playerInfo { flex: 1; display: flex; align-items: center; gap: 10px; }
+.playerName { font-weight: 600; font-size: 1.05rem; }
+
+.gameList { display: flex; flex-direction: column; gap: 10px; }
+.gameCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.gameCard:hover { background: rgba(255,255,255,0.09); border-color: var(--gold); }
+
+.gameDate {
+  font-size: 0.82rem;
+  color: var(--gray-300);
+  width: 100px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.gameVs { flex: 1; }
+.gameOpponent { font-weight: 700; font-size: 1.05rem; }
+.gameLocation { font-size: 0.82rem; color: var(--gray-300); margin-top: 2px; }
+
+.gameRight { text-align: right; flex-shrink: 0; }
+.score {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+.win { color: #6edba8; }
+.loss { color: var(--danger); }
+.statCount { font-size: 0.75rem; color: var(--gray-500); margin-top: 2px; }
