@@ -16,12 +16,12 @@ function PrivateRoute({ children }) {
 }
 
 export default function App() {
-  const { isLoading } = useAuth0();
+  const { isLoading, isAuthenticated } = useAuth0();
   if (isLoading) return <div className="spinner" style={{ marginTop: '120px' }} />;
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/teams" replace /> : <LoginPage />} />
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<Navigate to="/teams" replace />} />
         <Route path="teams" element={<TeamsPage />} />
