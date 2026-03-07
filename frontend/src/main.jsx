@@ -15,6 +15,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         audience: import.meta.env.VITE_AUTH0_AUDIENCE,
         scope: 'openid profile email',
       }}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
     >
       <BrowserRouter>
         <App />
