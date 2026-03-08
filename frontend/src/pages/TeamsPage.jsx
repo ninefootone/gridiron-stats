@@ -91,10 +91,10 @@ export default function TeamsPage() {
               <div className={styles.teamName}>{team.name}</div>
               {team.season && <div className={styles.season}>{team.season}</div>}
               <div className={styles.stats}>
-                <span className="stat-badge">👥 {team.player_count} players</span>
-                <span className="stat-badge">🏈 {team.game_count} games</span>
-                {team.my_role === 'admin' && <span className="tag tag-gold">Admin</span>}
-                {team.my_role === 'member' && <span className="tag tag-gray">Member</span>}
+                <span className="stat-badge">{team.player_count} players</span>
+                <span className="stat-badge">{team.game_count} games</span>
+                {team.my_role === 'admin' && <span className="tag tag-gold" style={{ alignSelf: 'center' }}>Admin</span>}
+		{team.my_role === 'member' && <span className="tag tag-gray" style={{ alignSelf: 'center' }}>Member</span>}
               </div>
               {team.join_code && team.my_role === 'admin' && (
                 <div
