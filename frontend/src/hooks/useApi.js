@@ -1,13 +1,13 @@
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '@clerk/clerk-react';
 import { useCallback } from 'react';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export function useApi() {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getToken } = useAuth();
 
   const request = useCallback(async (path, options = {}) => {
-    const token = await getAccessTokenSilently();
+    const token = await getToken();
     const res = await fetch(`${BASE_URL}/api${path}`, {
       ...options,
       headers: {
@@ -21,7 +21,7 @@ export function useApi() {
       throw new Error(err.error || 'Request failed');
     }
     return res.json();
-  }, [getAccessTokenSilently]);
+  }, [getToken]);
 
   return {
     get: (path) => request(path),

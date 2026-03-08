@@ -1,4 +1,4 @@
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '@clerk/clerk-react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage';
@@ -9,26 +9,19 @@ import PlayerPage from './pages/PlayerPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 
 function PrivateRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth0();
-  if (isLoading) return <div className="spinner" style={{ marginTop: '120px' }} />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return <div className="spinner" style={{ marginTop: '120px' }} />;
+  if (!isSignedIn) return <Navigate to="/login" replace />;
   return children;
 }
 
-function CallbackPage() {
-  const { isLoading } = useAuth0();
-  if (isLoading) return <div className="spinner" style={{ marginTop: '120px' }} />;
-  return <Navigate to="/teams" replace />;
-}
-
 export default function App() {
-  const { isLoading, isAuthenticated } = useAuth0();
-  if (isLoading) return <div className="spinner" style={{ marginTop: '120px' }} />;
+  const { isLoaded } = useAuth();
+  if (!isLoaded) return <div className="spinner" style={{ marginTop: '120px' }} />;
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/teams" replace /> : <LoginPage />} />
-      <Route path="/callback" element={<CallbackPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<Navigate to="/teams" replace />} />
         <Route path="teams" element={<TeamsPage />} />

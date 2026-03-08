@@ -1,19 +1,14 @@
-const { auth } = require('express-oauth2-jwt-bearer');
+const { clerkMiddleware, getAuth } = require('@clerk/express');
 const { pool } = require('../db/init');
 
-// Validates the JWT from Auth0
-const checkJwt = auth({
-  audience: process.env.AUTH0_AUDIENCE,
-  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
-});
+const clerkAuth = clerkMiddleware();
 
-// Attaches db user record to req.user
-async function attachUser(req, res, next) {
+async function requireAuth(req, res, next) {
   try {
-    const auth0Id = req.auth.payload.sub;
-    const email = req.auth.payload[`${process.env.AUTH0_AUDIENCE}/email`] || req.auth.payload.email || '';
-    const name = req.auth.payload[`${process.env.AUTH0_AUDIENCE}/name`] || req.auth.payload.name || '';
-    const picture = req.auth.payload[`${process.env.AUTH0_AUDIENCE}/picture`] || req.auth.payload.picture || '';
+    const auth = getAuth(req);
+    if (!auth?.userId) {
+      return res.status(401).json({ error: 'Unauthorised' });
+    }
 
     const result = await pool.query(
       `INSERT INTO users (auth0_id, email, name, picture)
@@ -23,7 +18,12 @@ async function attachUser(req, res, next) {
              name = EXCLUDED.name,
              picture = EXCLUDED.picture
        RETURNING *`,
-      [auth0Id, email, name, picture]
+      [
+        auth.userId,
+        auth.sessionClaims?.email || '',
+        auth.sessionClaims?.name || auth.sessionClaims?.username || '',
+        auth.sessionClaims?.image_url || '',
+      ]
     );
 
     req.dbUser = result.rows[0];
@@ -33,6 +33,4 @@ async function attachUser(req, res, next) {
   }
 }
 
-const requireAuth = [checkJwt, attachUser];
-
-module.exports = { checkJwt, attachUser, requireAuth };
+module.exports = { clerkAuth, requireAuth };
