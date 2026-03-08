@@ -1,6 +1,13 @@
 .shell {
   display: flex;
+  flex-direction: column;
   height: 100vh;
+  overflow: hidden;
+}
+
+.body {
+  display: flex;
+  flex: 1;
   overflow: hidden;
 }
 
@@ -105,7 +112,7 @@
 
 @media (max-width: 700px) {
   .sidebar { display: none; }
-  .main { padding: 16px; padding-top: 0; }
+  .main { padding: 16px; }
   .mobileHeader {
     display: flex;
     align-items: center;
