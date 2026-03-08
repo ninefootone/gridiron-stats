@@ -28,15 +28,20 @@ export default function Layout() {
           {user?.imageUrl && <img src={user.imageUrl} alt={user.fullName} className={styles.avatar} />}
           <div className={styles.userInfo}>
             <div className={styles.userName}>{user?.fullName || user?.primaryEmailAddress?.emailAddress}</div>
-            <button
-              className={styles.logoutBtn}
-              onClick={() => signOut(() => navigate('/login'))}
-            >
+            <button className={styles.logoutBtn} onClick={() => signOut(() => navigate('/login'))}>
               Sign out
             </button>
           </div>
         </div>
       </nav>
+
+      {/* Mobile header */}
+      <div className={styles.mobileHeader}>
+        <div className={styles.mobileLogo} onClick={() => navigate('/teams')}>🏈 Gridiron Stats</div>
+        <button className={styles.mobileSignOut} onClick={() => signOut(() => navigate('/login'))}>
+          Sign out
+        </button>
+      </div>
 
       <main className={`${styles.main} yard-lines`}>
         <Outlet />

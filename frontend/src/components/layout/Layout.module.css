@@ -99,7 +99,43 @@
   padding: 32px;
 }
 
+.mobileHeader {
+  display: none;
+}
+
 @media (max-width: 700px) {
   .sidebar { display: none; }
-  .main { padding: 16px; }
+  .main { padding: 16px; padding-top: 0; }
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .mobileLogo {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    cursor: pointer;
+  }
+  .mobileSignOut {
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    color: var(--gray-300);
+    background: none;
+    text-transform: none;
+    letter-spacing: 0;
+    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius);
+  }
+  .mobileSignOut:hover { color: var(--white); border-color: var(--white); }
 }

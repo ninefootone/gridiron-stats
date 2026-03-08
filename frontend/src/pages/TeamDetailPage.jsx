@@ -12,6 +12,7 @@ export default function TeamDetailPage() {
   const api = useApi();
   const [team, setTeam] = useState(null);
   const isViewer = team?.my_role === 'viewer';
+  const isAdmin = team?.my_role === 'admin';
   const [players, setPlayers] = useState([]);
   const [games, setGames] = useState([]);
   const [tab, setTab] = useState('players');
@@ -79,6 +80,19 @@ export default function TeamDetailPage() {
         <div className={styles.teamInfo}>
           <div className="page-title">{team.name}</div>
           {team.season && <span className="tag tag-gold">{team.season}</span>}
+          {isAdmin && (
+            <button
+              className="btn btn-danger btn-sm"
+              style={{ marginTop: 8, alignSelf: 'flex-start' }}
+              onClick={async () => {
+                if (!confirm(`Delete ${team.name}? This cannot be undone.`)) return;
+                await api.del(`/teams/${team.id}`);
+                navigate('/teams');
+              }}
+            >
+              Delete Team
+            </button>
+          )}
         </div>
         <div className={styles.record}>
           <span className={styles.recordNum}>{wins}</span><span className={styles.recordSep}>-</span><span className={styles.recordNum}>{losses}</span>
