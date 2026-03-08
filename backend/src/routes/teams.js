@@ -4,15 +4,26 @@ const { pool } = require('../db/init');
 
 const router = express.Router();
 
-// GET /api/teams — list teams the current user belongs to
+function generateJoinCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+// GET /api/teams
 router.get('/', requireAuth, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
       `SELECT t.*, u.name as creator_name,
               (SELECT COUNT(*) FROM players p WHERE p.team_id = t.id AND p.active = true) AS player_count,
-              (SELECT COUNT(*) FROM games g WHERE g.team_id = t.id) AS game_count
+              (SELECT COUNT(*) FROM games g WHERE g.team_id = t.id) AS game_count,
+              tm.role as my_role
        FROM teams t
        LEFT JOIN users u ON u.id = t.created_by
+       LEFT JOIN team_members tm ON tm.team_id = t.id AND tm.user_id = $1
        WHERE t.created_by = $1
           OR t.id IN (SELECT team_id FROM team_members WHERE user_id = $1)
        ORDER BY t.created_at DESC`,
@@ -24,7 +35,7 @@ router.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-// POST /api/teams — create a team
+// POST /api/teams
 router.post('/', requireAuth, async (req, res, next) => {
   const { name, season, description } = req.body;
   if (!name) return res.status(400).json({ error: 'Team name required' });
@@ -32,12 +43,18 @@ router.post('/', requireAuth, async (req, res, next) => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      let join_code, attempts = 0;
+      while (!join_code && attempts < 10) {
+        const candidate = generateJoinCode();
+        const existing = await client.query('SELECT id FROM teams WHERE join_code = $1', [candidate]);
+        if (!existing.rows.length) join_code = candidate;
+        attempts++;
+      }
       const { rows } = await client.query(
-        `INSERT INTO teams (name, season, description, created_by) VALUES ($1, $2, $3, $4) RETURNING *`,
-        [name, season, description, req.dbUser.id]
+        `INSERT INTO teams (name, season, description, created_by, join_code) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [name, season, description, req.dbUser.id, join_code]
       );
       const team = rows[0];
-      // Creator also gets a team_member record with admin role
       await client.query(
         `INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, 'admin')`,
         [team.id, req.dbUser.id]
@@ -55,12 +72,47 @@ router.post('/', requireAuth, async (req, res, next) => {
   }
 });
 
+// POST /api/teams/join
+router.post('/join', requireAuth, async (req, res, next) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'Join code required' });
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM teams WHERE UPPER(join_code) = UPPER($1)`,
+      [code.trim()]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Invalid join code — double check and try again' });
+    const team = rows[0];
+
+    const existing = await pool.query(
+      `SELECT * FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [team.id, req.dbUser.id]
+    );
+    if (existing.rows.length) {
+      return res.status(400).json({ error: 'You are already a member of this team' });
+    }
+
+    await pool.query(
+      `INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, 'member')`,
+      [team.id, req.dbUser.id]
+    );
+    res.json({ success: true, team });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/teams/:id
 router.get('/:id', requireAuth, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
-      `SELECT t.*, u.name as creator_name FROM teams t LEFT JOIN users u ON u.id = t.created_by WHERE t.id = $1`,
-      [req.params.id]
+      `SELECT t.*, u.name as creator_name,
+              tm.role as my_role
+       FROM teams t
+       LEFT JOIN users u ON u.id = t.created_by
+       LEFT JOIN team_members tm ON tm.team_id = t.id AND tm.user_id = $2
+       WHERE t.id = $1`,
+      [req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Team not found' });
     res.json(rows[0]);
