@@ -3,12 +3,14 @@ export const STAT_CATEGORIES = {
     label: 'Offense',
     color: '#f5a623',
     stats: [
-      { key: 'touchdown',      label: 'Touchdown',          icon: '🏈', unit: null,   description: 'TD scored' },
-      { key: 'receiving_yds',  label: 'Receiving Yards',    icon: '📡', unit: 'yds',  description: 'Yards after catch' },
-      { key: 'rushing_yds',    label: 'Rushing Yards',      icon: '🏃', unit: 'yds',  description: 'Yards run' },
-      { key: 'passing_yds',    label: 'Passing Yards',      icon: '💨', unit: 'yds',  description: 'Yards thrown' },
-      { key: 'reception',      label: 'Reception',          icon: '🙌', unit: null,   description: 'Catch made' },
-      { key: 'two_pt_conv',    label: '2-Point Conversion', icon: '✌️', unit: null,   description: '2-pt conversion' },
+	{ key: 'td_passing',     label: 'Passing TD',         icon: '🏈', unit: null,   description: 'Touchdown pass (QB)' },
+	{ key: 'td_receiving',   label: 'Receiving TD',       icon: '🙌', unit: null,   description: 'Touchdown catch (WR/TE/RB)' },
+	{ key: 'td_rushing',     label: 'Rushing TD',         icon: '🏃', unit: null,   description: 'Touchdown run (RB/QB)' },
+	{ key: 'receiving_yds',  label: 'Receiving Yards',    icon: '📡', unit: 'yds',  description: 'Yards after catch' },
+	{ key: 'rushing_yds',    label: 'Rushing Yards',      icon: '💨', unit: 'yds',  description: 'Yards run' },
+	{ key: 'passing_yds',    label: 'Passing Yards',      icon: '💫', unit: 'yds',  description: 'Yards thrown' },
+	{ key: 'reception',      label: 'Reception',          icon: '👐', unit: null,   description: 'Catch made' },
+	{ key: 'two_pt_conv',    label: '2-Point Conversion', icon: '✌️', unit: null,   description: '2-pt conversion' },
     ]
   },
   defense: {

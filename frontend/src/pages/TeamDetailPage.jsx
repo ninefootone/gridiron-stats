@@ -87,13 +87,13 @@ export default function TeamDetailPage() {
 
       <div className={styles.tabs}>
         <button className={`${styles.tab} ${tab === 'players' ? styles.activeTab : ''}`} onClick={() => setTab('players')}>
-          👥 Players ({players.length})
+          Players ({players.length})
         </button>
         <button className={`${styles.tab} ${tab === 'games' ? styles.activeTab : ''}`} onClick={() => setTab('games')}>
-          🏈 Games ({games.length})
+          Games ({games.length})
         </button>
         <button className={`${styles.tab} ${tab === 'leaderboard' ? styles.activeTab : ''}`} onClick={() => navigate(`/teams/${teamId}/leaderboard`)}>
-          📊 Leaderboard
+          Leaderboard
         </button>
       </div>
 
