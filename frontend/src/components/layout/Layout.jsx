@@ -17,12 +17,6 @@ export default function Layout() {
           </div>
         </div>
 
-        <nav className={styles.navLinks}>
-          <NavLink to="/teams" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}>
-            My Teams
-          </NavLink>
-        </nav>
-
         <div className={styles.userArea}>
           {user?.imageUrl && <img src={user.imageUrl} alt={user.fullName} className={styles.avatar} />}
           <div className={styles.userInfo}>
