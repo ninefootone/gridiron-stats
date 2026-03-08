@@ -15,6 +15,12 @@ function PrivateRoute({ children }) {
   return children;
 }
 
+function CallbackPage() {
+  const { isLoading } = useAuth0();
+  if (isLoading) return <div className="spinner" style={{ marginTop: '120px' }} />;
+  return <Navigate to="/teams" replace />;
+}
+
 export default function App() {
   const { isLoading, isAuthenticated } = useAuth0();
   if (isLoading) return <div className="spinner" style={{ marginTop: '120px' }} />;
@@ -22,6 +28,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/teams" replace /> : <LoginPage />} />
+      <Route path="/callback" element={<CallbackPage />} />
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
         <Route index element={<Navigate to="/teams" replace />} />
         <Route path="teams" element={<TeamsPage />} />
