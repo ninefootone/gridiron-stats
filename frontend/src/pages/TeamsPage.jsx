@@ -106,9 +106,11 @@ export default function TeamsPage() {
                       onClick={e => { e.stopPropagation(); copyCode(team.join_code, team.id + '_join'); }}
                       title="Click to copy join code"
                     >
-                      <span className={styles.joinCodeLabel}>Join</span>
-                      <span className={styles.joinCodeValue}>{team.join_code}</span>
-                      <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_join' ? '✓' : '📋'}</span>
+                      <span className={styles.joinCodeLabel}>Join Code</span>
+			<div className={styles.joinCodeTop}>
+			  <span className={styles.joinCodeValue}>{team.join_code}</span>
+			  <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_join' ? '✓' : '📋'}</span>
+			</div>
                     </div>
                   )}
                   {team.view_code && (
@@ -117,9 +119,11 @@ export default function TeamsPage() {
                       onClick={e => { e.stopPropagation(); copyCode(team.view_code, team.id + '_view'); }}
                       title="Click to copy view code"
                     >
-                      <span className={styles.joinCodeLabel}>View</span>
-                      <span className={styles.joinCodeValue}>{team.view_code}</span>
-                      <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_view' ? '✓' : '📋'}</span>
+                      <span className={styles.joinCodeLabel}>View Code</span>
+			<div className={styles.joinCodeTop}>
+			  <span className={styles.joinCodeValue}>{team.view_code}</span>
+			  <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_view' ? '✓' : '📋'}</span>
+			</div>
                     </div>
                   )}
                 </div>
