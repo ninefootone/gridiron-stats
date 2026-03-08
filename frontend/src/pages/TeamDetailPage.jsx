@@ -11,6 +11,7 @@ export default function TeamDetailPage() {
   const navigate = useNavigate();
   const api = useApi();
   const [team, setTeam] = useState(null);
+  const isViewer = team?.my_role === 'viewer';
   const [players, setPlayers] = useState([]);
   const [games, setGames] = useState([]);
   const [tab, setTab] = useState('players');
@@ -99,9 +100,11 @@ export default function TeamDetailPage() {
 
       {tab === 'players' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-            <button className="btn btn-primary" onClick={() => setPlayerModal(true)}>+ Add Player</button>
-          </div>
+          {!isViewer && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+              <button className="btn btn-primary" onClick={() => setPlayerModal(true)}>+ Add Player</button>
+            </div>
+          )}
           {players.length === 0 ? (
             <div className="empty-state"><div className="icon">👥</div><p>No players yet. Add your roster.</p></div>
           ) : (
@@ -113,7 +116,7 @@ export default function TeamDetailPage() {
                     <div className={styles.playerName}>{p.name}</div>
                     {p.position && <span className="tag tag-green">{p.position}</span>}
                   </div>
-                  <button className="btn btn-danger btn-sm" onClick={e => deletePlayer(p.id, e)}>✕</button>
+                  {!isViewer && <button className="btn btn-danger btn-sm" onClick={e => deletePlayer(p.id, e)}>✕</button>}
                 </div>
               ))}
             </div>
@@ -123,9 +126,11 @@ export default function TeamDetailPage() {
 
       {tab === 'games' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-            <button className="btn btn-primary" onClick={() => setGameModal(true)}>+ Add Game</button>
-          </div>
+          {!isViewer && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+              <button className="btn btn-primary" onClick={() => setGameModal(true)}>+ Add Game</button>
+            </div>
+          )}
           {games.length === 0 ? (
             <div className="empty-state"><div className="icon">🏈</div><p>No games yet. Add your schedule.</p></div>
           ) : (

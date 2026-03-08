@@ -22,6 +22,7 @@ const SCHEMA = `
     season VARCHAR(50),
     description TEXT,
     join_code VARCHAR(10) UNIQUE,
+    view_code VARCHAR(10) UNIQUE,
     created_by INTEGER REFERENCES users(id),
     created_at TIMESTAMPTZ DEFAULT NOW()
   );
@@ -75,6 +76,15 @@ const SCHEMA = `
       WHERE table_name='teams' AND column_name='join_code'
     ) THEN
       ALTER TABLE teams ADD COLUMN join_code VARCHAR(10) UNIQUE;
+    END IF;
+  END $$;
+
+  DO $$ BEGIN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='teams' AND column_name='view_code'
+    ) THEN
+      ALTER TABLE teams ADD COLUMN view_code VARCHAR(10) UNIQUE;
     END IF;
   END $$;
 `;

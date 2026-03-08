@@ -13,6 +13,7 @@ export default function TeamsPage() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [form, setForm] = useState({ name: '', season: '', description: '' });
   const [joinCode, setJoinCode] = useState('');
+  const [joinType, setJoinType] = useState('join');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState(null);
@@ -42,7 +43,8 @@ export default function TeamsPage() {
     if (!joinCode.trim()) return;
     setSaving(true); setError('');
     try {
-      const { team } = await api.post('/teams/join', { code: joinCode });
+      const endpoint = joinType === 'view' ? '/teams/view' : '/teams/join';
+      const { team } = await api.post(endpoint, { code: joinCode });
       setTeams(prev => [...prev, team]);
       setShowJoinModal(false);
       setJoinCode('');
@@ -96,15 +98,30 @@ export default function TeamsPage() {
                 {team.my_role === 'admin' && <span className="tag tag-gold" style={{ alignSelf: 'center' }}>Admin</span>}
 		{team.my_role === 'member' && <span className="tag tag-gray" style={{ alignSelf: 'center' }}>Member</span>}
               </div>
-              {team.join_code && team.my_role === 'admin' && (
-                <div
-                  className={styles.joinCode}
-                  onClick={e => { e.stopPropagation(); copyCode(team.join_code, team.id); }}
-                  title="Click to copy join code"
-                >
-                  <span className={styles.joinCodeLabel}>Join Code</span>
-                  <span className={styles.joinCodeValue}>{team.join_code}</span>
-                  <span className={styles.joinCodeCopy}>{copiedCode === team.id ? '✓ Copied!' : '📋 Copy'}</span>
+              {team.my_role === 'admin' && (
+                <div className={styles.codeRow}>
+                  {team.join_code && (
+                    <div
+                      className={styles.joinCode}
+                      onClick={e => { e.stopPropagation(); copyCode(team.join_code, team.id + '_join'); }}
+                      title="Click to copy join code"
+                    >
+                      <span className={styles.joinCodeLabel}>Join</span>
+                      <span className={styles.joinCodeValue}>{team.join_code}</span>
+                      <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_join' ? '✓' : '📋'}</span>
+                    </div>
+                  )}
+                  {team.view_code && (
+                    <div
+                      className={`${styles.joinCode} ${styles.viewCode}`}
+                      onClick={e => { e.stopPropagation(); copyCode(team.view_code, team.id + '_view'); }}
+                      title="Click to copy view code"
+                    >
+                      <span className={styles.joinCodeLabel}>View</span>
+                      <span className={styles.joinCodeValue}>{team.view_code}</span>
+                      <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_view' ? '✓' : '📋'}</span>
+                    </div>
+                  )}
                 </div>
               )}
               {team.description && <p className={styles.desc}>{team.description}</p>}
@@ -141,8 +158,26 @@ export default function TeamsPage() {
         <Modal title="Join a Team" onClose={() => setShowJoinModal(false)}>
           <form onSubmit={handleJoin}>
             {error && <div className="alert alert-error">{error}</div>}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <button
+                type="button"
+                className={`btn ${joinType === 'join' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                onClick={() => setJoinType('join')}
+              >
+                Join (can log stats)
+              </button>
+              <button
+                type="button"
+                className={`btn ${joinType === 'view' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                onClick={() => setJoinType('view')}
+              >
+                View only
+              </button>
+            </div>
             <p style={{ color: 'var(--gray-300)', marginBottom: 16, fontSize: '0.95rem' }}>
-              Ask your head coach for the 6-character join code for your team.
+              {joinType === 'join'
+                ? 'Ask your head coach for the 6-character join code.'
+                : 'Ask your head coach for the 6-character view code.'}
             </p>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Join Code</label>

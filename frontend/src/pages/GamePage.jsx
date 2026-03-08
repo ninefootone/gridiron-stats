@@ -12,6 +12,7 @@ export default function GamePage() {
   const api = useApi();
 
   const [game, setGame] = useState(null);
+  const [teamRole, setTeamRole] = useState(null);
   const [players, setPlayers] = useState([]);
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +34,8 @@ export default function GamePage() {
       api.get(`/games/${gameId}`),
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?game_id=${gameId}`),
-    ]).then(([g, p, s]) => { setGame(g); setPlayers(p); setStats(s); setScoreForm({ our_score: g.our_score, opponent_score: g.opponent_score, status: g.status }); })
+      api.get(`/teams/${teamId}`),
+    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score, opponent_score: g.opponent_score, status: g.status }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -91,6 +93,7 @@ export default function GamePage() {
   });
 
   const homeAway = game.home_away === 'home' ? '🏠 Home' : game.home_away === 'away' ? '✈️ Away' : '⚖️ Neutral';
+  const isViewer = teamRole === 'viewer';
 
   return (
     <div>
@@ -107,7 +110,7 @@ export default function GamePage() {
             {` · ${homeAway}`}
           </div>
         </div>
-        <div className={styles.scoreBox} onClick={() => setScoreModal(true)}>
+        <div className={styles.scoreBox} onClick={() => !isViewer && setScoreModal(true)} style={isViewer ? { cursor: 'default' } : {}}>
           <div className={styles.scoreInner}>
             <div className={styles.scoreNum}>{game.our_score}</div>
             <div className={styles.scoreDash}>–</div>
@@ -121,11 +124,11 @@ export default function GamePage() {
       </div>
 
       <div className={styles.layout}>
-        {/* Player roster — quick stat buttons */}
+        {/* Player roster */}
         <div className={styles.roster}>
-          <div className={styles.sectionTitle}>Roster — Tap to Log Stat</div>
+          <div className={styles.sectionTitle}>{isViewer ? 'Roster' : 'Roster — Tap to Log Stat'}</div>
           {players.filter(p => p.active).map(p => (
-            <button key={p.id} className={styles.rosterBtn} onClick={() => openStatModal(p)}>
+            <button key={p.id} className={styles.rosterBtn} onClick={() => !isViewer && openStatModal(p)} style={isViewer ? { cursor: 'default', opacity: 0.7 } : {}}>
               <span className={styles.rosterNum}>#{p.number ?? '—'}</span>
               <span className={styles.rosterName}>{p.name}</span>
               {p.position && <span className="tag tag-gray" style={{ fontSize: '0.7rem' }}>{p.position}</span>}
@@ -156,7 +159,7 @@ export default function GamePage() {
                       </div>
                       {s.notes && <div className={styles.statNotes}>{s.notes}</div>}
                     </div>
-                    <button className={styles.statDel} onClick={() => deleteStat(s.id)}>✕</button>
+                    {!isViewer && <button className={styles.statDel} onClick={() => deleteStat(s.id)}>✕</button>}
                   </div>
                 );
               })}

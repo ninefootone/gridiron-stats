@@ -4,10 +4,10 @@ const { pool } = require('../db/init');
 
 const router = express.Router();
 
-function generateJoinCode() {
+function generateCode(length = 6) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < length; i++) {
     code += chars[Math.floor(Math.random() * chars.length)];
   }
   return code;
@@ -43,16 +43,19 @@ router.post('/', requireAuth, async (req, res, next) => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      let join_code, attempts = 0;
-      while (!join_code && attempts < 10) {
-        const candidate = generateJoinCode();
-        const existing = await client.query('SELECT id FROM teams WHERE join_code = $1', [candidate]);
-        if (!existing.rows.length) join_code = candidate;
+      let join_code, view_code, attempts = 0;
+      while ((!join_code || !view_code) && attempts < 10) {
+        const jc = generateCode(6);
+        const vc = generateCode(6);
+        const ej = await client.query('SELECT id FROM teams WHERE join_code = $1', [jc]);
+        const ev = await client.query('SELECT id FROM teams WHERE view_code = $1', [vc]);
+        if (!ej.rows.length) join_code = jc;
+        if (!ev.rows.length) view_code = vc;
         attempts++;
       }
       const { rows } = await client.query(
-        `INSERT INTO teams (name, season, description, created_by, join_code) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-        [name, season, description, req.dbUser.id, join_code]
+        `INSERT INTO teams (name, season, description, created_by, join_code, view_code) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [name, season, description, req.dbUser.id, join_code, view_code]
       );
       const team = rows[0];
       await client.query(
@@ -72,7 +75,7 @@ router.post('/', requireAuth, async (req, res, next) => {
   }
 });
 
-// POST /api/teams/join
+// POST /api/teams/join — join as member
 router.post('/join', requireAuth, async (req, res, next) => {
   const { code } = req.body;
   if (!code) return res.status(400).json({ error: 'Join code required' });
@@ -83,7 +86,6 @@ router.post('/join', requireAuth, async (req, res, next) => {
     );
     if (!rows.length) return res.status(404).json({ error: 'Invalid join code — double check and try again' });
     const team = rows[0];
-
     const existing = await pool.query(
       `SELECT * FROM team_members WHERE team_id = $1 AND user_id = $2`,
       [team.id, req.dbUser.id]
@@ -91,9 +93,36 @@ router.post('/join', requireAuth, async (req, res, next) => {
     if (existing.rows.length) {
       return res.status(400).json({ error: 'You are already a member of this team' });
     }
-
     await pool.query(
       `INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, 'member')`,
+      [team.id, req.dbUser.id]
+    );
+    res.json({ success: true, team });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/teams/view — join as viewer
+router.post('/view', requireAuth, async (req, res, next) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'View code required' });
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM teams WHERE UPPER(view_code) = UPPER($1)`,
+      [code.trim()]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Invalid view code — double check and try again' });
+    const team = rows[0];
+    const existing = await pool.query(
+      `SELECT * FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [team.id, req.dbUser.id]
+    );
+    if (existing.rows.length) {
+      return res.status(400).json({ error: 'You already have access to this team' });
+    }
+    await pool.query(
+      `INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, 'viewer')`,
       [team.id, req.dbUser.id]
     );
     res.json({ success: true, team });
