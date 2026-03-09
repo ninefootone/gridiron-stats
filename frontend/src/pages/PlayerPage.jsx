@@ -16,12 +16,15 @@ export default function PlayerPage() {
   const [editModal, setEditModal] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', number: '', position: '' });
   const [saving, setSaving] = useState(false);
+  const [teamRole, setTeamRole] = useState(null);
 
   useEffect(() => {
     Promise.all([
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?player_id=${playerId}`),
-    ]).then(([players, s]) => {
+      api.get(`/teams/${teamId}`),
+    ]).then(([players, s, t]) => {
+      setTeamRole(t.my_role);
       const p = players.find(p => String(p.id) === String(playerId));
       setPlayer(p);
       if (p) setEditForm({ name: p.name, number: p.number || '', position: p.position || '' });
@@ -73,10 +76,12 @@ export default function PlayerPage() {
           <div className="page-title">{player.name}</div>
           {player.position && <span className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{player.position}</span>}
         </div>
-        <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
-          <button className="btn btn-ghost btn-sm" onClick={() => setEditModal(true)}>Edit</button>
-          <button className="btn btn-danger btn-sm" onClick={deletePlayer}>Delete</button>
-        </div>
+        {teamRole !== 'viewer' && (
+          <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => setEditModal(true)}>Edit</button>
+            <button className="btn btn-danger btn-sm" onClick={deletePlayer}>Delete</button>
+          </div>
+        )}
       </div>
 
       {editModal && (

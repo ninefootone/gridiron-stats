@@ -110,13 +110,14 @@ export default function GamePage() {
             {` · ${homeAway}`}
           </div>
         </div>
-        <div className={styles.scoreBox} onClick={() => !isViewer && setScoreModal(true)} style={isViewer ? { cursor: 'default' } : {}}>
+        <div className={styles.scoreBox} onClick={() => teamRole === 'admin' && setScoreModal(true)} style={teamRole !== 'admin' ? { cursor: 'default' } : {}}>
           <div className={styles.scoreInner}>
             <div className={styles.scoreNum}>{game.our_score}</div>
             <div className={styles.scoreDash}>–</div>
             <div className={styles.scoreNum}>{game.opponent_score}</div>
           </div>
-          <div className={styles.scoreLabel}>tap to update score</div>
+          {teamRole === 'admin' && <div className={styles.scoreTap}>Tap to update score</div>}
+
           <span className={`tag ${game.status === 'in_progress' ? 'tag-gold' : game.status === 'completed' ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
             {game.status === 'in_progress' ? '🔴 Live' : game.status === 'completed' ? 'Final' : 'Scheduled'}
           </span>
