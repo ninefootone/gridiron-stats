@@ -74,6 +74,12 @@ export default function TeamDetailPage() {
     setPlayers(prev => prev.filter(p => p.id !== id));
   }
 
+  async function toggleActive(player, e) {
+    e.stopPropagation();
+    const updated = await api.patch(`/players/${player.id}/active`, { active: !player.active });
+    setPlayers(prev => prev.map(p => p.id === updated.id ? updated : p));
+  }
+
   if (loading) return <div className="spinner" />;
   if (!team) return <div>Team not found</div>;
 
@@ -130,7 +136,7 @@ export default function TeamDetailPage() {
             <div className="empty-state"><div className="icon">👥</div><p>No players yet. Add your roster.</p></div>
           ) : (
             <div className={styles.playerGrid}>
-              {players.map(p => (
+              {players.filter(p => p.active).map(p => (
                 <div key={p.id} className={styles.playerCard} onClick={() => navigate(`/teams/${teamId}/players/${p.id}`)}>
                   <div className={styles.playerNum}>#{p.number ?? '—'}</div>
                   <div className={styles.playerInfo}>
@@ -138,15 +144,47 @@ export default function TeamDetailPage() {
                     {p.position && <span className="tag tag-green">{p.position}</span>}
                   </div>
                   {!isViewer && (
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
-                    >
-                      Edit
-                    </button>
-                  )}
+                <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
+                  >
+                    Edit
+                  </button>
+                  <button className="btn btn-secondary btn-sm" onClick={e => toggleActive(p, e)}>
+                    {p.active ? 'Injured' : 'Restore'}
+                  </button>
+                </div>
+              )}
                 </div>
               ))}
+            </div>
+
+{players.filter(p => !p.active).length > 0 && (
+                <>
+                  <div style={{ width: '100%', fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 16, marginBottom: 4 }}>Inactive / Injured</div>
+                  {players.filter(p => !p.active).map(p => (
+                    <div key={p.id} className={styles.playerCard} style={{ opacity: 0.5 }} onClick={() => navigate(`/teams/${teamId}/players/${p.id}`)}>
+                      <div className={styles.playerNum}>#{p.number ?? '—'}</div>
+                      <div className={styles.playerInfo}>
+                        <div className={styles.playerName}>{p.name}</div>
+                        {p.position && <span className="tag tag-gray">{p.position}</span>}
+                      </div>
+                      {!isViewer && (
+                        <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
+                          >
+                            Edit
+                          </button>
+                          <button className="btn btn-secondary btn-sm" onClick={e => toggleActive(p, e)}>Restore</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           )}
         </div>

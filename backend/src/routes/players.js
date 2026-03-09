@@ -1,7 +1,6 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
-
 const router = express.Router();
 
 // GET /api/players?team_id=X
@@ -45,26 +44,6 @@ router.post('/', requireAuth, async (req, res, next) => {
 
 // PUT /api/players/:id
 router.put('/:id', requireAuth, async (req, res, next) => {
-  const { name, number, position, active } = req.body;
-  try {
-    const { rows } = await pool.query(
-      `UPDATE players SET
-         name = COALESCE($1, name),
-         number = COALESCE($2, number),
-         position = COALESCE($3, position),
-         active = COALESCE($4, active)
-       WHERE id = $5 RETURNING *`,
-      [name, number, position, active, req.params.id]
-    );
-    if (!rows.length) return res.status(404).json({ error: 'Player not found' });
-    res.json(rows[0]);
-  } catch (err) {
-    next(err);
-  }
-});
-
-// PUT /api/players/:id
-router.put('/:id', requireAuth, async (req, res, next) => {
   const { name, number, position } = req.body;
   try {
     const { rows } = await pool.query(
@@ -76,6 +55,24 @@ router.put('/:id', requireAuth, async (req, res, next) => {
        AND team_id IN (SELECT team_id FROM team_members WHERE user_id = $5 AND role IN ('admin','member'))
        RETURNING *`,
       [name, number ?? null, position, req.params.id, req.dbUser.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Player not found or not authorised' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/players/:id/active
+router.patch('/:id/active', requireAuth, async (req, res, next) => {
+  const { active } = req.body;
+  try {
+    const { rows } = await pool.query(
+      `UPDATE players SET active = $1
+       WHERE id = $2
+       AND team_id IN (SELECT team_id FROM team_members WHERE user_id = $3 AND role IN ('admin','member'))
+       RETURNING *`,
+      [active, req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Player not found or not authorised' });
     res.json(rows[0]);
