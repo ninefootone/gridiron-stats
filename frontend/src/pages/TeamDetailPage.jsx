@@ -16,6 +16,7 @@ export default function TeamDetailPage() {
   const [players, setPlayers] = useState([]);
   const [games, setGames] = useState([]);
   const [tab, setTab] = useState('players');
+  const [playerSort, setPlayerSort] = useState('number');
   const [loading, setLoading] = useState(true);
 
   // Modals
@@ -127,16 +128,20 @@ export default function TeamDetailPage() {
 
       {tab === 'players' && (
         <div>
-          {!isViewer && (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-              <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', position: '' }); setPlayerModal(true); }}>+ Add Player</button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}># Number</button>
+              <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
             </div>
-          )}
+            {!isViewer && (
+              <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', position: '' }); setPlayerModal(true); }}>+ Add Player</button>
+            )}
+          </div>
           {players.length === 0 ? (
             <div className="empty-state"><div className="icon">👥</div><p>No players yet. Add your roster.</p></div>
           ) : (
             <div className={styles.playerGrid}>
-              {players.filter(p => p.active).map(p => (
+              {[...players.filter(p => p.active)].sort((a, b) => playerSort === 'name' ? a.name.localeCompare(b.name) : (a.number ?? 999) - (b.number ?? 999)).map(p => (
                 <div key={p.id} className={styles.playerCard} onClick={() => navigate(`/teams/${teamId}/players/${p.id}`)}>
                   <div className={styles.playerNum}>#{p.number ?? '—'}</div>
                   <div className={styles.playerInfo}>
