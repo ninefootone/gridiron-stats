@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import LoginPage from './pages/LoginPage';
 import TeamsPage from './pages/TeamsPage';
+import AdminPage from './pages/AdminPage';
 import TeamDetailPage from './pages/TeamDetailPage';
 import GamePage from './pages/GamePage';
 import PlayerPage from './pages/PlayerPage';
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="teams/:teamId/games/:gameId" element={<GamePage />} />
         <Route path="teams/:teamId/players/:playerId" element={<PlayerPage />} />
         <Route path="teams/:teamId/leaderboard" element={<LeaderboardPage />} />
+	<Route path="admin" element={<AdminPage />} />
       </Route>
     </Routes>
   );
