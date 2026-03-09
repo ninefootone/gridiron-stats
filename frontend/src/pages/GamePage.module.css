@@ -65,8 +65,6 @@
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: var(--radius-lg);
   padding: 16px;
-  position: sticky;
-  top: 0;
 }
 
 .rosterBtn {
