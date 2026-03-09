@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
-import { getStatInfo } from '../utils/stats';
+import { getStatInfo, POSITIONS } from '../utils/stats';
 import { format } from 'date-fns';
 import styles from './PlayerPage.module.css';
 
@@ -13,16 +13,38 @@ export default function PlayerPage() {
   const [player, setPlayer] = useState(null);
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [editModal, setEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', number: '', position: '' });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     Promise.all([
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?player_id=${playerId}`),
     ]).then(([players, s]) => {
-      setPlayer(players.find(p => String(p.id) === String(playerId)));
+      const p = players.find(p => String(p.id) === String(playerId));
+      setPlayer(p);
+      if (p) setEditForm({ name: p.name, number: p.number || '', position: p.position || '' });
       setStats(s);
     }).catch(console.error).finally(() => setLoading(false));
   }, [playerId, teamId]);
+
+  async function saveEdit(e) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const updated = await api.put(`/players/${playerId}`, { ...editForm, number: editForm.number ? Number(editForm.number) : null });
+      setPlayer(updated);
+      setEditModal(false);
+    } catch (err) { alert(err.message); }
+    finally { setSaving(false); }
+  }
+
+  async function deletePlayer() {
+    if (!confirm(`Delete ${player.name}? This cannot be undone.`)) return;
+    await api.del(`/players/${playerId}`);
+    navigate(`/teams/${teamId}`);
+  }
 
   if (loading) return <div className="spinner" />;
   if (!player) return <div>Player not found</div>;
@@ -47,11 +69,49 @@ export default function PlayerPage() {
 
       <div className={styles.header}>
         <div className={styles.jersey}>#{player.number ?? '—'}</div>
-        <div>
+        <div style={{ flex: 1 }}>
           <div className="page-title">{player.name}</div>
           {player.position && <span className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{player.position}</span>}
         </div>
+        <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
+          <button className="btn btn-ghost btn-sm" onClick={() => setEditModal(true)}>Edit</button>
+          <button className="btn btn-danger btn-sm" onClick={deletePlayer}>Delete</button>
+        </div>
       </div>
+
+      {editModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setEditModal(false)}>
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">Edit Player</div>
+              <button className="modal-close btn" onClick={() => setEditModal(false)}>✕</button>
+            </div>
+            <form onSubmit={saveEdit}>
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label>Name *</label>
+                <input className="form-control" value={editForm.name} onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))} required />
+              </div>
+              <div className="grid-2" style={{ marginBottom: 0 }}>
+                <div className="form-group">
+                  <label>Jersey #</label>
+                  <input className="form-control" type="number" min="0" max="99" value={editForm.number} onChange={e => setEditForm(p => ({ ...p, number: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>Position</label>
+                  <select className="form-control" value={editForm.position} onChange={e => setEditForm(p => ({ ...p, position: e.target.value }))}>
+                    <option value="">Select...</option>
+                    {POSITIONS.map(pos => <option key={pos} value={pos}>{pos}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Season totals */}
       <div className={styles.section}>

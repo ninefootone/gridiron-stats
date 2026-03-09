@@ -63,6 +63,27 @@ router.put('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
+// PUT /api/players/:id
+router.put('/:id', requireAuth, async (req, res, next) => {
+  const { name, number, position } = req.body;
+  try {
+    const { rows } = await pool.query(
+      `UPDATE players SET
+        name = COALESCE($1, name),
+        number = $2,
+        position = COALESCE($3, position)
+       WHERE id = $4
+       AND team_id IN (SELECT team_id FROM team_members WHERE user_id = $5 AND role IN ('admin','member'))
+       RETURNING *`,
+      [name, number ?? null, position, req.params.id, req.dbUser.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Player not found or not authorised' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // DELETE /api/players/:id
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {

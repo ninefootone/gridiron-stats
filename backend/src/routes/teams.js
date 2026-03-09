@@ -131,6 +131,20 @@ router.post('/view', requireAuth, async (req, res, next) => {
   }
 });
 
+// DELETE /api/teams/:id/leave
+router.delete('/:id/leave', requireAuth, async (req, res, next) => {
+  try {
+    const { rowCount } = await pool.query(
+      `DELETE FROM team_members WHERE team_id = $1 AND user_id = $2 AND role IN ('member', 'viewer')`,
+      [req.params.id, req.dbUser.id]
+    );
+    if (!rowCount) return res.status(404).json({ error: 'Not a member of this team or not authorised' });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/teams/:id
 router.get('/:id', requireAuth, async (req, res, next) => {
   try {

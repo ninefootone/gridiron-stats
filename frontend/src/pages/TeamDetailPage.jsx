@@ -22,6 +22,7 @@ export default function TeamDetailPage() {
   const [playerModal, setPlayerModal] = useState(false);
   const [gameModal, setGameModal] = useState(false);
   const [playerForm, setPlayerForm] = useState({ name: '', number: '', position: '' });
+  const [editingPlayer, setEditingPlayer] = useState(null);
   const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -40,9 +41,15 @@ export default function TeamDetailPage() {
     e.preventDefault();
     setSaving(true); setError('');
     try {
-      const p = await api.post('/players', { team_id: Number(teamId), ...playerForm, number: playerForm.number ? Number(playerForm.number) : null });
-      setPlayers(prev => [...prev, p]);
+      if (editingPlayer) {
+        const p = await api.put(`/players/${editingPlayer.id}`, { ...playerForm, number: playerForm.number ? Number(playerForm.number) : null });
+        setPlayers(prev => prev.map(pl => pl.id === p.id ? p : pl));
+      } else {
+        const p = await api.post('/players', { team_id: Number(teamId), ...playerForm, number: playerForm.number ? Number(playerForm.number) : null });
+        setPlayers(prev => [...prev, p]);
+      }
       setPlayerModal(false);
+      setEditingPlayer(null);
       setPlayerForm({ name: '', number: '', position: '' });
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
@@ -116,7 +123,7 @@ export default function TeamDetailPage() {
         <div>
           {!isViewer && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-              <button className="btn btn-primary" onClick={() => setPlayerModal(true)}>+ Add Player</button>
+              <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', position: '' }); setPlayerModal(true); }}>+ Add Player</button>
             </div>
           )}
           {players.length === 0 ? (
@@ -130,7 +137,14 @@ export default function TeamDetailPage() {
                     <div className={styles.playerName}>{p.name}</div>
                     {p.position && <span className="tag tag-green">{p.position}</span>}
                   </div>
-                  {!isViewer && <button className="btn btn-danger btn-sm" onClick={e => deletePlayer(p.id, e)}>✕</button>}
+                  {!isViewer && (
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -180,7 +194,7 @@ export default function TeamDetailPage() {
 
       {/* Add Player Modal */}
       {playerModal && (
-        <Modal title="Add Player" onClose={() => setPlayerModal(false)}>
+        <Modal title={editingPlayer ? 'Edit Player' : 'Add Player'} onClose={() => { setPlayerModal(false); setEditingPlayer(null); }}>
           <form onSubmit={addPlayer}>
             {error && <div className="alert alert-error">{error}</div>}
             <div className="form-group" style={{ marginBottom: 14 }}>
@@ -202,7 +216,7 @@ export default function TeamDetailPage() {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setPlayerModal(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Adding...' : 'Add Player'}</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editingPlayer ? 'Save Changes' : 'Add Player'}</button>
             </div>
           </form>
         </Modal>

@@ -56,6 +56,13 @@ export default function TeamsPage() {
     }
   }
 
+async function leaveTeam(e, teamId) {
+    e.stopPropagation();
+    if (!confirm('Remove this team from your list? You can rejoin with the code later.')) return;
+    await api.del(`/teams/${teamId}/leave`);
+    setTeams(prev => prev.filter(t => t.id !== teamId));
+  }
+
   function copyCode(code, id) {
     navigator.clipboard.writeText(code);
     setCopiedCode(id);
@@ -129,6 +136,15 @@ export default function TeamsPage() {
                 </div>
               )}
               {team.description && <p className={styles.desc}>{team.description}</p>}
+              {(team.my_role === 'member' || team.my_role === 'viewer') && (
+                <button
+                  className="btn btn-ghost btn-sm"
+                  style={{ marginTop: 8, fontSize: '0.78rem', color: 'var(--gray-300)' }}
+                  onClick={e => leaveTeam(e, team.id)}
+                >
+                  Leave Team
+                </button>
+              )}
             </div>
           ))}
         </div>
