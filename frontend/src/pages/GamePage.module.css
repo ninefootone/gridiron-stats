@@ -28,7 +28,7 @@
   flex-shrink: 0;
 }
 .scoreBox:hover { border-color: var(--gold); }
-.scoreInner { display: flex; align-items: center; gap: 8px; }
+.scoreInner { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .scoreNum {
   font-family: var(--font-display);
   font-size: 3rem;
