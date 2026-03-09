@@ -158,9 +158,7 @@ export default function TeamDetailPage() {
               )}
                 </div>
               ))}
-            </div>
-
-{players.filter(p => !p.active).length > 0 && (
+            {players.filter(p => !p.active).length > 0 && (
                 <>
                   <div style={{ width: '100%', fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 16, marginBottom: 4 }}>Inactive / Injured</div>
                   {players.filter(p => !p.active).map(p => (
