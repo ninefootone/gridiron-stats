@@ -35,7 +35,7 @@ export default function GamePage() {
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?game_id=${gameId}`),
       api.get(`/teams/${teamId}`),
-    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score, opponent_score: g.opponent_score, status: g.status }); })
+    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', status: g.status }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -76,7 +76,11 @@ export default function GamePage() {
 
   async function updateScore(e) {
     e.preventDefault();
-    const g = await api.put(`/games/${gameId}`, scoreForm);
+    const g = await api.put(`/games/${gameId}`, {
+      ...scoreForm,
+      our_score: scoreForm.our_score === '' ? 0 : Number(scoreForm.our_score),
+      opponent_score: scoreForm.opponent_score === '' ? 0 : Number(scoreForm.opponent_score),
+    });
     setGame(g);
     setScoreModal(false);
   }
@@ -244,11 +248,11 @@ export default function GamePage() {
             <div className="grid-2" style={{ marginBottom: 14 }}>
               <div className="form-group">
                 <label>Our Score</label>
-                <input className="form-control" type="number" min="0" value={scoreForm.our_score} onChange={e => setScoreForm(p => ({ ...p, our_score: Number(e.target.value) }))} />
+                <input className="form-control" type="number" min="0" value={scoreForm.our_score} onChange={e => setScoreForm(p => ({ ...p, our_score: e.target.value }))} />
               </div>
               <div className="form-group">
                 <label>Opponent Score</label>
-                <input className="form-control" type="number" min="0" value={scoreForm.opponent_score} onChange={e => setScoreForm(p => ({ ...p, opponent_score: Number(e.target.value) }))} />
+                <input className="form-control" type="number" min="0" value={scoreForm.opponent_score} onChange={e => setScoreForm(p => ({ ...p, opponent_score: e.target.value }))} />
               </div>
             </div>
             <div className="form-group">
