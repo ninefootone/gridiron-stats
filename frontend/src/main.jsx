@@ -13,7 +13,7 @@ if (!PUBLISHABLE_KEY) {
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignInUrl="/teams" afterSignUpUrl="/teams">
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} fallbackRedirectUrl="/teams">
       <BrowserRouter>
         <App />
       </BrowserRouter>
