@@ -132,9 +132,9 @@ export default function GamePage() {
       <div className={styles.layout}>
         {/* Player roster */}
         <div className={styles.roster}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div className={styles.rosterHeader}>
             <div className={styles.sectionTitle} style={{ marginBottom: 0 }}>{isViewer ? 'Roster' : 'Roster — Tap to Log Stat'}</div>
-            <div style={{ display: 'flex', gap: 4 }}>
+            <div className={styles.rosterSort}>
               <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}>#</button>
               <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
             </div>

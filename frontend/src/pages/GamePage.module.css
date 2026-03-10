@@ -161,3 +161,19 @@
 .statBtnActive { }
 .statBtnIcon { font-size: 1.4rem; }
 .statBtnLabel { font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; text-align: center; }
+
+.rosterHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.rosterSort { display: flex; gap: 4px; }
+
+@media (min-width: 801px) {
+  .rosterHeader { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
+@media (max-width: 360px) {
+  .rosterHeader { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
