@@ -182,8 +182,10 @@
   width: auto;
 }
 
-@media (max-width: 640px) {
+@@media (max-width: 640px) {
   .logStatBtn {
     width: 100%;
+    text-align: center;
+    justify-content: center;
   }
 }
