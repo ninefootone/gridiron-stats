@@ -185,7 +185,7 @@ async function loadMembers() {
 
       <div className={styles.tabs}>
         <button className={`${styles.tab} ${tab === 'players' ? styles.activeTab : ''}`} onClick={() => setTab('players')}>
-          Players ({players.length})
+          Players ({players.filter(p => p.active).length})
         </button>
         <button className={`${styles.tab} ${tab === 'games' ? styles.activeTab : ''}`} onClick={() => setTab('games')}>
           Games ({games.length})
