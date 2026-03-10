@@ -15,8 +15,8 @@ router.get('/me', requireAuth, async (req, res, next) => {
 
 // GET /api/users/admin/stats — superadmin only
 router.get('/admin/stats', requireAuth, async (req, res, next) => {
-  const ADMIN_ID = 'user_3AiQe1YxmWYTooEO5Ix0HnmJ9Tx';
-  if (req.dbUser.auth0_id !== ADMIN_ID) return res.status(403).json({ error: 'Forbidden' });
+  const ADMIN_IDS = ['user_3AiQe1YxmWYTooEO5Ix0HnmJ9Tx', 'user_3AgGD3kALzcbzzPc0PHGo2lwwr8'];
+  if (!ADMIN_IDS.includes(req.dbUser.auth0_id)) return res.status(403).json({ error: 'Forbidden' });
   try {
     const [users, teamCount, teams, players, games] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM users'),
