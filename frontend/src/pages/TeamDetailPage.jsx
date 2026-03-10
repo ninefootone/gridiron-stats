@@ -338,11 +338,11 @@ export default function TeamDetailPage() {
             </div>
             <div className="form-group" style={{ marginBottom: 14 }}>
               <label>Date *</label>
-              <input className="form-control" type="date" value={gameForm.game_date} onChange={e => setGameForm(p => ({ ...p, game_date: e.target.value }))} required />
+              <input className="form-control" type="date" value={gameForm.game_date} onChange={e => setGameForm(p => ({ ...p, game_date: e.target.value }))} required style={{ maxWidth: '100%', minWidth: 0 }} />
             </div>
             <div className="form-group" style={{ marginBottom: 14 }}>
               <label>Kick-off Time</label>
-              <input className="form-control" type="time" value={gameForm.game_time} onChange={e => setGameForm(p => ({ ...p, game_time: e.target.value }))} />
+              <input className="form-control" type="time" value={gameForm.game_time} onChange={e => setGameForm(p => ({ ...p, game_time: e.target.value }))} style={{ maxWidth: '100%', minWidth: 0 }} />
             </div>
             <div className="grid-2" style={{ marginBottom: 14 }}>
               <div className="form-group">

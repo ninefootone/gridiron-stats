@@ -109,7 +109,11 @@ input, select, textarea {
   font-size: 1rem;
   transition: border-color 0.15s;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .form-control:focus { outline: none; border-color: var(--gold); }
 .form-control option { background: var(--field-green); }
