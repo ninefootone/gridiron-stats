@@ -124,7 +124,7 @@
 @media (max-width: 640px) {
   .playerInfo { flex-wrap: wrap; gap: 4px; }
   .playerInfo .tag { order: 3; flex-basis: 100%; margin-top: 2px; }
-  .playerEditBtn { display: none; }
+  .playerEditBtn { display: none !important; }
 }
 
 @media (max-width: 480px) {
