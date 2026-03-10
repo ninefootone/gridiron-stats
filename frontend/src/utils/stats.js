@@ -10,11 +10,9 @@ export const STAT_CATEGORIES = {
       { key: 'rushing_yds',    label: 'Rushing Yards',      icon: '💨', unit: 'yds',  description: 'Yards run' },
       { key: 'passing_yds',    label: 'Passing Yards',      icon: '💫', unit: 'yds',  description: 'Yards thrown' },
       { key: 'reception',      label: 'Reception',          icon: '👐', unit: null,   description: 'Catch made' },
-      { key: 'two_pt_pass',    label: '2PT Conv Pass',      icon: '✌️', unit: null,   description: '2-pt conversion pass (QB)' },
-      { key: 'two_pt_rec',     label: '2PT Conv Reception', icon: '🤲', unit: null,   description: '2-pt conversion catch' },
+      { key: 'two_pt_pass',    label: '2PT Conv',           icon: '✌️', unit: null,   description: '2-pt conversion pass (QB)' },
       { key: 'two_pt_carry',   label: '2PT Conv Carry',     icon: '💪', unit: null,   description: '2-pt conversion run' },
-      { key: 'one_pt_pass',    label: '1PT Conv Pass',      icon: '1️⃣', unit: null,   description: '1-pt conversion pass (QB)' },
-      { key: 'one_pt_rec',     label: '1PT Conv Reception', icon: '☝️', unit: null,   description: '1-pt conversion catch' },
+      { key: 'one_pt_pass',    label: '1PT Conv',           icon: '1️⃣', unit: null,   description: '1-pt conversion pass (QB)' },
     ]
   },
   defense: {
