@@ -140,6 +140,7 @@ export default function GamePage() {
 
   const homeAway = game.home_away === 'home' ? '🏠 Home' : game.home_away === 'away' ? '✈️ Away' : '⚖️ Neutral';
   const isViewer = teamRole === 'viewer';
+  const isAdmin = teamRole === 'admin';
   const gameTypeLabel = { friendly: 'Friendly', playoff: 'Playoff', finals: 'Finals' }[game.game_type];
   const today = new Date(); today.setHours(0,0,0,0);
   const gameDate = new Date(game.game_date); gameDate.setHours(0,0,0,0);
@@ -169,7 +170,7 @@ export default function GamePage() {
             <div className={styles.scoreDash}>–</div>
             <div className={styles.scoreNum}>{game.opponent_score}</div>
           </div>
-          {teamRole === 'admin' && <div className={styles.scoreTap}>Tap to update score</div>}
+          {teamRole === 'admin' && <div className={styles.scoreTap}>Tap to update score & type</div>}
 
           <span className={`tag ${isToday ? 'tag-gold' : isPast ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
             {isToday ? '🔴 Live' : isPast ? 'Final' : 'Scheduled'}
@@ -178,8 +179,15 @@ export default function GamePage() {
       </div>
 
       {!isViewer && (
-        <div style={{ margin: '12px 0' }}>
+        <div style={{ margin: '12px 0', display: 'flex', gap: 8 }}>
           <button className={`btn btn-primary ${styles.logStatBtn}`} onClick={openStatFirst}>⚡ Log Stat</button>
+          {isAdmin && (
+            <button className="btn btn-danger btn-sm" onClick={async () => {
+              if (!confirm('Delete this game and all its stats? This cannot be undone.')) return;
+              await api.del(`/games/${gameId}`);
+              navigate(`/teams/${teamId}`);
+            }}>Delete Game</button>
+          )}
         </div>
       )}
 
