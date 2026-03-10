@@ -204,8 +204,8 @@ export default function TeamDetailPage() {
                   >
                     Edit
                   </button>
-                  <button className="btn btn-secondary btn-sm" onClick={e => toggleActive(p, e)}>
-                    {p.active ? 'Inactive' : 'Restore'}
+                  <button className={`btn btn-sm ${p.active ? 'btn-success' : 'btn-secondary'}`} onClick={e => toggleActive(p, e)}>
+                    {p.active ? 'Active' : 'Inactive'}
                   </button>
                 </div>
               )}
@@ -229,7 +229,7 @@ export default function TeamDetailPage() {
                           >
                             Edit
                           </button>
-                          <button className="btn btn-secondary btn-sm" onClick={e => toggleActive(p, e)}>Restore</button>
+                          <button className="btn btn-secondary btn-sm" onClick={e => toggleActive(p, e)}>Inactive</button>
                         </div>
                       )}
                     </div>

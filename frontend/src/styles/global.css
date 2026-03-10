@@ -77,6 +77,14 @@ input, select, textarea {
   border: 2px solid var(--gray-500);
   color: var(--white);
 }
+.btn-success {
+  background: var(--green, #4CAF50);
+  color: white;
+  border: none;
+}
+.btn-success:hover {
+  opacity: 0.85;
+}
 .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
 .btn-danger {
   background: var(--danger);
