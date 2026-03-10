@@ -174,16 +174,16 @@ export default function TeamDetailPage() {
       {tab === 'players' && (
         <div>
           <div className={styles.playerToolbar}>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}># Number</button>
-              <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
-            </div>
             {!isViewer && (
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className={styles.playerToolbarActions}>
                 <button className="btn btn-secondary" onClick={() => { setImportPreview([]); setImportError(''); setImportModal(true); }}>Import CSV</button>
                 <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
               </div>
             )}
+            <div className={styles.playerToolbarSort}>
+              <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}># Number</button>
+              <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
+            </div>
           </div>
           {players.length === 0 ? (
             <div className="empty-state"><div className="icon">👥</div><p>No players yet. Add your roster.</p></div>

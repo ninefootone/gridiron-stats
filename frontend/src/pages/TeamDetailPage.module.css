@@ -164,9 +164,27 @@
   gap: 10px;
 }
 
+.playerToolbarActions {
+  display: flex;
+  gap: 8px;
+}
+
+.playerToolbarSort {
+  display: flex;
+  gap: 6px;
+}
+
 @media (max-width: 640px) {
   .playerToolbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .playerToolbarActions {
+    order: 1;
+  }
+
+  .playerToolbarSort {
+    order: 2;
   }
 }
