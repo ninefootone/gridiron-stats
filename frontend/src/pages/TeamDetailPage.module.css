@@ -137,18 +137,21 @@
 .playerActions {
   display: flex;
   gap: 8px;
+  justify-content: flex-end;
 }
 
-.playerActions .btn {
-  flex: 0 0 auto;
+.playerActionsRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.playerActions {
+  display: flex;
+  gap: 8px;
 }
 
 @media (max-width: 640px) {
-  .playerActions {
-    flex-direction: column;
-  }
-
-  .playerActions .btn {
-    width: 100%;
+  .playerActionsRow {
+    justify-content: flex-start;
   }
 }
