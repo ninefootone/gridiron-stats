@@ -68,7 +68,7 @@ export default function GamePage() {
 
   // Score edit
   const [scoreModal, setScoreModal] = useState(false);
-  const [scoreForm, setScoreForm] = useState({ our_score: 0, opponent_score: 0, status: 'scheduled', game_type: 'regular' });
+  const [scoreForm, setScoreForm] = useState({ our_score: 0, opponent_score: 0, game_type: 'regular' });
 
   useEffect(() => {
     Promise.all([
@@ -76,7 +76,7 @@ export default function GamePage() {
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?game_id=${gameId}`),
       api.get(`/teams/${teamId}`),
-    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', status: g.status, game_type: g.game_type || 'regular' }); })
+    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -141,6 +141,10 @@ export default function GamePage() {
   const homeAway = game.home_away === 'home' ? '🏠 Home' : game.home_away === 'away' ? '✈️ Away' : '⚖️ Neutral';
   const isViewer = teamRole === 'viewer';
   const gameTypeLabel = { friendly: 'Friendly', playoff: 'Playoff', finals: 'Finals' }[game.game_type];
+  const today = new Date(); today.setHours(0,0,0,0);
+  const gameDate = new Date(game.game_date); gameDate.setHours(0,0,0,0);
+  const isToday = gameDate.getTime() === today.getTime();
+  const isPast = gameDate < today;
 
   return (
     <div>
@@ -167,8 +171,8 @@ export default function GamePage() {
           </div>
           {teamRole === 'admin' && <div className={styles.scoreTap}>Tap to update score</div>}
 
-          <span className={`tag ${game.status === 'in_progress' ? 'tag-gold' : game.status === 'completed' ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
-            {game.status === 'in_progress' ? '🔴 Live' : game.status === 'completed' ? 'Final' : 'Scheduled'}
+          <span className={`tag ${isToday ? 'tag-gold' : isPast ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
+            {isToday ? '🔴 Live' : isPast ? 'Final' : 'Scheduled'}
           </span>
         </div>
       </div>
@@ -426,7 +430,7 @@ export default function GamePage() {
 
       {/* Score Modal */}
       {scoreModal && (
-        <Modal title="Update Score & Status" onClose={() => setScoreModal(false)}>
+        <Modal title="Update Score" onClose={() => setScoreModal(false)}>
           <form onSubmit={updateScore}>
             <div className="grid-2" style={{ marginBottom: 14 }}>
               <div className="form-group">
@@ -437,14 +441,6 @@ export default function GamePage() {
                 <label>Opponent Score</label>
                 <input className="form-control" type="number" min="0" value={scoreForm.opponent_score} onChange={e => setScoreForm(p => ({ ...p, opponent_score: e.target.value }))} />
               </div>
-            </div>
-            <div className="form-group">
-              <label>Status</label>
-              <select className="form-control" value={scoreForm.status} onChange={e => setScoreForm(p => ({ ...p, status: e.target.value }))}>
-                <option value="scheduled">Scheduled</option>
-                <option value="in_progress">In Progress (Live)</option>
-                <option value="completed">Completed</option>
-              </select>
             </div>
             <div className="form-group">
               <label>Game Type</label>

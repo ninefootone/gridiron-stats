@@ -253,9 +253,13 @@ export default function TeamDetailPage() {
           ) : (
             <div className={styles.gameList}>
               {games.map(g => {
-                const isCompleted = g.status === 'completed';
-                const won = isCompleted && g.our_score > g.opponent_score;
-                const lost = isCompleted && g.our_score < g.opponent_score;
+                const today = new Date(); today.setHours(0,0,0,0);
+                const gameDate = new Date(g.game_date); gameDate.setHours(0,0,0,0);
+                const isToday = gameDate.getTime() === today.getTime();
+                const isPast = gameDate < today;
+                const isFuture = gameDate > today;
+                const won = isPast && g.our_score > g.opponent_score;
+                const lost = isPast && g.our_score < g.opponent_score;
                 return (
                   <div key={g.id} className={styles.gameCard} onClick={() => navigate(`/teams/${teamId}/games/${g.id}`)}>
                     <div className={styles.gameDate}>
@@ -272,9 +276,13 @@ export default function TeamDetailPage() {
                       </div>
                     </div>
                     <div className={styles.gameRight}>
-                      {isCompleted
+                      {isPast && (g.our_score > 0 || g.opponent_score > 0)
                         ? <div className={`${styles.score} ${won ? styles.win : lost ? styles.loss : ''}`}>{g.our_score}–{g.opponent_score}</div>
-                        : <span className={`tag ${g.status === 'in_progress' ? 'tag-gold' : 'tag-gray'}`}>{g.status === 'in_progress' ? '🔴 Live' : 'Scheduled'}</span>
+                        : isToday
+                          ? <span className="tag tag-gold">🔴 Live</span>
+                          : isPast
+                            ? <span className="tag tag-gray">Completed</span>
+                            : <span className="tag tag-gray">Scheduled</span>
                       }
                       <div className={styles.statCount}>{g.stat_count} stats</div>
                     </div>
