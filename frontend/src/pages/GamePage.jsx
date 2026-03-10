@@ -316,7 +316,7 @@ export default function GamePage() {
               <div style={{ marginBottom: 12, color: 'var(--gray-300)', fontSize: '0.9rem' }}>Choose a stat type:</div>
               <div className={styles.statCategories}>
                 {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
-                  const countingInCat = cat.stats.filter(s => s.unit === null);
+                  const countingInCat = cat.stats.filter(s => s.unit === null && !s.excludeFromStatFirst);
                   if (!countingInCat.length) return null;
                   return (
                     <div key={catKey}>

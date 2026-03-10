@@ -4,15 +4,17 @@ export const STAT_CATEGORIES = {
     color: '#f5a623',
     stats: [
       { key: 'td_passing',     label: 'Passing TD',         icon: '🏈', unit: null,   description: 'Touchdown pass (QB)' },
-      { key: 'td_receiving',   label: 'Receiving TD',       icon: '🙌', unit: null,   description: 'Touchdown catch (WR/TE/RB)' },
+      { key: 'td_receiving',   label: 'Receiving TD',       icon: '🙌', unit: null,   description: 'Touchdown catch (WR/TE/RB)', excludeFromStatFirst: true },
       { key: 'td_rushing',     label: 'Rushing TD',         icon: '🏃', unit: null,   description: 'Touchdown run (RB/QB)' },
       { key: 'receiving_yds',  label: 'Receiving Yards',    icon: '📡', unit: 'yds',  description: 'Yards after catch' },
       { key: 'rushing_yds',    label: 'Rushing Yards',      icon: '💨', unit: 'yds',  description: 'Yards run' },
       { key: 'passing_yds',    label: 'Passing Yards',      icon: '💫', unit: 'yds',  description: 'Yards thrown' },
       { key: 'reception',      label: 'Reception',          icon: '👐', unit: null,   description: 'Catch made' },
       { key: 'two_pt_pass',    label: '2PT Conv',           icon: '✌️', unit: null,   description: '2-pt conversion pass (QB)' },
+      { key: 'two_pt_rec',     label: '2PT Conv Reception', icon: '🤲', unit: null,   description: '2-pt conversion catch', excludeFromStatFirst: true },
       { key: 'two_pt_carry',   label: '2PT Conv Carry',     icon: '💪', unit: null,   description: '2-pt conversion run' },
       { key: 'one_pt_pass',    label: '1PT Conv',           icon: '1️⃣', unit: null,   description: '1-pt conversion pass (QB)' },
+      { key: 'one_pt_rec',     label: '1PT Conv Reception', icon: '☝️', unit: null,   description: '1-pt conversion catch', excludeFromStatFirst: true },
     ]
   },
   defense: {
