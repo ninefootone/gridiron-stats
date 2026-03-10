@@ -25,15 +25,15 @@ router.get('/', requireAuth, async (req, res, next) => {
 
 // POST /api/games
 router.post('/', requireAuth, async (req, res, next) => {
-  const { team_id, opponent_name, location, game_date, game_time, home_away, notes } = req.body;
+  const { team_id, opponent_name, location, game_date, game_time, home_away, notes, game_type } = req.body;
   if (!team_id || !opponent_name || !game_date) {
     return res.status(400).json({ error: 'team_id, opponent_name and game_date required' });
   }
   try {
     const { rows } = await pool.query(
-      `INSERT INTO games (team_id, opponent_name, location, game_date, game_time, home_away, notes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [team_id, opponent_name, location, game_date, game_time, home_away || 'home', notes]
+      `INSERT INTO games (team_id, opponent_name, location, game_date, game_time, home_away, notes, game_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [team_id, opponent_name, location, game_date, game_time, home_away || 'home', notes, game_type || 'regular']
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -54,7 +54,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
 // PUT /api/games/:id
 router.put('/:id', requireAuth, async (req, res, next) => {
-  const { opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes } = req.body;
+  const { opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, game_type } = req.body;
   try {
     const { rows } = await pool.query(
       `UPDATE games SET
@@ -66,9 +66,10 @@ router.put('/:id', requireAuth, async (req, res, next) => {
          our_score = COALESCE($6, our_score),
          opponent_score = COALESCE($7, opponent_score),
          status = COALESCE($8, status),
-         notes = COALESCE($9, notes)
-       WHERE id = $10 RETURNING *`,
-      [opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, req.params.id]
+         notes = COALESCE($9, notes),
+         game_type = COALESCE($10, game_type)
+       WHERE id = $11 RETURNING *`,
+      [opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, game_type, req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Game not found' });
     res.json(rows[0]);

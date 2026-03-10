@@ -28,7 +28,7 @@ export default function GamePage() {
 
   // Score edit
   const [scoreModal, setScoreModal] = useState(false);
-  const [scoreForm, setScoreForm] = useState({ our_score: 0, opponent_score: 0, status: 'scheduled' });
+  const [scoreForm, setScoreForm] = useState({ our_score: 0, opponent_score: 0, status: 'scheduled', game_type: 'regular' });
 
   useEffect(() => {
     Promise.all([
@@ -36,7 +36,7 @@ export default function GamePage() {
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?game_id=${gameId}`),
       api.get(`/teams/${teamId}`),
-    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', status: g.status }); })
+    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', status: g.status, game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -81,6 +81,7 @@ export default function GamePage() {
       ...scoreForm,
       our_score: scoreForm.our_score === '' ? 0 : Number(scoreForm.our_score),
       opponent_score: scoreForm.opponent_score === '' ? 0 : Number(scoreForm.opponent_score),
+      game_type: scoreForm.game_type,
     });
     setGame(g);
     setScoreModal(false);
@@ -99,6 +100,7 @@ export default function GamePage() {
 
   const homeAway = game.home_away === 'home' ? '🏠 Home' : game.home_away === 'away' ? '✈️ Away' : '⚖️ Neutral';
   const isViewer = teamRole === 'viewer';
+  const gameTypeLabel = { friendly: 'Friendly', playoff: 'Playoff', finals: 'Finals' }[game.game_type];
 
   return (
     <div>
@@ -113,6 +115,8 @@ export default function GamePage() {
             {game.game_time && ` · ${game.game_time}`}
             {game.location && ` · 📍 ${game.location}`}
             {` · ${homeAway}`}
+            {gameTypeLabel && <span className="tag tag-gold" style={{ marginLeft: 8 }}>{gameTypeLabel}</span>}
+            {game.game_type === 'friendly' && <span className="tag tag-gray" style={{ marginLeft: 4 }}>Doesn't count for leaderboard</span>}
           </div>
         </div>
         <div className={styles.scoreBox} onClick={() => teamRole === 'admin' && setScoreModal(true)} style={teamRole !== 'admin' ? { cursor: 'default' } : {}}>
@@ -267,6 +271,15 @@ export default function GamePage() {
                 <option value="scheduled">Scheduled</option>
                 <option value="in_progress">In Progress (Live)</option>
                 <option value="completed">Completed</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Game Type</label>
+              <select className="form-control" value={scoreForm.game_type} onChange={e => setScoreForm(p => ({ ...p, game_type: e.target.value }))}>
+                <option value="regular">Regular</option>
+                <option value="friendly">Friendly (doesn't count for leaderboard)</option>
+                <option value="playoff">Playoff</option>
+                <option value="finals">Finals</option>
               </select>
             </div>
             <div className="modal-footer">

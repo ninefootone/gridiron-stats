@@ -28,7 +28,7 @@ export default function TeamDetailPage() {
   const [gameModal, setGameModal] = useState(false);
   const [playerForm, setPlayerForm] = useState({ name: '', number: '', positions: [] });
   const [editingPlayer, setEditingPlayer] = useState(null);
-  const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '' });
+  const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -67,7 +67,7 @@ export default function TeamDetailPage() {
       const g = await api.post('/games', { team_id: Number(teamId), ...gameForm });
       setGames(prev => [g, ...prev]);
       setGameModal(false);
-      setGameForm({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '' });
+      setGameForm({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
   }
@@ -264,7 +264,12 @@ export default function TeamDetailPage() {
                     </div>
                     <div className={styles.gameVs}>
                       <div className={styles.gameOpponent}>vs {g.opponent_name}</div>
-                      {g.location && <div className={styles.gameLocation}>📍 {g.location}</div>}
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                        {g.location && <span className={styles.gameLocation}>📍 {g.location}</span>}
+                        {g.game_type === 'friendly' && <span className="tag tag-gray" style={{ fontSize: '0.7rem' }}>Friendly</span>}
+                        {g.game_type === 'playoff' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Playoff</span>}
+                        {g.game_type === 'finals' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Finals</span>}
+                      </div>
                     </div>
                     <div className={styles.gameRight}>
                       {isCompleted
@@ -354,6 +359,15 @@ export default function TeamDetailPage() {
                   <option value="neutral">Neutral</option>
                 </select>
               </div>
+            </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Game Type</label>
+              <select className="form-control" value={gameForm.game_type} onChange={e => setGameForm(p => ({ ...p, game_type: e.target.value }))}>
+                <option value="regular">Regular</option>
+                <option value="friendly">Friendly (doesn't count for leaderboard)</option>
+                <option value="playoff">Playoff</option>
+                <option value="finals">Finals</option>
+              </select>
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Notes</label>

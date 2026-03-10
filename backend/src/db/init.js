@@ -103,6 +103,8 @@ async function initDB() {
   const client = await pool.connect();
   try {
     await client.query(SCHEMA);
+    await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS stat_count INTEGER DEFAULT 0`);
+    await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS game_type TEXT NOT NULL DEFAULT 'regular'`);
     console.log('✅ Database schema ready');
   } finally {
     client.release();

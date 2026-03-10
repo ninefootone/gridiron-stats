@@ -21,7 +21,7 @@ router.get('/', requireAuth, async (req, res, next) => {
       params = [game_id];
     } else if (player_id) {
       query = `
-        SELECT ps.*, g.opponent_name, g.game_date
+        SELECT ps.*, g.opponent_name, g.game_date, g.game_type
         FROM player_stats ps
         JOIN games g ON g.id = ps.game_id
         WHERE ps.player_id = $1
@@ -47,7 +47,8 @@ router.get('/summary', requireAuth, async (req, res, next) => {
               ps.stat_type, SUM(ps.value) AS total
        FROM players p
        JOIN player_stats ps ON ps.player_id = p.id
-       WHERE p.team_id = $1
+       JOIN games g ON g.id = ps.game_id
+       WHERE p.team_id = $1 AND g.game_type != 'friendly'
        GROUP BY p.id, p.name, p.number, p.position, ps.stat_type
        ORDER BY p.name, ps.stat_type`,
       [team_id]
