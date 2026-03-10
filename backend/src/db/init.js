@@ -87,6 +87,16 @@ const SCHEMA = `
       ALTER TABLE teams ADD COLUMN view_code VARCHAR(10) UNIQUE;
     END IF;
   END $$;
+
+  DO $$ BEGIN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='players' AND column_name='positions'
+    ) THEN
+      ALTER TABLE players ADD COLUMN positions TEXT[] DEFAULT '{}';
+      UPDATE players SET positions = ARRAY[position] WHERE position IS NOT NULL AND position != '';
+    END IF;
+  END $$;
 `;
 
 async function initDB() {

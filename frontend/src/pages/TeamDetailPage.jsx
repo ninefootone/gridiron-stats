@@ -22,7 +22,7 @@ export default function TeamDetailPage() {
   // Modals
   const [playerModal, setPlayerModal] = useState(false);
   const [gameModal, setGameModal] = useState(false);
-  const [playerForm, setPlayerForm] = useState({ name: '', number: '', position: '' });
+  const [playerForm, setPlayerForm] = useState({ name: '', number: '', positions: [] });
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '' });
   const [saving, setSaving] = useState(false);
@@ -43,15 +43,15 @@ export default function TeamDetailPage() {
     setSaving(true); setError('');
     try {
       if (editingPlayer) {
-        const p = await api.put(`/players/${editingPlayer.id}`, { ...playerForm, number: playerForm.number ? Number(playerForm.number) : null });
+        const p = await api.put(`/players/${editingPlayer.id}`, { ...playerForm, number: playerForm.number ? Number(playerForm.number) : null, positions: playerForm.positions });
         setPlayers(prev => prev.map(pl => pl.id === p.id ? p : pl));
       } else {
-        const p = await api.post('/players', { team_id: Number(teamId), ...playerForm, number: playerForm.number ? Number(playerForm.number) : null });
+        const p = await api.post('/players', { team_id: Number(teamId), ...playerForm, number: playerForm.number ? Number(playerForm.number) : null, positions: playerForm.positions });
         setPlayers(prev => [...prev, p]);
       }
       setPlayerModal(false);
       setEditingPlayer(null);
-      setPlayerForm({ name: '', number: '', position: '' });
+      setPlayerForm({ name: '', number: '', positions: [] });
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
   }
@@ -134,7 +134,7 @@ export default function TeamDetailPage() {
               <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
             </div>
             {!isViewer && (
-              <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', position: '' }); setPlayerModal(true); }}>+ Add Player</button>
+              <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
             )}
           </div>
           {players.length === 0 ? (
@@ -146,13 +146,13 @@ export default function TeamDetailPage() {
                   <div className={styles.playerNum}>#{p.number ?? '—'}</div>
                   <div className={styles.playerInfo}>
                     <div className={styles.playerName}>{p.name}</div>
-                    {p.position && <span className="tag tag-green">{p.position}</span>}
+                    {p.positions?.length > 0 && p.positions.map(pos => <span key={pos} className="tag tag-green">{pos}</span>)}
                   </div>
                   {!isViewer && (
                 <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
                   <button
                     className={`btn btn-ghost btn-sm ${styles.playerEditBtn}`}
-                    onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
+                    onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', positions: p.positions || [] }); setPlayerModal(true); }}
                   >
                     Edit
                   </button>
@@ -171,13 +171,13 @@ export default function TeamDetailPage() {
                       <div className={styles.playerNum}>#{p.number ?? '—'}</div>
                       <div className={styles.playerInfo}>
                         <div className={styles.playerName}>{p.name}</div>
-                        {p.position && <span className="tag tag-gray">{p.position}</span>}
+                        {p.positions?.length > 0 && p.positions.map(pos => <span key={pos} className="tag tag-gray">{pos}</span>)}
                       </div>
                       {!isViewer && (
                         <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
                           <button
                             className={`btn btn-ghost btn-sm ${styles.playerEditBtn}`}
-                            onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
+                            onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', positions: p.positions || [] }); setPlayerModal(true); }}
                           >
                             Edit
                           </button>
@@ -248,11 +248,24 @@ export default function TeamDetailPage() {
                 <input className="form-control" type="number" min="0" max="99" value={playerForm.number} onChange={e => setPlayerForm(p => ({ ...p, number: e.target.value }))} placeholder="e.g. 12" />
               </div>
               <div className="form-group">
-                <label>Position</label>
-                <select className="form-control" value={playerForm.position} onChange={e => setPlayerForm(p => ({ ...p, position: e.target.value }))}>
-                  <option value="">Select...</option>
-                  {POSITIONS.map(pos => <option key={pos} value={pos}>{pos}</option>)}
-                </select>
+                <label>Positions</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {POSITIONS.map(pos => (
+                    <button
+                      key={pos}
+                      type="button"
+                      className={`btn btn-sm ${playerForm.positions.includes(pos) ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setPlayerForm(p => ({
+                        ...p,
+                        positions: p.positions.includes(pos)
+                          ? p.positions.filter(x => x !== pos)
+                          : [...p.positions, pos]
+                      }))}
+                    >
+                      {pos}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="modal-footer">

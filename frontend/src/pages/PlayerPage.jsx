@@ -14,7 +14,7 @@ export default function PlayerPage() {
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editModal, setEditModal] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', number: '', position: '' });
+  const [editForm, setEditForm] = useState({ name: '', number: '', positions: '' });
   const [saving, setSaving] = useState(false);
   const [teamRole, setTeamRole] = useState(null);
 
@@ -27,7 +27,7 @@ export default function PlayerPage() {
       setTeamRole(t.my_role);
       const p = players.find(p => String(p.id) === String(playerId));
       setPlayer(p);
-      if (p) setEditForm({ name: p.name, number: p.number || '', position: p.position || '' });
+      if (p) setEditForm({ name: p.name, number: p.number || '', positions: p.positions || [] });
       setStats(s);
     }).catch(console.error).finally(() => setLoading(false));
   }, [playerId, teamId]);
@@ -36,7 +36,7 @@ export default function PlayerPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const updated = await api.put(`/players/${playerId}`, { ...editForm, number: editForm.number ? Number(editForm.number) : null });
+      const updated = await api.put(`/players/${playerId}`, { ...editForm, number: editForm.number ? Number(editForm.number) : null, positions: editForm.positions });
       setPlayer(updated);
       setEditModal(false);
     } catch (err) { alert(err.message); }
@@ -74,7 +74,7 @@ export default function PlayerPage() {
         <div className={styles.jersey}>#{player.number ?? '—'}</div>
         <div style={{ flex: 1 }}>
           <div className="page-title">{player.name}</div>
-          {player.position && <span className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{player.position}</span>}
+          {player.positions?.length > 0 && player.positions.map(pos => <span key={pos} className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{pos}</span>)}
         </div>
         {teamRole !== 'viewer' && (
           <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
@@ -102,11 +102,24 @@ export default function PlayerPage() {
                   <input className="form-control" type="number" min="0" max="99" value={editForm.number} onChange={e => setEditForm(p => ({ ...p, number: e.target.value }))} />
                 </div>
                 <div className="form-group">
-                  <label>Position</label>
-                  <select className="form-control" value={editForm.position} onChange={e => setEditForm(p => ({ ...p, position: e.target.value }))}>
-                    <option value="">Select...</option>
-                    {POSITIONS.map(pos => <option key={pos} value={pos}>{pos}</option>)}
-                  </select>
+                  <label>Positions</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {POSITIONS.map(pos => (
+                      <button
+                        key={pos}
+                        type="button"
+                        className={`btn btn-sm ${editForm.positions?.includes(pos) ? 'btn-primary' : 'btn-secondary'}`}
+                        onClick={() => setEditForm(p => ({
+                          ...p,
+                          positions: p.positions?.includes(pos)
+                            ? p.positions.filter(x => x !== pos)
+                            : [...(p.positions || []), pos]
+                        }))}
+                      >
+                        {pos}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="modal-footer">

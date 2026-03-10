@@ -29,12 +29,12 @@ router.get('/', requireAuth, async (req, res, next) => {
 
 // POST /api/players
 router.post('/', requireAuth, async (req, res, next) => {
-  const { team_id, name, number, position } = req.body;
+  const { team_id, name, number, positions } = req.body;
   if (!team_id || !name) return res.status(400).json({ error: 'team_id and name required' });
   try {
     const { rows } = await pool.query(
-      `INSERT INTO players (team_id, name, number, position) VALUES ($1, $2, $3, $4) RETURNING *`,
-      [team_id, name, number || null, position || null]
+      `INSERT INTO players (team_id, name, number, positions) VALUES ($1, $2, $3, $4) RETURNING *`,
+      [team_id, name, number || null, positions || []]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -44,17 +44,17 @@ router.post('/', requireAuth, async (req, res, next) => {
 
 // PUT /api/players/:id
 router.put('/:id', requireAuth, async (req, res, next) => {
-  const { name, number, position } = req.body;
+  const { name, number, positions } = req.body;
   try {
     const { rows } = await pool.query(
       `UPDATE players SET
         name = COALESCE($1, name),
         number = $2,
-        position = COALESCE($3, position)
+        positions = COALESCE($3, positions)
        WHERE id = $4
        AND team_id IN (SELECT team_id FROM team_members WHERE user_id = $5 AND role IN ('admin','member'))
        RETURNING *`,
-      [name, number ?? null, position, req.params.id, req.dbUser.id]
+      [name, number ?? null, positions || null, req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Player not found or not authorised' });
     res.json(rows[0]);
