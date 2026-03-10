@@ -17,6 +17,8 @@ export default function TeamsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState(null);
+  const [feedbackModal, setFeedbackModal] = useState(false);
+  const [feedbackForm, setFeedbackForm] = useState({ name: '', message: '' });
 
   useEffect(() => {
     api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
@@ -86,15 +88,6 @@ async function leaveTeam(e, teamId) {
             + New Team
           </button>
         </div>
-      </div>
-      <div style={{ marginBottom: 24, textAlign: 'right' }}>
-        
-          <a href="mailto:beardybradley@gmail.com?subject=Gridiron%20Stats%20Feedback"
-          className="btn btn-ghost btn-sm"
-          style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }}
-        >
-          💬 Give Feedback
-        </a>
       </div>
 
       {teams.length === 0 ? (
@@ -225,6 +218,53 @@ async function leaveTeam(e, teamId) {
               <button type="submit" className="btn btn-primary" disabled={saving || !joinCode.trim()}>{saving ? 'Joining...' : 'Join Team'}</button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      <div style={{ marginTop: 32, textAlign: 'center' }}>
+        <button
+          className="btn btn-ghost btn-sm"
+          style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }}
+          onClick={() => setFeedbackModal(true)}
+        >
+          💬 Give Feedback
+        </button>
+      </div>
+
+      {feedbackModal && (
+        <Modal title="Give Feedback" onClose={() => setFeedbackModal(false)}>
+          <p style={{ color: 'var(--gray-300)', fontSize: '0.9rem', marginBottom: 16 }}>
+            Got a suggestion or spotted a bug? We'd love to hear from you.
+          </p>
+          <div className="form-group" style={{ marginBottom: 14 }}>
+            <label>Your Name</label>
+            <input
+              className="form-control"
+              value={feedbackForm.name}
+              onChange={e => setFeedbackForm(p => ({ ...p, name: e.target.value }))}
+              placeholder="e.g. Jon"
+            />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label>Message *</label>
+            <textarea
+              className="form-control"
+              rows={4}
+              value={feedbackForm.message}
+              onChange={e => setFeedbackForm(p => ({ ...p, message: e.target.value }))}
+              placeholder="Tell us what you think..."
+            />
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={() => setFeedbackModal(false)}>Cancel</button>
+              <a className={`btn btn-primary${!feedbackForm.message.trim() ? ' btn-disabled' : ''}`}
+              href={`mailto:beardybradley@gmail.com?subject=Gridiron%20Stats%20Feedback${feedbackForm.name ? `%20from%20${encodeURIComponent(feedbackForm.name)}` : ''}&body=${encodeURIComponent(feedbackForm.message)}`}
+              onClick={() => { setFeedbackModal(false); setFeedbackForm({ name: '', message: '' }); }}
+              style={!feedbackForm.message.trim() ? { pointerEvents: 'none', opacity: 0.5 } : {}}
+            >
+              Send Feedback
+            </a>
+          </div>
         </Modal>
       )}
     </div>
