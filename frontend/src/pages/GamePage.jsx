@@ -179,15 +179,8 @@ export default function GamePage() {
       </div>
 
       {!isViewer && (
-        <div style={{ margin: '12px 0', display: 'flex', gap: 8 }}>
+        <div style={{ margin: '12px 0' }}>
           <button className={`btn btn-primary ${styles.logStatBtn}`} onClick={openStatFirst}>⚡ Log Stat</button>
-          {isAdmin && (
-            <button className="btn btn-danger btn-sm" onClick={async () => {
-              if (!confirm('Delete this game and all its stats? This cannot be undone.')) return;
-              await api.del(`/games/${gameId}`);
-              navigate(`/teams/${teamId}`);
-            }}>Delete Game</button>
-          )}
         </div>
       )}
 
@@ -465,6 +458,15 @@ export default function GamePage() {
             </div>
           </form>
         </Modal>
+      )}
+    {isAdmin && (
+        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <button className="btn btn-danger btn-sm" onClick={async () => {
+            if (!confirm('Delete this game and all its stats? This cannot be undone.')) return;
+            await api.del(`/games/${gameId}`);
+            navigate(`/teams/${teamId}`);
+          }}>Delete Game</button>
+        </div>
       )}
     </div>
   );
