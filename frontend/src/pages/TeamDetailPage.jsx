@@ -31,6 +31,8 @@ export default function TeamDetailPage() {
   const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [members, setMembers] = useState([]);
+  const [membersLoading, setMembersLoading] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -70,6 +72,27 @@ export default function TeamDetailPage() {
       setGameForm({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
+  }
+
+async function loadMembers() {
+    if (!isAdmin) return;
+    setMembersLoading(true);
+    try {
+      const m = await api.get(`/teams/${teamId}/members`);
+      setMembers(m);
+    } catch (err) { console.error(err); }
+    finally { setMembersLoading(false); }
+  }
+
+  async function updateMemberRole(userId, role) {
+    await api.put(`/teams/${teamId}/members/${userId}`, { role });
+    setMembers(prev => prev.map(m => m.id === userId ? { ...m, role } : m));
+  }
+
+  async function removeMember(userId, name) {
+    if (!confirm(`Remove ${name} from this team?`)) return;
+    await api.del(`/teams/${teamId}/members/${userId}`);
+    setMembers(prev => prev.filter(m => m.id !== userId));
   }
 
   async function deletePlayer(id, e) {
@@ -170,6 +193,11 @@ export default function TeamDetailPage() {
         <button className={`${styles.tab} ${tab === 'leaderboard' ? styles.activeTab : ''}`} onClick={() => navigate(`/teams/${teamId}/leaderboard`)}>
           Leaderboard
         </button>
+        {isAdmin && (
+          <button className={`${styles.tab} ${tab === 'members' ? styles.activeTab : ''}`} onClick={() => { setTab('members'); loadMembers(); }}>
+            Members
+          </button>
+        )}
       </div>
 
       {tab === 'players' && (
@@ -290,6 +318,45 @@ export default function TeamDetailPage() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'members' && isAdmin && (
+        <div>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Join Code (members)</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)' }}>{team.join_code}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>View Code (read-only)</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)' }}>{team.view_code}</div>
+            </div>
+          </div>
+          {membersLoading ? <div className="spinner" /> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {members.map(m => (
+                <div key={m.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  {m.picture && <img src={m.picture} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />}
+                  <div style={{ flex: 1, minWidth: 120 }}>
+                    <div style={{ fontWeight: 700 }}>{m.name}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{m.email}</div>
+                  </div>
+                  <select
+                    className="form-control"
+                    style={{ width: 'auto' }}
+                    value={m.role}
+                    onChange={e => updateMemberRole(m.id, e.target.value)}
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="member">Member</option>
+                    <option value="viewer">Viewer</option>
+                  </select>
+                  <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
+                </div>
+              ))}
             </div>
           )}
         </div>

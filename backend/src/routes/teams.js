@@ -194,4 +194,74 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
   }
 });
 
+// GET /api/teams/:id/members
+router.get('/:id/members', requireAuth, async (req, res, next) => {
+  try {
+    const adminCheck = await pool.query(
+      `SELECT role FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [req.params.id, req.dbUser.id]
+    );
+    if (!adminCheck.rows.length || adminCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Admin only' });
+    }
+    const { rows } = await pool.query(
+      `SELECT u.id, u.name, u.email, u.picture, tm.role
+       FROM team_members tm
+       JOIN users u ON u.id = tm.user_id
+       WHERE tm.team_id = $1
+       ORDER BY tm.role DESC, u.name ASC`,
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /api/teams/:id/members/:userId — change role
+router.put('/:id/members/:userId', requireAuth, async (req, res, next) => {
+  const { role } = req.body;
+  if (!['admin', 'member', 'viewer'].includes(role)) {
+    return res.status(400).json({ error: 'Invalid role' });
+  }
+  try {
+    const adminCheck = await pool.query(
+      `SELECT role FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [req.params.id, req.dbUser.id]
+    );
+    if (!adminCheck.rows.length || adminCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Admin only' });
+    }
+    const { rows } = await pool.query(
+      `UPDATE team_members SET role = $1 WHERE team_id = $2 AND user_id = $3 RETURNING *`,
+      [role, req.params.id, req.params.userId]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Member not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/teams/:id/members/:userId — remove member
+router.delete('/:id/members/:userId', requireAuth, async (req, res, next) => {
+  try {
+    const adminCheck = await pool.query(
+      `SELECT role FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [req.params.id, req.dbUser.id]
+    );
+    if (!adminCheck.rows.length || adminCheck.rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'Admin only' });
+    }
+    const { rowCount } = await pool.query(
+      `DELETE FROM team_members WHERE team_id = $1 AND user_id = $2`,
+      [req.params.id, req.params.userId]
+    );
+    if (!rowCount) return res.status(404).json({ error: 'Member not found' });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
