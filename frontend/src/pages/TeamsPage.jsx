@@ -87,6 +87,15 @@ async function leaveTeam(e, teamId) {
           </button>
         </div>
       </div>
+      <div style={{ marginBottom: 24, textAlign: 'right' }}>
+        
+          href="mailto:beardybradley@gmail.com?subject=Gridiron%20Stats%20Feedback"
+          className="btn btn-ghost btn-sm"
+          style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }}
+        >
+          💬 Give Feedback
+        </a>
+      </div>
 
       {teams.length === 0 ? (
         <div className="empty-state">
