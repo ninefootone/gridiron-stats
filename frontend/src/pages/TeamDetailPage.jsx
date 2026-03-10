@@ -17,6 +17,10 @@ export default function TeamDetailPage() {
   const [games, setGames] = useState([]);
   const [tab, setTab] = useState('players');
   const [playerSort, setPlayerSort] = useState('number');
+  const [importing, setImporting] = useState(false);
+  const [importModal, setImportModal] = useState(false);
+  const [importPreview, setImportPreview] = useState([]);
+  const [importError, setImportError] = useState('');
   const [loading, setLoading] = useState(true);
 
   // Modals
@@ -81,6 +85,47 @@ export default function TeamDetailPage() {
     setPlayers(prev => prev.map(p => p.id === updated.id ? updated : p));
   }
 
+  function parseCSV(text) {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    if (!lines.length) return [];
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+    return lines.slice(1).map(line => {
+      const vals = line.split(',').map(v => v.trim().replace(/['"]/g, ''));
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = vals[i] || '');
+      const positions = obj.positions ? obj.positions.split('|').map(p => p.trim()).filter(Boolean)
+        : obj.position ? [obj.position] : [];
+      return { name: obj.name || '', number: obj.number || '', positions };
+    }).filter(p => p.name);
+  }
+
+  function handleCSVFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImportError('');
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const parsed = parseCSV(ev.target.result);
+      if (!parsed.length) { setImportError('No valid players found. Check your CSV format.'); return; }
+      setImportPreview(parsed);
+    };
+    reader.readAsText(file);
+  }
+
+  async function confirmImport() {
+    setImporting(true);
+    try {
+      const { players: newPlayers } = await api.post('/players/import', { team_id: Number(teamId), players: importPreview });
+      setPlayers(prev => [...prev, ...newPlayers]);
+      setImportModal(false);
+      setImportPreview([]);
+    } catch (err) {
+      setImportError(err.message);
+    } finally {
+      setImporting(false);
+    }
+  }
+
   if (loading) return <div className="spinner" />;
   if (!team) return <div>Team not found</div>;
 
@@ -134,7 +179,10 @@ export default function TeamDetailPage() {
               <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
             </div>
             {!isViewer && (
-              <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn btn-secondary" onClick={() => { setImportPreview([]); setImportError(''); setImportModal(true); }}>Import CSV</button>
+                <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
+              </div>
             )}
           </div>
           {players.length === 0 ? (
@@ -316,6 +364,46 @@ export default function TeamDetailPage() {
               <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Adding...' : 'Add Game'}</button>
             </div>
           </form>
+        </Modal>
+      )}
+
+{importModal && (
+        <Modal title="Import Players from CSV" onClose={() => setImportModal(false)}>
+          <div style={{ marginBottom: 14 }}>
+            <p style={{ color: 'var(--gray-300)', fontSize: '0.9rem', marginBottom: 12 }}>
+              Upload a CSV with columns: <code>name, number, positions</code><br />
+              For multiple positions use a pipe: <code>QB|WR</code>
+            </p>
+            <input type="file" accept=".csv" className="form-control" onChange={handleCSVFile} />
+          </div>
+          {importError && <div className="alert alert-error" style={{ marginBottom: 12 }}>{importError}</div>}
+          {importPreview.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                Preview — {importPreview.length} players found
+              </div>
+              <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {importPreview.map((p, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 12px' }}>
+                    <span style={{ fontFamily: 'var(--font-display)', color: 'var(--gold)', fontWeight: 900, width: 32 }}>#{p.number || '—'}</span>
+                    <span style={{ flex: 1, fontWeight: 600 }}>{p.name}</span>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{p.positions.join(', ') || '—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={() => setImportModal(false)}>Cancel</button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={!importPreview.length || importing}
+              onClick={confirmImport}
+            >
+              {importing ? 'Importing...' : `Import ${importPreview.length} Players`}
+            </button>
+          </div>
         </Modal>
       )}
     </div>

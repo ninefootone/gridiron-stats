@@ -81,6 +81,40 @@ router.patch('/:id/active', requireAuth, async (req, res, next) => {
   }
 });
 
+// POST /api/players/import
+router.post('/import', requireAuth, async (req, res, next) => {
+  const { team_id, players } = req.body;
+  if (!team_id || !Array.isArray(players)) return res.status(400).json({ error: 'team_id and players array required' });
+  try {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const inserted = [];
+      for (const p of players) {
+        if (!p.name?.trim()) continue;
+        const positions = Array.isArray(p.positions) ? p.positions : (p.position ? [p.position] : []);
+        const { rows } = await client.query(
+          `INSERT INTO players (team_id, name, number, positions)
+           VALUES ($1, $2, $3, $4)
+           ON CONFLICT DO NOTHING
+           RETURNING *`,
+          [team_id, p.name.trim(), p.number ? Number(p.number) : null, positions]
+        );
+        if (rows.length) inserted.push(rows[0]);
+      }
+      await client.query('COMMIT');
+      res.json({ inserted: inserted.length, players: inserted });
+    } catch (e) {
+      await client.query('ROLLBACK');
+      throw e;
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
 // DELETE /api/players/:id
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
