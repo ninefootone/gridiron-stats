@@ -174,8 +174,8 @@ export default function GamePage() {
       </div>
 
       {!isViewer && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '12px 0' }}>
-          <button className="btn btn-primary" onClick={openStatFirst}>⚡ Log Stat</button>
+        <div style={{ margin: '12px 0' }}>
+          <button className={`btn btn-primary ${styles.logStatBtn}`} onClick={openStatFirst}>⚡ Log Stat</button>
         </div>
       )}
 
