@@ -133,3 +133,22 @@
   .gameVs { flex-basis: 60%; }
   .gameRight { flex-basis: 35%; }
 }
+
+.playerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.playerActions .btn {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .playerActions {
+    flex-direction: column;
+  }
+
+  .playerActions .btn {
+    width: 100%;
+  }
+}
