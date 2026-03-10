@@ -129,8 +129,8 @@ export default function TeamDetailPage() {
   if (loading) return <div className="spinner" />;
   if (!team) return <div>Team not found</div>;
 
-  const wins = games.filter(g => g.status === 'completed' && g.our_score > g.opponent_score).length;
-  const losses = games.filter(g => g.status === 'completed' && g.our_score < g.opponent_score).length;
+  const wins = games.filter(g => g.status === 'completed' && g.game_type !== 'friendly' && g.our_score > g.opponent_score).length;
+  const losses = games.filter(g => g.status === 'completed' && g.game_type !== 'friendly' && g.our_score < g.opponent_score).length;
 
   return (
     <div>
