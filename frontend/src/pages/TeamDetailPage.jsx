@@ -336,15 +336,13 @@ export default function TeamDetailPage() {
               <label>Opponent *</label>
               <input className="form-control" value={gameForm.opponent_name} onChange={e => setGameForm(p => ({ ...p, opponent_name: e.target.value }))} placeholder="Opponent team name" required />
             </div>
-            <div style={{ display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-              <div className="form-group" style={{ flex: '1 1 140px', minWidth: 0 }}>
-                <label>Date *</label>
-                <input className="form-control" type="date" value={gameForm.game_date} onChange={e => setGameForm(p => ({ ...p, game_date: e.target.value }))} required style={{ width: '100%', boxSizing: 'border-box' }} />
-              </div>
-              <div className="form-group" style={{ flex: '1 1 120px', minWidth: 0 }}>
-                <label>Kick-off Time</label>
-                <input className="form-control" type="time" value={gameForm.game_time} onChange={e => setGameForm(p => ({ ...p, game_time: e.target.value }))} style={{ width: '100%', boxSizing: 'border-box' }} />
-              </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Date *</label>
+              <input className="form-control" type="date" value={gameForm.game_date} onChange={e => setGameForm(p => ({ ...p, game_date: e.target.value }))} required />
+            </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Kick-off Time</label>
+              <input className="form-control" type="time" value={gameForm.game_time} onChange={e => setGameForm(p => ({ ...p, game_time: e.target.value }))} />
             </div>
             <div className="grid-2" style={{ marginBottom: 14 }}>
               <div className="form-group">

@@ -109,6 +109,7 @@ input, select, textarea {
   font-size: 1rem;
   transition: border-color 0.15s;
   width: 100%;
+  box-sizing: border-box;
 }
 .form-control:focus { outline: none; border-color: var(--gold); }
 .form-control option { background: var(--field-green); }
