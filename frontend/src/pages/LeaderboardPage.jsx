@@ -11,7 +11,7 @@ export default function LeaderboardPage() {
 
   const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedStat, setSelectedStat] = useState('touchdown');
+  const [selectedStat, setSelectedStat] = useState('td_passing');
 
   useEffect(() => {
     api.get(`/stats/summary?team_id=${teamId}`)
