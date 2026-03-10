@@ -190,7 +190,9 @@ input, select, textarea {
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: var(--shadow-lg);
+  box-sizing: border-box;
 }
 .modal-header {
   display: flex;
