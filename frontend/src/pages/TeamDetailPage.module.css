@@ -98,10 +98,14 @@
 .gameDate {
   font-size: 0.82rem;
   color: var(--gray-300);
-  width: 100px;
+  width: 80px;
   flex-shrink: 0;
   font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
+.gameTime { font-size: 0.78rem; color: var(--gray-400); }
 .gameVs { flex: 1; }
 .gameOpponent { font-weight: 700; font-size: 1.05rem; }
 .gameLocation { font-size: 0.82rem; color: var(--gray-300); margin-top: 2px; }
@@ -116,3 +120,16 @@
 .win { color: #6edba8; }
 .loss { color: var(--danger); }
 .statCount { font-size: 0.75rem; color: var(--gray-500); margin-top: 2px; }
+
+@media (max-width: 640px) {
+  .playerInfo { flex-wrap: wrap; gap: 4px; }
+  .playerInfo .tag { order: 3; flex-basis: 100%; margin-top: 2px; }
+  .playerEditBtn { display: none; }
+}
+
+@media (max-width: 480px) {
+  .gameCard { flex-wrap: wrap; gap: 8px; }
+  .gameDate { width: auto; flex-direction: row; gap: 6px; flex-basis: 100%; }
+  .gameVs { flex-basis: 60%; }
+  .gameRight { flex-basis: 35%; }
+}

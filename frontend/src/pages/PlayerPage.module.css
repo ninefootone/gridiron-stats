@@ -68,3 +68,17 @@
 .gameLogTitle { font-weight: 700; }
 .gameLogDate { font-size: 0.82rem; color: var(--gray-300); }
 .gameLogStats { display: flex; flex-wrap: wrap; gap: 6px; }
+
+@media (max-width: 640px) {
+  .header { flex-wrap: wrap; }
+  .jersey {
+    font-size: 2.4rem;
+    width: 64px;
+    height: 64px;
+  }
+  .header > div:last-child {
+    flex-basis: 100%;
+    display: flex;
+    gap: 8px;
+  }
+}

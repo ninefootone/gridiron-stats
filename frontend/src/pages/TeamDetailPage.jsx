@@ -151,7 +151,7 @@ export default function TeamDetailPage() {
                   {!isViewer && (
                 <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
                   <button
-                    className="btn btn-ghost btn-sm"
+                    className={`btn btn-ghost btn-sm ${styles.playerEditBtn}`}
                     onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
                   >
                     Edit
@@ -176,7 +176,7 @@ export default function TeamDetailPage() {
                       {!isViewer && (
                         <div style={{ display: 'flex', gap: 6 }} onClick={e => e.stopPropagation()}>
                           <button
-                            className="btn btn-ghost btn-sm"
+                            className={`btn btn-ghost btn-sm ${styles.playerEditBtn}`}
                             onClick={e => { e.stopPropagation(); setEditingPlayer(p); setPlayerForm({ name: p.name, number: p.number || '', position: p.position || '' }); setPlayerModal(true); }}
                           >
                             Edit
@@ -211,8 +211,8 @@ export default function TeamDetailPage() {
                 return (
                   <div key={g.id} className={styles.gameCard} onClick={() => navigate(`/teams/${teamId}/games/${g.id}`)}>
                     <div className={styles.gameDate}>
-                      {format(new Date(g.game_date), 'EEE d MMM')}
-                      {g.game_time && <span> · {g.game_time}</span>}
+                      <span>{format(new Date(g.game_date), 'EEE d MMM')}</span>
+                      {g.game_time && <span className={styles.gameTime}>{g.game_time}</span>}
                     </div>
                     <div className={styles.gameVs}>
                       <div className={styles.gameOpponent}>vs {g.opponent_name}</div>
