@@ -81,6 +81,7 @@ export default function TeamDetailPage() {
 
   async function toggleActive(player, e) {
     e.stopPropagation();
+    if (player.active && !confirm(`Mark ${player.name} as inactive?`)) return;
     const updated = await api.patch(`/players/${player.id}/active`, { active: !player.active });
     setPlayers(prev => prev.map(p => p.id === updated.id ? updated : p));
   }
@@ -229,7 +230,7 @@ export default function TeamDetailPage() {
                           >
                             Edit
                           </button>
-                          <button className="btn btn-secondary btn-sm" onClick={e => toggleActive(p, e)}>Inactive</button>
+                          <button className="btn btn-secondary btn-sm" onClick={e => toggleActive(p, e)}>Restore</button>
                         </div>
                       )}
                     </div>
