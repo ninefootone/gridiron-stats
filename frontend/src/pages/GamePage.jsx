@@ -13,6 +13,7 @@ export default function GamePage() {
 
   const [game, setGame] = useState(null);
   const [teamRole, setTeamRole] = useState(null);
+  const [playerSort, setPlayerSort] = useState('number');
   const [players, setPlayers] = useState([]);
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -131,8 +132,14 @@ export default function GamePage() {
       <div className={styles.layout}>
         {/* Player roster */}
         <div className={styles.roster}>
-          <div className={styles.sectionTitle}>{isViewer ? 'Roster' : 'Roster — Tap to Log Stat'}</div>
-          {players.filter(p => p.active).map(p => (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div className={styles.sectionTitle} style={{ marginBottom: 0 }}>{isViewer ? 'Roster' : 'Roster — Tap to Log Stat'}</div>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}>#</button>
+              <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
+            </div>
+          </div>
+          {[...players.filter(p => p.active)].sort((a, b) => playerSort === 'name' ? a.name.localeCompare(b.name) : (a.number ?? 999) - (b.number ?? 999)).map(p => (
             <button key={p.id} className={styles.rosterBtn} onClick={() => !isViewer && openStatModal(p)} style={isViewer ? { cursor: 'default', opacity: 0.7 } : {}}>
               <span className={styles.rosterNum}>#{p.number ?? '—'}</span>
               <span className={styles.rosterName}>{p.name}</span>
