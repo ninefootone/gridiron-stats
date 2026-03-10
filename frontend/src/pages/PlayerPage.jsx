@@ -14,7 +14,7 @@ export default function PlayerPage() {
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editModal, setEditModal] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', number: '', positions: '' });
+  const [editForm, setEditForm] = useState({ name: '', number: '', positions: [] });
   const [saving, setSaving] = useState(false);
   const [teamRole, setTeamRole] = useState(null);
 
@@ -96,14 +96,13 @@ export default function PlayerPage() {
                 <label>Name *</label>
                 <input className="form-control" value={editForm.name} onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))} required />
               </div>
-              <div className="grid-2" style={{ marginBottom: 0 }}>
-                <div className="form-group">
-                  <label>Jersey #</label>
-                  <input className="form-control" type="number" min="0" max="99" value={editForm.number} onChange={e => setEditForm(p => ({ ...p, number: e.target.value }))} />
-                </div>
-                <div className="form-group">
-                  <label>Positions</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label>Jersey #</label>
+                <input className="form-control" type="number" min="0" max="99" value={editForm.number} onChange={e => setEditForm(p => ({ ...p, number: e.target.value }))} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label>Positions</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {POSITIONS.map(pos => (
                       <button
                         key={pos}
@@ -121,7 +120,6 @@ export default function PlayerPage() {
                     ))}
                   </div>
                 </div>
-              </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setEditModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>

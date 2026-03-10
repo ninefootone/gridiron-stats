@@ -242,14 +242,13 @@ export default function TeamDetailPage() {
               <label>Name *</label>
               <input className="form-control" value={playerForm.name} onChange={e => setPlayerForm(p => ({ ...p, name: e.target.value }))} placeholder="Player name" required />
             </div>
-            <div className="grid-2" style={{ marginBottom: 14 }}>
-              <div className="form-group">
-                <label>Jersey #</label>
-                <input className="form-control" type="number" min="0" max="99" value={playerForm.number} onChange={e => setPlayerForm(p => ({ ...p, number: e.target.value }))} placeholder="e.g. 12" />
-              </div>
-              <div className="form-group">
-                <label>Positions</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Jersey #</label>
+              <input className="form-control" type="number" min="0" max="99" value={playerForm.number} onChange={e => setPlayerForm(p => ({ ...p, number: e.target.value }))} placeholder="e.g. 12" />
+            </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Positions</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {POSITIONS.map(pos => (
                     <button
                       key={pos}
@@ -267,7 +266,6 @@ export default function TeamDetailPage() {
                   ))}
                 </div>
               </div>
-            </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setPlayerModal(false)}>Cancel</button>
               <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editingPlayer ? 'Save Changes' : 'Add Player'}</button>

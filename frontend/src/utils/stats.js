@@ -53,4 +53,5 @@ export const POSITIONS = [
   'QB', 'RB', 'FB', 'WR', 'TE', 'OL', 'OT', 'OG', 'C',
   'DL', 'DE', 'DT', 'LB', 'MLB', 'OLB', 'CB', 'S', 'FS', 'SS',
   'K', 'P', 'LS', 'KR', 'PR',
+  'Defense', 'Offense',
 ];
