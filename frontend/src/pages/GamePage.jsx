@@ -143,7 +143,6 @@ export default function GamePage() {
             <button key={p.id} className={styles.rosterBtn} onClick={() => !isViewer && openStatModal(p)} style={isViewer ? { cursor: 'default', opacity: 0.7 } : {}}>
               <span className={styles.rosterNum}>#{p.number ?? '—'}</span>
               <span className={styles.rosterName}>{p.name}</span>
-              {p.position && <span className="tag tag-gray" style={{ fontSize: '0.7rem' }}>{p.position}</span>}
               <span className={styles.rosterPlus}>+</span>
             </button>
           ))}
