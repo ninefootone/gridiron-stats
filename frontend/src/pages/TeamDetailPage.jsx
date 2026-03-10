@@ -173,17 +173,17 @@ export default function TeamDetailPage() {
 
       {tab === 'players' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+            {!isViewer && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => { setImportPreview([]); setImportError(''); setImportModal(true); }}>Import CSV</button>
+                <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 6 }}>
               <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}># Number</button>
               <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
             </div>
-            {!isViewer && (
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-secondary" onClick={() => { setImportPreview([]); setImportError(''); setImportModal(true); }}>Import CSV</button>
-                <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
-              </div>
-            )}
           </div>
           {players.length === 0 ? (
             <div className="empty-state"><div className="icon">👥</div><p>No players yet. Add your roster.</p></div>
@@ -336,14 +336,14 @@ export default function TeamDetailPage() {
               <label>Opponent *</label>
               <input className="form-control" value={gameForm.opponent_name} onChange={e => setGameForm(p => ({ ...p, opponent_name: e.target.value }))} placeholder="Opponent team name" required />
             </div>
-            <div className="grid-2" style={{ marginBottom: 14 }}>
-              <div className="form-group">
+            <div style={{ display: 'flex', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+              <div className="form-group" style={{ flex: '1 1 140px', minWidth: 0 }}>
                 <label>Date *</label>
-                <input className="form-control" type="date" value={gameForm.game_date} onChange={e => setGameForm(p => ({ ...p, game_date: e.target.value }))} required />
+                <input className="form-control" type="date" value={gameForm.game_date} onChange={e => setGameForm(p => ({ ...p, game_date: e.target.value }))} required style={{ width: '100%', boxSizing: 'border-box' }} />
               </div>
-              <div className="form-group">
+              <div className="form-group" style={{ flex: '1 1 120px', minWidth: 0 }}>
                 <label>Kick-off Time</label>
-                <input className="form-control" type="time" value={gameForm.game_time} onChange={e => setGameForm(p => ({ ...p, game_time: e.target.value }))} />
+                <input className="form-control" type="time" value={gameForm.game_time} onChange={e => setGameForm(p => ({ ...p, game_time: e.target.value }))} style={{ width: '100%', boxSizing: 'border-box' }} />
               </div>
             </div>
             <div className="grid-2" style={{ marginBottom: 14 }}>
