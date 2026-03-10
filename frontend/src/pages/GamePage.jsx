@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
-import { STAT_CATEGORIES, getStatInfo } from '../utils/stats';
+import { STAT_CATEGORIES, COUNTING_STATS, getStatInfo } from '../utils/stats';
 import { format } from 'date-fns';
 import styles from './GamePage.module.css';
 
@@ -25,6 +25,46 @@ export default function GamePage() {
   const [statValue, setStatValue] = useState('');
   const [statNotes, setStatNotes] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Stat-first flow
+  const [statFirstModal, setStatFirstModal] = useState(false);
+  const [sfStat, setSfStat] = useState(null);
+  const [sfPlayer, setSfPlayer] = useState(null);
+  const [sfPasser, setSfPasser] = useState(null);
+  const [sfReceiver, setSfReceiver] = useState(null);
+  const [sfPickSix, setSfPickSix] = useState(false);
+  const [sfReturnPlayer, setSfReturnPlayer] = useState(null);
+  const [sfNotes, setSfNotes] = useState('');
+  const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
+
+  function openStatFirst() {
+    setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
+    setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1);
+    setStatFirstModal(true);
+  }
+
+  async function logStatFirst() {
+    setSaving(true);
+    try {
+      const toLog = [];
+      if (sfStat === 'td_passing') {
+        if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'td_passing' });
+        if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'td_receiving' });
+      } else if (sfStat === 'interception') {
+        if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'interception' });
+        if (sfPickSix && sfReturnPlayer) toLog.push({ player: sfReturnPlayer, stat_type: 'td_return' });
+      } else {
+        if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
+      }
+      const results = await Promise.all(toLog.map(({ player, stat_type }) =>
+        api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: 1, notes: sfNotes || null })
+          .then(s => ({ ...s, player_name: player.name, player_number: player.number }))
+      ));
+      setStats(prev => [...results.reverse(), ...prev]);
+      setStatFirstModal(false);
+    } catch (err) { alert(err.message); }
+    finally { setSaving(false); }
+  }
 
   // Score edit
   const [scoreModal, setScoreModal] = useState(false);
@@ -132,6 +172,12 @@ export default function GamePage() {
           </span>
         </div>
       </div>
+
+      {!isViewer && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '12px 0' }}>
+          <button className="btn btn-primary" onClick={openStatFirst}>⚡ Log Stat</button>
+        </div>
+      )}
 
       <div className={styles.layout}>
         {/* Player roster */}
@@ -248,6 +294,133 @@ export default function GamePage() {
               <button type="submit" className="btn btn-primary" disabled={!selectedStat || saving}>{saving ? 'Logging...' : 'Log Stat'}</button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {/* Stat-First Modal */}
+      {statFirstModal && (
+        <Modal title="Log Stat" onClose={() => setStatFirstModal(false)} wide>
+          {sfStep === 1 && (
+            <div>
+              <div style={{ marginBottom: 12, color: 'var(--gray-300)', fontSize: '0.9rem' }}>Choose a stat type:</div>
+              <div className={styles.statCategories}>
+                {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
+                  const countingInCat = cat.stats.filter(s => s.unit === null);
+                  if (!countingInCat.length) return null;
+                  return (
+                    <div key={catKey}>
+                      <div className={styles.catLabel} style={{ color: cat.color }}>{cat.label}</div>
+                      <div className={styles.statGrid}>
+                        {countingInCat.map(s => (
+                          <button
+                            key={s.key}
+                            type="button"
+                            className={`${styles.statBtn} ${sfStat === s.key ? styles.statBtnActive : ''}`}
+                            style={sfStat === s.key ? { borderColor: cat.color, background: `${cat.color}22` } : {}}
+                            onClick={() => { setSfStat(s.key); setSfStep(2); setSfPlayer(null); setSfPasser(null); setSfReceiver(null); setSfPickSix(false); setSfReturnPlayer(null); }}
+                          >
+                            <span className={styles.statBtnIcon}>{s.icon}</span>
+                            <span className={styles.statBtnLabel}>{s.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setStatFirstModal(false)}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {sfStep === 2 && sfStat && (
+            <div>
+              <button className="btn btn-ghost btn-sm" style={{ marginBottom: 16 }} onClick={() => setSfStep(1)}>← Back</button>
+              <div style={{ marginBottom: 16, fontWeight: 700, fontSize: '1.1rem' }}>
+                {getStatInfo(sfStat).icon} {getStatInfo(sfStat).label}
+              </div>
+
+              {sfStat === 'td_passing' ? (
+                <>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Passer (optional)</label>
+                    <select className="form-control" value={sfPasser?.id || ''} onChange={e => setSfPasser(players.find(p => String(p.id) === e.target.value) || null)}>
+                      <option value="">— Select passer —</option>
+                      {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Receiver (optional)</label>
+                    <select className="form-control" value={sfReceiver?.id || ''} onChange={e => setSfReceiver(players.find(p => String(p.id) === e.target.value) || null)}>
+                      <option value="">— Select receiver —</option>
+                      {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              ) : sfStat === 'interception' ? (
+                <>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Player</label>
+                    <select className="form-control" value={sfPlayer?.id || ''} onChange={e => setSfPlayer(players.find(p => String(p.id) === e.target.value) || null)}>
+                      <option value="">— Select player —</option>
+                      {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={sfPickSix} onChange={e => { setSfPickSix(e.target.checked); if (!e.target.checked) setSfReturnPlayer(null); }} />
+                      Pick 6? (log a Return TD)
+                    </label>
+                  </div>
+                  {sfPickSix && (
+                    <div className="form-group" style={{ marginBottom: 14 }}>
+                      <label>Return TD Player (optional)</label>
+                      <select className="form-control" value={sfReturnPlayer?.id || ''} onChange={e => setSfReturnPlayer(players.find(p => String(p.id) === e.target.value) || null)}>
+                        <option value="">— Same as interceptor or select —</option>
+                        {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                          <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label>Player</label>
+                  <select className="form-control" value={sfPlayer?.id || ''} onChange={e => setSfPlayer(players.find(p => String(p.id) === e.target.value) || null)}>
+                    <option value="">— Select player —</option>
+                    {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                      <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label>Notes (optional)</label>
+                <input className="form-control" value={sfNotes} onChange={e => setSfNotes(e.target.value)} placeholder="e.g. Red zone TD, 2nd quarter" />
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setStatFirstModal(false)}>Cancel</button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={saving || (sfStat === 'td_passing' ? (!sfPasser && !sfReceiver) : sfStat === 'interception' ? !sfPlayer : !sfPlayer)}
+                  onClick={logStatFirst}
+                >
+                  {saving ? 'Logging...' : 'Log Stat'}
+                </button>
+              </div>
+            </div>
+          )}
         </Modal>
       )}
 

@@ -29,6 +29,7 @@ export const STAT_CATEGORIES = {
       { key: 'pbu',            label: 'PBU',                icon: '✋', unit: null,   description: 'Pass break-up' },
       { key: 'fumble_rec',     label: 'Fumble Recovery',    icon: '💎', unit: null,   description: 'Fumble recovered' },
       { key: 'forced_fumble',  label: 'Forced Fumble',      icon: '💥', unit: null,   description: 'Fumble forced' },
+      { key: 'td_return',      label: 'Return TD',          icon: '🏆', unit: null,   description: 'Defensive/special teams return TD' },
     ]
   },
   special: {
@@ -44,6 +45,7 @@ export const STAT_CATEGORIES = {
 };
 
 export const ALL_STATS = Object.values(STAT_CATEGORIES).flatMap(c => c.stats);
+export const COUNTING_STATS = ALL_STATS.filter(s => s.unit === null);
 
 export function getStatInfo(key) {
   return ALL_STATS.find(s => s.key === key) || { key, label: key, icon: '📊', unit: null };
