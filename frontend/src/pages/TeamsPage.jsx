@@ -89,7 +89,7 @@ async function leaveTeam(e, teamId) {
       </div>
       <div style={{ marginBottom: 24, textAlign: 'right' }}>
         
-          href="mailto:beardybradley@gmail.com?subject=Gridiron%20Stats%20Feedback"
+          <a href="mailto:beardybradley@gmail.com?subject=Gridiron%20Stats%20Feedback"
           className="btn btn-ghost btn-sm"
           style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }}
         >
