@@ -175,9 +175,9 @@ export default function TeamDetailPage() {
         <div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
             {!isViewer && (
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => { setImportPreview([]); setImportError(''); setImportModal(true); }}>Import CSV</button>
-                <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button className="btn btn-secondary" style={{ flex: '1 1 auto' }} onClick={() => { setImportPreview([]); setImportError(''); setImportModal(true); }}>Import CSV</button>
+                <button className="btn btn-primary" style={{ flex: '1 1 auto' }} onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
               </div>
             )}
             <div style={{ display: 'flex', gap: 6 }}>
