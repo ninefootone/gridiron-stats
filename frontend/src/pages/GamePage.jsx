@@ -50,6 +50,12 @@ export default function GamePage() {
       if (sfStat === 'td_passing') {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'td_passing' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'td_receiving' });
+      } else if (sfStat === 'two_pt_pass') {
+        if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'two_pt_pass' });
+        if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'two_pt_rec' });
+      } else if (sfStat === 'one_pt_pass') {
+        if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'one_pt_pass' });
+        if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'one_pt_rec' });
       } else if (sfStat === 'interception') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'interception' });
         if (sfPickSix && sfReturnPlayer) toLog.push({ player: sfReturnPlayer, stat_type: 'td_return' });
@@ -346,7 +352,7 @@ export default function GamePage() {
                 {getStatInfo(sfStat).icon} {getStatInfo(sfStat).label}
               </div>
 
-              {sfStat === 'td_passing' ? (
+              {['td_passing', 'two_pt_pass', 'one_pt_pass'].includes(sfStat) ? (
                 <>
                   <div className="form-group" style={{ marginBottom: 14 }}>
                     <label>Passer (optional)</label>
@@ -418,7 +424,7 @@ export default function GamePage() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={saving || (sfStat === 'td_passing' ? (!sfPasser && !sfReceiver) : sfStat === 'interception' ? !sfPlayer : !sfPlayer)}
+                  disabled={saving || (['td_passing', 'two_pt_pass', 'one_pt_pass'].includes(sfStat) ? (!sfPasser && !sfReceiver) : sfStat === 'interception' ? !sfPlayer : !sfPlayer)}
                   onClick={logStatFirst}
                 >
                   {saving ? 'Logging...' : 'Log Stat'}
