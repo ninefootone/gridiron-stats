@@ -95,6 +95,7 @@ export default function TeamDetailPage() {
   const [importModal, setImportModal] = useState(false);
   const [importPreview, setImportPreview] = useState([]);
   const [importError, setImportError] = useState('');
+  const [addPlayerMenuModal, setAddPlayerMenuModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Modals
@@ -292,16 +293,15 @@ async function loadMembers() {
       {tab === 'players' && (
         <div>
           <div className={styles.playerToolbar}>
-            {!isViewer && (
-              <div className={styles.playerToolbarActions}>
-                <button className="btn btn-secondary" onClick={() => { setImportPreview([]); setImportError(''); setImportModal(true); }}>Import CSV</button>
-                <button className="btn btn-primary" onClick={() => { setEditingPlayer(null); setPlayerForm({ name: '', number: '', positions: [] }); setPlayerModal(true); }}>+ Add Player</button>
-              </div>
-            )}
             <div className={styles.playerToolbarSort}>
               <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}># Number</button>
               <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
             </div>
+            {!isViewer && (
+              <div className={styles.playerToolbarAdd}>
+                <button className="btn btn-primary btn-sm" onClick={() => setAddPlayerMenuModal(true)}>+ Add</button>
+              </div>
+            )}
           </div>
           {players.length === 0 ? (
             <div className="empty-state"><div className="icon">👥</div><p>No players yet. Add your roster.</p></div>
@@ -530,6 +530,35 @@ async function loadMembers() {
       )}
 
       <div className={styles.bottomNavPadding} />
+
+      {addPlayerMenuModal && (
+        <Modal title="Add Players" onClose={() => setAddPlayerMenuModal(false)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                setAddPlayerMenuModal(false);
+                setEditingPlayer(null);
+                setPlayerForm({ name: '', number: '', positions: [] });
+                setPlayerModal(true);
+              }}
+            >
+              + Add Single Player
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setAddPlayerMenuModal(false);
+                setImportPreview([]);
+                setImportError('');
+                setImportModal(true);
+              }}
+            >
+              ⬆ Import from CSV
+            </button>
+          </div>
+        </Modal>
+      )}
 
       {/* Add Player Modal */}
       {playerModal && (
