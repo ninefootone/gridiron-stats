@@ -10,11 +10,16 @@ export default function Layout() {
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <div className={styles.logo} onClick={() => navigate('/teams')}>
-          <span className={styles.logoIcon}>🏈</span>
-          <div>
-            <div className={styles.logoTitle}>Gridiron Stats</div>
+        <div className={styles.logoArea}>
+          <div className={styles.logo} onClick={() => navigate('/teams')}>
+            <span className={styles.logoIcon}>🏈</span>
+            <div>
+              <div className={styles.logoTitle}>Gridiron Stats</div>
+            </div>
           </div>
+          <NavLink to="/teams" className={styles.allTeamsBtn}>
+            All Teams
+          </NavLink>
         </div>
 
         <div className={styles.userArea}>

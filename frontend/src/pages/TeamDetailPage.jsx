@@ -5,6 +5,80 @@ import Modal from '../components/shared/Modal';
 import { POSITIONS } from '../utils/stats';
 import { format } from 'date-fns';
 import styles from './TeamDetailPage.module.css';
+import lbStyles from './LeaderboardPage.module.css';
+import { getStatInfo, STAT_CATEGORIES } from '../utils/stats';
+
+function LeaderboardTab({ teamId, onPlayerClick }) {
+  const api = useApi();
+  const [summary, setSummary] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedStat, setSelectedStat] = useState('td_passing');
+
+  useEffect(() => {
+    api.get(`/stats/summary?team_id=${teamId}`)
+      .then(setSummary)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [teamId]);
+
+  const leaderboard = summary
+    .filter(r => r.stat_type === selectedStat)
+    .sort((a, b) => b.total - a.total);
+
+  const availableStats = [...new Set(summary.map(r => r.stat_type))];
+  const statInfo = getStatInfo(selectedStat);
+
+  if (loading) return <div className="spinner" />;
+
+  if (summary.length === 0) return (
+    <div className="empty-state"><div className="icon">📊</div><p>No stats recorded yet this season.</p></div>
+  );
+
+  return (
+    <div className={lbStyles.layout}>
+      <div className={lbStyles.statSelector}>
+        {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => (
+          <div key={catKey}>
+            <div className={lbStyles.catLabel} style={{ color: cat.color }}>{cat.label}</div>
+            {cat.stats.filter(s => availableStats.includes(s.key)).map(s => (
+              <button
+                key={s.key}
+                className={`${lbStyles.statPill} ${selectedStat === s.key ? lbStyles.activeStatPill : ''}`}
+                onClick={() => setSelectedStat(s.key)}
+              >
+                {s.icon} {s.label}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className={lbStyles.board}>
+        <div className={lbStyles.boardTitle}>{statInfo.icon} {statInfo.label} Leaders</div>
+        {leaderboard.length === 0 ? (
+          <p style={{ color: 'var(--gray-500)' }}>No data for this stat yet.</p>
+        ) : (
+          leaderboard.map((row, i) => (
+            <div
+              key={row.id}
+              className={`${lbStyles.leaderRow} ${i === 0 ? lbStyles.first : ''}`}
+              onClick={() => onPlayerClick(row.id)}
+            >
+              <div className={lbStyles.rank}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
+              <div className={lbStyles.playerNum}>#{row.number}</div>
+              <div className={lbStyles.leaderInfo}>
+                <div className={lbStyles.leaderName}>{row.name}</div>
+                {row.position && <span className="tag tag-gray" style={{ fontSize: '0.72rem' }}>{row.position}</span>}
+              </div>
+              <div className={lbStyles.leaderTotal}>
+                {row.total}{statInfo.unit ? ` ${statInfo.unit}` : ''}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function TeamDetailPage() {
   const { teamId } = useParams();
@@ -159,23 +233,9 @@ async function loadMembers() {
   return (
     <div>
       <div className={styles.header}>
-        <button className="btn btn-ghost btn-sm" onClick={() => navigate('/teams')}>← Back</button>
         <div className={styles.teamInfo}>
           <div className="page-title">{team.name}</div>
           {team.season && <span className="tag tag-gold">{team.season}</span>}
-          {isAdmin && (
-            <button
-              className="btn btn-danger btn-sm"
-              style={{ marginTop: 8, alignSelf: 'flex-start' }}
-              onClick={async () => {
-                if (!confirm(`Delete ${team.name}? This cannot be undone.`)) return;
-                await api.del(`/teams/${team.id}`);
-                navigate('/teams');
-              }}
-            >
-              Delete Team
-            </button>
-          )}
         </div>
         <div className={styles.record}>
           <span className={styles.recordNum}>{wins}</span><span className={styles.recordSep}>-</span><span className={styles.recordNum}>{losses}</span>
@@ -190,7 +250,7 @@ async function loadMembers() {
         <button className={`${styles.tab} ${tab === 'games' ? styles.activeTab : ''}`} onClick={() => setTab('games')}>
           Games ({games.length})
         </button>
-        <button className={`${styles.tab} ${tab === 'leaderboard' ? styles.activeTab : ''}`} onClick={() => navigate(`/teams/${teamId}/leaderboard`)}>
+        <button className={`${styles.tab} ${tab === 'leaderboard' ? styles.activeTab : ''}`} onClick={() => setTab('leaderboard')}>
           Leaderboard
         </button>
         {isAdmin && (
@@ -359,6 +419,25 @@ async function loadMembers() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {tab === 'leaderboard' && (
+        <LeaderboardTab teamId={teamId} onPlayerClick={playerId => navigate(`/teams/${teamId}/players/${playerId}`)} />
+      )}
+
+      {isAdmin && (
+        <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>
+          <button
+            className="btn btn-danger btn-sm"
+            onClick={async () => {
+              if (!confirm(`Delete ${team.name}? This cannot be undone.`)) return;
+              await api.del(`/teams/${team.id}`);
+              navigate('/teams');
+            }}
+          >
+            Delete Team
+          </button>
         </div>
       )}
 
