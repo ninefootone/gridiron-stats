@@ -455,64 +455,68 @@ async function loadMembers() {
         <LeaderboardTab teamId={teamId} onPlayerClick={playerId => navigate(`/teams/${teamId}/players/${playerId}`)} />
       )}
 
-      {isAdmin && (
+      {isAdmin && tab !== 'members' && (
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Export</div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                const rows = [
-                  ['Name', 'Number', 'Positions', 'Status'],
-                  ...[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => [
-                    p.name,
-                    p.number ?? '',
-                    (p.positions || []).join('|'),
-                    p.active ? 'Active' : 'Inactive',
-                  ])
-                ];
-                const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${team.name} — Roster.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-            >
-              ⬇ Roster CSV
-            </button>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={async () => {
-                const summary = await api.get(`/stats/summary?team_id=${teamId}`);
-                const allStats = {};
-                summary.forEach(r => {
-                  if (!allStats[r.name]) allStats[r.name] = { name: r.name, number: r.number };
-                  allStats[r.name][r.stat_type] = r.total;
-                });
-                const statTypes = [...new Set(summary.map(r => r.stat_type))];
-                const rows = [
-                  ['Name', 'Number', ...statTypes],
-                  ...Object.values(allStats).sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => [
-                    p.name,
-                    p.number ?? '',
-                    ...statTypes.map(s => p[s] ?? 0),
-                  ])
-                ];
-                const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${team.name} — Season Stats.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
-            >
-              ⬇ Season Stats CSV
-            </button>
+            {(tab === 'players') && (
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  const rows = [
+                    ['Name', 'Number', 'Positions', 'Status'],
+                    ...[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => [
+                      p.name,
+                      p.number ?? '',
+                      (p.positions || []).join('|'),
+                      p.active ? 'Active' : 'Inactive',
+                    ])
+                  ];
+                  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${team.name} — Roster.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                ⬇ Roster CSV
+              </button>
+            )}
+            {(tab === 'games' || tab === 'leaderboard') && (
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={async () => {
+                  const summary = await api.get(`/stats/summary?team_id=${teamId}`);
+                  const allStats = {};
+                  summary.forEach(r => {
+                    if (!allStats[r.name]) allStats[r.name] = { name: r.name, number: r.number };
+                    allStats[r.name][r.stat_type] = r.total;
+                  });
+                  const statTypes = [...new Set(summary.map(r => r.stat_type))];
+                  const rows = [
+                    ['Name', 'Number', ...statTypes],
+                    ...Object.values(allStats).sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => [
+                      p.name,
+                      p.number ?? '',
+                      ...statTypes.map(s => p[s] ?? 0),
+                    ])
+                  ];
+                  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+                  const blob = new Blob([csv], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${team.name} — Season Stats.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                ⬇ Season Stats CSV
+              </button>
+            )}
           </div>
           <div style={{ textAlign: 'center' }}>
             <button
