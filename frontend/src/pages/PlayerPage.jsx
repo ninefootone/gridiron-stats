@@ -73,8 +73,12 @@ export default function PlayerPage() {
       <div className={styles.header}>
         <div className={styles.jersey}>#{player.number ?? '—'}</div>
         <div style={{ flex: 1 }}>
-          <div className="page-title">{player.name}</div>
-          {player.positions?.length > 0 && player.positions.map(pos => <span key={pos} className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{pos}</span>)}
+          <div className="page-title" style={{ marginBottom: 8 }}>{player.name}</div>
+          {player.positions?.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {player.positions.map(pos => <span key={pos} className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{pos}</span>)}
+            </div>
+          )}
         </div>
         {teamRole !== 'viewer' && (
           <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
@@ -126,6 +130,24 @@ export default function PlayerPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {teamRole !== 'viewer' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0', padding: '14px 18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
+          <div style={{ flex: 1, fontSize: '0.9rem', color: 'var(--gray-300)' }}>
+            {player.name} is currently <span style={{ color: player.active ? 'var(--green, #4ade80)' : 'var(--gray-300)', fontWeight: 700 }}>{player.active ? 'active' : 'inactive'}</span>
+          </div>
+          <button
+            className={`btn btn-sm ${player.active ? 'btn-success' : 'btn-secondary'}`}
+            onClick={async () => {
+              if (player.active && !confirm(`Mark ${player.name} as inactive?`)) return;
+              const updated = await api.patch(`/players/${playerId}/active`, { active: !player.active });
+              setPlayer(updated);
+            }}
+          >
+            {player.active ? 'Active' : 'Restore'}
+          </button>
         </div>
       )}
 
