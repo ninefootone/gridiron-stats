@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
 import styles from './TeamsPage.module.css';
+import { useUser } from '@clerk/clerk-react';
 
 export default function TeamsPage() {
   const api = useApi();
@@ -18,10 +19,11 @@ export default function TeamsPage() {
   const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState(null);
   const [feedbackModal, setFeedbackModal] = useState(false);
-  const [feedbackForm, setFeedbackForm] = useState({ name: '', message: '' });
+  const [feedbackForm, setFeedbackForm] = useState({ name: '', email: '', message: '' });
   const [feedbackSending, setFeedbackSending] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [feedbackError, setFeedbackError] = useState('');
+  const { user } = useUser();
 
   useEffect(() => {
     api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
@@ -228,7 +230,16 @@ async function leaveTeam(e, teamId) {
         <button
           className="btn btn-ghost btn-sm"
           style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }}
-          onClick={() => setFeedbackModal(true)}
+          onClick={() => {
+            setFeedbackForm({
+              name: user?.fullName || '',
+              email: user?.primaryEmailAddress?.emailAddress || '',
+              message: '',
+            });
+            setFeedbackSent(false);
+            setFeedbackError('');
+            setFeedbackModal(true);
+          }}
         >
           💬 Give Feedback
         </button>
@@ -257,6 +268,16 @@ async function leaveTeam(e, teamId) {
                   placeholder="e.g. Jon"
                 />
               </div>
+              <div className="form-group" style={{ marginBottom: 14 }}>
+                <label>Email (optional — so we can reply)</label>
+                <input
+                  className="form-control"
+                  type="email"
+                  value={feedbackForm.email}
+                  onChange={e => setFeedbackForm(p => ({ ...p, email: e.target.value }))}
+                  placeholder="your@email.com"
+                />
+              </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Message *</label>
                 <textarea
@@ -283,7 +304,7 @@ async function leaveTeam(e, teamId) {
                       });
                       if (!res.ok) throw new Error('Failed to send');
                       setFeedbackSent(true);
-                      setFeedbackForm({ name: '', message: '' });
+                      setFeedbackForm({ name: '', email: '', message: '' });
                     } catch (err) {
                       setFeedbackError('Something went wrong — please try again.');
                     } finally {
