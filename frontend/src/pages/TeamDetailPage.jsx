@@ -260,6 +260,27 @@ async function loadMembers() {
         )}
       </div>
 
+      <nav className={styles.bottomNav}>
+        <button className={`${styles.bottomNavItem} ${tab === 'players' ? styles.bottomNavActive : ''}`} onClick={() => setTab('players')}>
+          <span className={styles.bottomNavIcon}>👥</span>
+          Players
+        </button>
+        <button className={`${styles.bottomNavItem} ${tab === 'games' ? styles.bottomNavActive : ''}`} onClick={() => setTab('games')}>
+          <span className={styles.bottomNavIcon}>🏈</span>
+          Games
+        </button>
+        <button className={`${styles.bottomNavItem} ${tab === 'leaderboard' ? styles.bottomNavActive : ''}`} onClick={() => setTab('leaderboard')}>
+          <span className={styles.bottomNavIcon}>🏆</span>
+          Leaders
+        </button>
+        {isAdmin && (
+          <button className={`${styles.bottomNavItem} ${tab === 'members' ? styles.bottomNavActive : ''}`} onClick={() => { setTab('members'); loadMembers(); }}>
+            <span className={styles.bottomNavIcon}>⚙️</span>
+            Members
+          </button>
+        )}
+      </nav>
+
       {tab === 'players' && (
         <div>
           <div className={styles.playerToolbar}>
@@ -440,6 +461,8 @@ async function loadMembers() {
           </button>
         </div>
       )}
+
+      <div className={styles.bottomNavPadding} />
 
       {/* Add Player Modal */}
       {playerModal && (
