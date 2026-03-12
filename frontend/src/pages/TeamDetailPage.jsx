@@ -661,15 +661,10 @@ async function loadMembers() {
         <Modal title="Import Players from CSV" onClose={() => setImportModal(false)}>
           <div style={{ marginBottom: 14 }}>
             <p style={{ color: 'var(--gray-300)', fontSize: '0.9rem', marginBottom: 12 }}>
-              Upload a CSV with columns: <code>name, number, positions</code><br />
-              For multiple positions use a pipe: <code>QB|WR</code>
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <input type="file" accept=".csv" className="form-control" onChange={handleCSVFile} />
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                style={{ whiteSpace: 'nowrap' }}
+              Upload a CSV with columns: name, number, positions.<br />
+              For multiple positions use a pipe separator e.g. QB|WR.{' '}
+              <span
+                style={{ color: 'var(--gold)', cursor: 'pointer', textDecoration: 'underline' }}
                 onClick={() => {
                   const csv = `"name","number","positions"\n"Example Player","12","QB|WR"`;
                   const blob = new Blob([csv], { type: 'text/csv' });
@@ -681,9 +676,10 @@ async function loadMembers() {
                   URL.revokeObjectURL(url);
                 }}
               >
-                ⬇ Template
-              </button>
-            </div>
+                Download template
+              </span>
+            </p>
+            <input type="file" accept=".csv" className="form-control" onChange={handleCSVFile} />
           </div>
           {importError && <div className="alert alert-error" style={{ marginBottom: 12 }}>{importError}</div>}
           {importPreview.length > 0 && (
