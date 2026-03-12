@@ -445,7 +445,11 @@ async function loadMembers() {
                     <option value="member">Member</option>
                     <option value="viewer">Viewer</option>
                   </select>
-                  <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
+                  {members.filter(x => x.role === 'admin').length === 1 && m.role === 'admin' ? (
+                    <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>Promote another admin first</span>
+                  ) : (
+                    <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
+                  )}
                 </div>
               ))}
             </div>
