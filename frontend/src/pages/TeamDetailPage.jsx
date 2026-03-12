@@ -435,8 +435,10 @@ async function loadMembers() {
                   </div>
                   <select
                     className="form-control"
-                    style={{ width: 'auto' }}
+                    style={{ width: 'auto', opacity: members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 0.5 : 1 }}
                     value={m.role}
+                    disabled={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin'}
+                    title={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 'Promote another member to admin first before changing this role' : undefined}
                     onChange={e => updateMemberRole(m.id, e.target.value)}
                   >
                     <option value="admin">Admin</option>
