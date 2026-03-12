@@ -192,8 +192,8 @@ async function loadMembers() {
       const vals = line.split(',').map(v => v.trim().replace(/['"]/g, ''));
       const obj = {};
       headers.forEach((h, i) => obj[h] = vals[i] || '');
-      const positions = obj.positions ? obj.positions.split('|').map(p => p.trim()).filter(Boolean)
-        : obj.position ? [obj.position] : [];
+      const positions = obj.positions ? obj.positions.split('|').map(p => p.trim()).filter(Boolean).filter(p => POSITIONS.includes(p))
+        : obj.position ? [obj.position].filter(p => POSITIONS.includes(p)) : [];
       return { name: obj.name || '', number: obj.number || '', positions };
     }).filter(p => p.name);
   }

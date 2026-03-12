@@ -77,7 +77,10 @@ export default function PlayerPage() {
           <div className="page-title" style={{ marginBottom: 8 }}>{player.name}</div>
           {player.positions?.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {player.positions.map(pos => <span key={pos} className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{pos}</span>)}
+              {player.positions.map(pos => POSITIONS.includes(pos)
+                ? <span key={pos} className="tag tag-green" style={{ fontSize: '1rem', padding: '4px 14px' }}>{pos}</span>
+                : <span key={pos} className="tag tag-gold" style={{ fontSize: '1rem', padding: '4px 14px', cursor: 'pointer' }} title="Unrecognised position — click Edit to remove" onClick={() => setEditModal(true)}>⚠️ {pos}</span>
+              )}
             </div>
           )}
         </div>
