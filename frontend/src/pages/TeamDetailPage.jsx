@@ -427,29 +427,31 @@ async function loadMembers() {
           {membersLoading ? <div className="spinner" /> : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {members.map(m => (
-                <div key={m.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div key={m.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 }}>
                   {m.picture && <img src={m.picture} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />}
                   <div style={{ flex: 1, minWidth: 120 }}>
                     <div style={{ fontWeight: 700 }}>{m.name}</div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{m.email}</div>
                   </div>
-                  <select
-                    className="form-control"
-                    style={{ width: 'auto', opacity: members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 0.5 : 1 }}
-                    value={m.role}
-                    disabled={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin'}
-                    title={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 'Promote another member to admin first before changing this role' : undefined}
-                    onChange={e => updateMemberRole(m.id, e.target.value)}
-                  >
-                    <option value="admin">Admin</option>
-                    <option value="member">Member</option>
-                    <option value="viewer">Viewer</option>
-                  </select>
-                  {members.filter(x => x.role === 'admin').length === 1 && m.role === 'admin' ? (
-                    <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>Promote another admin first</span>
-                  ) : (
-                    <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexBasis: '100%', justifyContent: 'flex-end' }} className="member-controls">
+                    <select
+                      className="form-control"
+                      style={{ width: 'auto', opacity: members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 0.5 : 1 }}
+                      value={m.role}
+                      disabled={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin'}
+                      title={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 'Promote another member to admin first before changing this role' : undefined}
+                      onChange={e => updateMemberRole(m.id, e.target.value)}
+                    >
+                      <option value="admin">Admin</option>
+                      <option value="member">Member</option>
+                      <option value="viewer">Viewer</option>
+                    </select>
+                    {members.filter(x => x.role === 'admin').length === 1 && m.role === 'admin' ? (
+                      <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>Promote another admin first</span>
+                    ) : (
+                      <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

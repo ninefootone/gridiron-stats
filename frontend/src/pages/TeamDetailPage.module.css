@@ -252,3 +252,9 @@
     display: none;
   }
 }
+
+@media (min-width: 600px) {
+  .member-controls {
+    flex-basis: auto !important;
+  }
+}
