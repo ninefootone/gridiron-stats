@@ -16,7 +16,7 @@ function LeaderboardTab({ teamId, onPlayerClick }) {
 
   useEffect(() => {
     api.get(`/stats/summary?team_id=${teamId}`)
-      .then(setSummary)
+      .then(res => setSummary(res.summary))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [teamId]);
@@ -659,7 +659,7 @@ async function loadMembers() {
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={async () => {
-                  const summary = await api.get(`/stats/summary?team_id=${teamId}`);
+                  const { summary } = await api.get(`/stats/summary?team_id=${teamId}`);
                   const allStats = {};
                   summary.forEach(r => {
                     if (!allStats[r.name]) allStats[r.name] = { name: r.name, number: r.number };
