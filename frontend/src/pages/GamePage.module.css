@@ -15,7 +15,7 @@
   letter-spacing: 0.04em;
 }
 
-.gameMeta { color: var(--gray-300); font-size: 0.9rem; margin-top: 4px; }
+.gameMeta { color: var(--gray-300); font-size: 0.9rem; margin-top: 4px; line-height: 1.7; }
 
 .scoreBox {
   background: rgba(0,0,0,0.3);
