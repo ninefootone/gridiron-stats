@@ -581,10 +581,11 @@ export default function GamePage() {
               doc.text(`#${s.player_number} ${s.player_name}`, 14, y);
               doc.setFont('helvetica', 'bold');
               doc.text(`${info.label}${info.unit ? ': ' + s.value + ' ' + info.unit : ''}`, 70, y);
-              if (s.notes) {
+              const meta = [s.play_name, s.notes].filter(Boolean).join(' · ');
+              if (meta) {
                 doc.setFont('helvetica', 'italic');
                 doc.setTextColor(100);
-                doc.text(s.notes, 130, y);
+                doc.text(meta, 130, y);
               }
               y += 6;
             });
