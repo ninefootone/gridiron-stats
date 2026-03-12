@@ -89,7 +89,7 @@ export default function TeamDetailPage() {
   const isAdmin = team?.my_role === 'admin';
   const [players, setPlayers] = useState([]);
   const [games, setGames] = useState([]);
-  const [tab, setTab] = useState('players');
+  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'players');
   const [playerSort, setPlayerSort] = useState('number');
   const [importing, setImporting] = useState(false);
   const [importModal, setImportModal] = useState(false);
