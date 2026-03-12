@@ -44,7 +44,7 @@ export const STAT_CATEGORIES = {
   }
 };
 
-export const ALL_STATS = Object.values(STAT_CATEGORIES).flatMap(c => c.stats);
+export const ALL_STATS = Object.entries(STAT_CATEGORIES).flatMap(([key, c]) => c.stats.map(s => ({ ...s, category: key })));
 export const COUNTING_STATS = ALL_STATS.filter(s => s.unit === null);
 
 export function getStatInfo(key) {

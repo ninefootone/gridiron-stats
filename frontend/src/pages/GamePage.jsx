@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
-import { STAT_CATEGORIES, COUNTING_STATS, getStatInfo } from '../utils/stats';
+import { STAT_CATEGORIES, COUNTING_STATS, getStatInfo, ALL_STATS } from '../utils/stats';
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import styles from './GamePage.module.css';
@@ -18,6 +18,9 @@ export default function GamePage() {
   const [players, setPlayers] = useState([]);
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [plays, setPlays] = useState([]);
+  const [selectedPlay, setSelectedPlay] = useState(null);
+  const [sfPlay, setSfPlay] = useState(null);
 
   // Stat logging
   const [statModal, setStatModal] = useState(false);
@@ -40,7 +43,7 @@ export default function GamePage() {
 
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
-    setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1);
+    setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1); setSfPlay(null);
     setStatFirstModal(true);
   }
 
@@ -64,7 +67,7 @@ export default function GamePage() {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
       }
       const results = await Promise.all(toLog.map(({ player, stat_type }) =>
-        api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: 1, notes: sfNotes || null })
+        api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: 1, notes: sfNotes || null, play_id: sfPlay || null })
           .then(s => ({ ...s, player_name: player.name, player_number: player.number }))
       ));
       setStats(prev => [...results.reverse(), ...prev]);
@@ -83,7 +86,8 @@ export default function GamePage() {
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?game_id=${gameId}`),
       api.get(`/teams/${teamId}`),
-    ]).then(([g, p, s, t]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
+      api.get(`/plays?team_id=${teamId}`),
+    ]).then(([g, p, s, t, pl]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setPlays(pl); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -93,6 +97,7 @@ export default function GamePage() {
     setSelectedStat(null);
     setStatValue('');
     setStatNotes('');
+    setSelectedPlay(null);
     setStatModal(true);
   }
 
@@ -109,6 +114,7 @@ export default function GamePage() {
         stat_type: selectedStat,
         value: val,
         notes: statNotes || null,
+        play_id: selectedPlay || null,
       });
       setStats(prev => [{ ...s, player_name: selectedPlayer.name, player_number: selectedPlayer.number, player_position: selectedPlayer.position }, ...prev]);
       setStatModal(false);
@@ -297,6 +303,21 @@ export default function GamePage() {
                 <input className="form-control" type="number" value={statValue} onChange={e => setStatValue(e.target.value)} placeholder="e.g. 35" autoFocus />
               </div>
             )}
+            {selectedStat && plays.length > 0 && (() => {
+              const statInfo2 = ALL_STATS.find(s => s.key === selectedStat);
+              const playType = statInfo2?.category === 'offense' ? 'offense' : statInfo2?.category === 'defense' ? 'defense' : null;
+              const filteredPlays = playType ? plays.filter(p => p.type === playType) : plays;
+              if (!filteredPlays.length) return null;
+              return (
+                <div className="form-group" style={{ marginTop: 12 }}>
+                  <label>Play (optional)</label>
+                  <select className="form-control" value={selectedPlay || ''} onChange={e => setSelectedPlay(e.target.value ? Number(e.target.value) : null)}>
+                    <option value="">— No play —</option>
+                    {filteredPlays.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+              );
+            })()}
             <div className="form-group" style={{ marginTop: 12 }}>
               <label>Notes (optional)</label>
               <input className="form-control" value={statNotes} onChange={e => setStatNotes(e.target.value)} placeholder="e.g. Red zone TD, 2nd quarter" />
@@ -415,6 +436,21 @@ export default function GamePage() {
                 </div>
               )}
 
+              {plays.length > 0 && (() => {
+                const statInfo2 = ALL_STATS.find(s => s.key === sfStat);
+                const playType = statInfo2?.category === 'offense' ? 'offense' : statInfo2?.category === 'defense' ? 'defense' : null;
+                const filteredPlays = playType ? plays.filter(p => p.type === playType) : plays;
+                if (!filteredPlays.length) return null;
+                return (
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Play (optional)</label>
+                    <select className="form-control" value={sfPlay || ''} onChange={e => setSfPlay(e.target.value ? Number(e.target.value) : null)}>
+                      <option value="">— No play —</option>
+                      {filteredPlays.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
+                );
+              })()}
               <div className="form-group" style={{ marginBottom: 14 }}>
                 <label>Notes (optional)</label>
                 <input className="form-control" value={sfNotes} onChange={e => setSfNotes(e.target.value)} placeholder="e.g. Red zone TD, 2nd quarter" />
