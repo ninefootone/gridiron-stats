@@ -664,7 +664,26 @@ async function loadMembers() {
               Upload a CSV with columns: <code>name, number, positions</code><br />
               For multiple positions use a pipe: <code>QB|WR</code>
             </p>
-            <input type="file" accept=".csv" className="form-control" onChange={handleCSVFile} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <input type="file" accept=".csv" className="form-control" onChange={handleCSVFile} />
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                style={{ whiteSpace: 'nowrap' }}
+                onClick={() => {
+                  const csv = `"name","number","positions"\n"Example Player","12","QB|WR"`;
+                  const blob = new Blob([csv], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'player-import-template.csv';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                ⬇ Template
+              </button>
+            </div>
           </div>
           {importError && <div className="alert alert-error" style={{ marginBottom: 12 }}>{importError}</div>}
           {importPreview.length > 0 && (
