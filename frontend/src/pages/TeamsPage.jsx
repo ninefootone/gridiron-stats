@@ -32,6 +32,11 @@ export default function TeamsPage() {
   async function handleCreate(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
+    if (form.season && !/^\d{4}$/.test(form.season)) {
+      setError('Season must be a 4-digit year e.g. 2026');
+      setSaving(false);
+      return;
+    }
     setSaving(true); setError('');
     try {
       const team = await api.post('/teams', form);
@@ -167,7 +172,16 @@ async function leaveTeam(e, teamId) {
             </div>
             <div className="form-group" style={{ marginBottom: 14 }}>
               <label>Season</label>
-              <input className="form-control" value={form.season} onChange={e => setForm(p => ({ ...p, season: e.target.value }))} placeholder="e.g. 2025/26" />
+              <input
+                className="form-control"
+                value={form.season}
+                onChange={e => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                  setForm(p => ({ ...p, season: val }));
+                }}
+                placeholder="e.g. 2026"
+                maxLength={4}
+              />
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Description</label>
