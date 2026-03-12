@@ -13,9 +13,9 @@ router.post('/', async (req, res, next) => {
         'api-key': process.env.BREVO_API_KEY,
       },
       body: JSON.stringify({
-        sender: { name: 'Gridiron Stats', email: 'hello@gridiron-stats.co.uk' },
-        to: [{ email: 'hello@gridiron-stats.co.uk' }],
-        replyTo: { email: 'hello@gridiron-stats.co.uk' },
+        sender: { name: 'Gridiron Stats', email: 'hello@gridiron-stats.app' },
+        to: [{ email: 'hello@gridiron-stats.app' }],
+        replyTo: { email: 'hello@gridiron-stats.app' },
         subject: `Feedback from ${name || 'Anonymous'}`,
         textContent: `Name: ${name || 'Not provided'}\n\nMessage:\n${message}`,
         htmlContent: `
