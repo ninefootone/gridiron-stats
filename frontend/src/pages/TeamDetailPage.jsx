@@ -433,7 +433,7 @@ async function loadMembers() {
                     <div style={{ fontWeight: 700 }}>{m.name}</div>
                     <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{m.email}</div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexBasis: '100%', justifyContent: 'flex-end' }} className="member-controls">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexBasis: '100%', justifyContent: 'flex-start' }} className={styles.memberControls}>
                     <select
                       className="form-control"
                       style={{ width: 'auto', opacity: members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 0.5 : 1 }}

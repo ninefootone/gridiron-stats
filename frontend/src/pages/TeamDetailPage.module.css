@@ -254,7 +254,8 @@
 }
 
 @media (min-width: 600px) {
-  .member-controls {
+  .memberControls {
     flex-basis: auto !important;
+    justify-content: flex-end !important;
   }
 }
