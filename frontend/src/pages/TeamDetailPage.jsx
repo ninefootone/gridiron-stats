@@ -108,6 +108,14 @@ export default function TeamDetailPage() {
   const [error, setError] = useState('');
   const [members, setMembers] = useState([]);
   const [membersLoading, setMembersLoading] = useState(false);
+  const [plays, setPlays] = useState([]);
+  const [playsLoading, setPlaysLoading] = useState(false);
+  const [playModal, setPlayModal] = useState(false);
+  const [editingPlay, setEditingPlay] = useState(null);
+  const [playForm, setPlayForm] = useState({ name: '', type: 'offense', season: '', notes: '' });
+  const [copyPlaysModal, setCopyPlaysModal] = useState(false);
+  const [copyFromSeason, setCopyFromSeason] = useState('');
+  const [copyToSeason, setCopyToSeason] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -146,6 +154,52 @@ export default function TeamDetailPage() {
       setGameModal(false);
       setGameForm({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
     } catch (err) { setError(err.message); }
+    finally { setSaving(false); }
+  }
+
+async function loadPlays() {
+    setPlaysLoading(true);
+    try {
+      const p = await api.get(`/plays?team_id=${teamId}`);
+      setPlays(p);
+    } catch (err) { console.error(err); }
+    finally { setPlaysLoading(false); }
+  }
+
+  async function savePlay(e) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (editingPlay) {
+        const p = await api.put(`/plays/${editingPlay.id}`, playForm);
+        setPlays(prev => prev.map(pl => pl.id === p.id ? p : pl));
+      } else {
+        const p = await api.post('/plays', { team_id: Number(teamId), ...playForm });
+        setPlays(prev => [...prev, p]);
+      }
+      setPlayModal(false);
+      setEditingPlay(null);
+      setPlayForm({ name: '', type: 'offense', season: team?.season || '', notes: '' });
+    } catch (err) { alert(err.message); }
+    finally { setSaving(false); }
+  }
+
+  async function deletePlay(id) {
+    if (!confirm('Delete this play?')) return;
+    await api.del(`/plays/${id}`);
+    setPlays(prev => prev.filter(p => p.id !== id));
+  }
+
+  async function copyPlays(e) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const newPlays = await api.post('/plays/copy', { team_id: Number(teamId), from_season: copyFromSeason, to_season: copyToSeason });
+      setPlays(prev => [...prev, ...newPlays]);
+      setCopyPlaysModal(false);
+      setCopyFromSeason('');
+      setCopyToSeason('');
+    } catch (err) { alert(err.message); }
     finally { setSaving(false); }
   }
 
@@ -255,6 +309,11 @@ async function loadMembers() {
           Leaderboard
         </button>
         {isAdmin && (
+          <button className={`${styles.tab} ${tab === 'plays' ? styles.activeTab : ''}`} onClick={() => { setTab('plays'); loadPlays(); }}>
+            Plays
+          </button>
+        )}
+        {isAdmin && (
           <button className={`${styles.tab} ${tab === 'members' ? styles.activeTab : ''}`} onClick={() => { setTab('members'); loadMembers(); }}>
             Members
           </button>
@@ -280,6 +339,14 @@ async function loadMembers() {
           </svg>
           Leaders
         </button>
+        {isAdmin && (
+          <button className={`${styles.bottomNavItem} ${tab === 'plays' ? styles.bottomNavActive : ''}`} onClick={() => { setTab('plays'); loadPlays(); }}>
+            <svg className={styles.bottomNavIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Plays
+          </button>
+        )}
         {isAdmin && (
           <button className={`${styles.bottomNavItem} ${tab === 'members' ? styles.bottomNavActive : ''}`} onClick={() => { setTab('members'); loadMembers(); }}>
             <svg className={styles.bottomNavIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -412,6 +479,101 @@ async function loadMembers() {
         </div>
       )}
 
+      {tab === 'plays' && isAdmin && (
+        <div className={styles.playsLayout}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-primary btn-sm" onClick={() => { setEditingPlay(null); setPlayForm({ name: '', type: 'offense', season: team?.season || '', notes: '' }); setPlayModal(true); }}>+ Add Play</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => setCopyPlaysModal(true)}>Copy from Season</button>
+            </div>
+          </div>
+
+          {playsLoading ? <div className="spinner" /> : (
+            <>
+              {['offense', 'defense'].map(type => {
+                const typePlays = plays.filter(p => p.type === type);
+                return (
+                  <div key={type} className={styles.playsBlock}>
+                    <div className={styles.playsBlockTitle} style={{ color: type === 'offense' ? '#f5a623' : '#4a90d9' }}>
+                      {type === 'offense' ? '⚔️ Offense' : '🛡️ Defense'}
+                    </div>
+                    {typePlays.length === 0 ? (
+                      <p style={{ color: 'var(--gray-500)', fontSize: '0.9rem' }}>No {type} plays yet.</p>
+                    ) : (
+                      typePlays.map(p => (
+                        <div key={p.id} className={styles.playCard}>
+                          <div className={styles.playInfo}>
+                            <div className={styles.playName}>{p.name}</div>
+                            <div className={styles.playSeason}>{p.season}</div>
+                            {p.notes && <div className={styles.playNotes}>{p.notes}</div>}
+                          </div>
+                          <div className={styles.playActions}>
+                            <button className="btn btn-ghost btn-sm" onClick={() => { setEditingPlay(p); setPlayForm({ name: p.name, type: p.type, season: p.season, notes: p.notes || '' }); setPlayModal(true); }}>Edit</button>
+                            <button className="btn btn-danger btn-sm" onClick={() => deletePlay(p.id)}>Delete</button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
+      )}
+
+      {playModal && (
+        <Modal title={editingPlay ? 'Edit Play' : 'Add Play'} onClose={() => { setPlayModal(false); setEditingPlay(null); }}>
+          <form onSubmit={savePlay}>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Play Name *</label>
+              <input className="form-control" value={playForm.name} onChange={e => setPlayForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. HB Sweep, Cover 2" required />
+            </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Type *</label>
+              <select className="form-control" value={playForm.type} onChange={e => setPlayForm(p => ({ ...p, type: e.target.value }))}>
+                <option value="offense">Offense</option>
+                <option value="defense">Defense</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Season *</label>
+              <input className="form-control" value={playForm.season} onChange={e => setPlayForm(p => ({ ...p, season: e.target.value }))} placeholder="e.g. 2026" maxLength={4} required />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>Notes (optional)</label>
+              <textarea className="form-control" rows={3} value={playForm.notes} onChange={e => setPlayForm(p => ({ ...p, notes: e.target.value }))} placeholder="Formation, assignment notes, etc." />
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => { setPlayModal(false); setEditingPlay(null); }}>Cancel</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editingPlay ? 'Save Changes' : 'Add Play'}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {copyPlaysModal && (
+        <Modal title="Copy Plays to New Season" onClose={() => setCopyPlaysModal(false)}>
+          <form onSubmit={copyPlays}>
+            <p style={{ color: 'var(--gray-300)', fontSize: '0.9rem', marginBottom: 16 }}>
+              Copy all plays from one season into another. Existing plays in the target season won't be affected.
+            </p>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Copy from season *</label>
+              <input className="form-control" value={copyFromSeason} onChange={e => setCopyFromSeason(e.target.value)} placeholder="e.g. 2025" maxLength={4} required />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>Copy to season *</label>
+              <input className="form-control" value={copyToSeason} onChange={e => setCopyToSeason(e.target.value)} placeholder="e.g. 2026" maxLength={4} required />
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setCopyPlaysModal(false)}>Cancel</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Copying...' : 'Copy Plays'}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
       {tab === 'members' && isAdmin && (
         <div>
           <div style={{ marginBottom: 16 }}>
@@ -463,7 +625,7 @@ async function loadMembers() {
         <LeaderboardTab teamId={teamId} onPlayerClick={playerId => navigate(`/teams/${teamId}/players/${playerId}`)} />
       )}
 
-      {isAdmin && tab !== 'members' && (
+      {isAdmin && tab !== 'members' && tab !== 'plays' && (
         <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Export</div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
