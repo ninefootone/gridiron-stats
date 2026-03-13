@@ -105,14 +105,14 @@ async function leaveTeam(e, teamId) {
 
       {teams.length === 0 ? (
         <div className="empty-state">
-          <div className="icon">🏈</div>
-          <p style={{ fontWeight: 700, fontSize: '1.05rem', marginBottom: 8 }}>Welcome to Gridiron Stats</p>
+          <div className="icon" style={{ filter: 'none', opacity: 1 }}>🏈</div>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', marginBottom: 8, color: '#ffffff' }}>Welcome to Gridiron Stats</p>
           <p style={{ color: 'var(--gray-300)', marginBottom: 24 }}>The fastest way to track player stats, manage your roster, and follow your team's season from the sideline.</p>
           <button className="btn btn-primary" style={{ marginBottom: 12 }} onClick={() => { setShowCreateModal(true); setError(''); }}>+ Create Your First Team</button>
           <div style={{ marginBottom: 12 }}>
             <button className="btn btn-secondary btn-sm" onClick={() => { setShowJoinModal(true); setError(''); }}>Join with a code</button>
           </div>
-          <button className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }} onClick={openHelp}>? How does it work</button>
+          <button className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }} onClick={openHelp}>How does it work?</button>
         </div>
       ) : (
         <div className={styles.grid}>
