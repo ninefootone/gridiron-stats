@@ -5,6 +5,7 @@ import Modal from '../components/shared/Modal';
 import styles from './TeamsPage.module.css';
 import { useUser } from '@clerk/clerk-react';
 import { useHelp } from '../context/HelpContext';
+import InstallBanner from '../components/shared/InstallBanner';
 
 export default function TeamsPage() {
   const api = useApi();
@@ -151,6 +152,7 @@ async function leaveTeam(e, teamId) {
             </div>
           ))}
         </div>
+        <InstallBanner />
       )}
 
       {showCreateModal && (
