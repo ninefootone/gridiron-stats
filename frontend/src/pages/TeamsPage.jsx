@@ -24,6 +24,7 @@ export default function TeamsPage() {
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [feedbackError, setFeedbackError] = useState('');
   const { user } = useUser();
+  const [shareTeam, setShareTeam] = useState(null);
 
   useEffect(() => {
     api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
@@ -118,34 +119,13 @@ async function leaveTeam(e, teamId) {
 		{team.my_role === 'member' && <span className="tag tag-gray" style={{ alignSelf: 'center' }}>Member</span>}
               </div>
               {team.my_role === 'admin' && (
-                <div className={styles.codeRow}>
-                  {team.join_code && (
-                    <div
-                      className={styles.joinCode}
-                      onClick={e => { e.stopPropagation(); copyCode(team.join_code, team.id + '_join'); }}
-                      title="Click to copy join code"
-                    >
-                      <span className={styles.joinCodeLabel}>Join Code</span>
-			<div className={styles.joinCodeTop}>
-			  <span className={styles.joinCodeValue}>{team.join_code}</span>
-			  <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_join' ? '✓' : '📋'}</span>
-			</div>
-                    </div>
-                  )}
-                  {team.view_code && (
-                    <div
-                      className={`${styles.joinCode} ${styles.viewCode}`}
-                      onClick={e => { e.stopPropagation(); copyCode(team.view_code, team.id + '_view'); }}
-                      title="Click to copy view code"
-                    >
-                      <span className={styles.joinCodeLabel}>View Code</span>
-			<div className={styles.joinCodeTop}>
-			  <span className={styles.joinCodeValue}>{team.view_code}</span>
-			  <span className={styles.joinCodeCopy}>{copiedCode === team.id + '_view' ? '✓' : '📋'}</span>
-			</div>
-                    </div>
-                  )}
-                </div>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  style={{ marginTop: 8, fontSize: '0.78rem', color: 'var(--gray-300)', alignSelf: 'flex-start' }}
+                  onClick={e => { e.stopPropagation(); setShareTeam(team); }}
+                >
+                  🔗 Share Codes
+                </button>
               )}
               {team.description && <p className={styles.desc}>{team.description}</p>}
               {(team.my_role === 'member' || team.my_role === 'viewer') && (
@@ -331,6 +311,39 @@ async function leaveTeam(e, teamId) {
               </div>
             </>
           )}
+        </Modal>
+      )}
+
+      {shareTeam && (
+        <Modal title={`Share — ${shareTeam.name}`} onClose={() => { setShareTeam(null); setCopiedCode(null); }}>
+          <p style={{ color: 'var(--gray-300)', fontSize: '0.9rem', marginBottom: 20 }}>
+            Share these codes with your squad. The join code lets members log stats; the view code is read-only.
+          </p>
+          {shareTeam.join_code && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--gray-300)', marginBottom: 6 }}>Join Code</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius)', padding: '12px 16px' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '0.15em', flex: 1 }}>{shareTeam.join_code}</span>
+                <button className="btn btn-secondary btn-sm" onClick={() => copyCode(shareTeam.join_code, shareTeam.id + '_join')}>
+                  {copiedCode === shareTeam.id + '_join' ? '✓ Copied' : '📋 Copy'}
+                </button>
+              </div>
+            </div>
+          )}
+          {shareTeam.view_code && (
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--gray-300)', marginBottom: 6 }}>View Code</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius)', padding: '12px 16px' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '0.15em', flex: 1 }}>{shareTeam.view_code}</span>
+                <button className="btn btn-secondary btn-sm" onClick={() => copyCode(shareTeam.view_code, shareTeam.id + '_view')}>
+                  {copiedCode === shareTeam.id + '_view' ? '✓ Copied' : '📋 Copy'}
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="modal-footer">
+            <button className="btn btn-primary" onClick={() => { setShareTeam(null); setCopiedCode(null); }}>Done</button>
+          </div>
         </Modal>
       )}
     </div>
