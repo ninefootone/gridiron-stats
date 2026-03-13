@@ -38,9 +38,9 @@ export function HelpProvider({ children }) {
                 { role: 'Member', desc: "Can log stats but can't manage the roster or settings" },
                 { role: 'Viewer', desc: 'Read-only access, great for parents and supporters' },
               ].map(({ role, desc }) => (
-                <div key={role} style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-                  <span className="tag tag-gold" style={{ flexShrink: 0 }}>{role}</span>
-                  <span style={{ color: 'var(--gray-300)', fontSize: '0.88rem', alignSelf: 'center' }}>{desc}</span>
+                <div key={role} style={{ marginBottom: 10 }}>
+                  <span className="tag tag-gold" style={{ marginBottom: 4, display: 'inline-block' }}>{role}</span>
+                  <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', margin: 0 }}>{desc}</p>
                 </div>
               ))}
             </div>
