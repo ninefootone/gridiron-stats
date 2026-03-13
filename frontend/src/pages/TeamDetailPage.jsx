@@ -509,7 +509,7 @@ async function loadMembers() {
                           </div>
                           <div className={styles.playActions}>
                             <button className="btn btn-ghost btn-sm" onClick={() => { setEditingPlay(p); setPlayForm({ name: p.name, type: p.type, season: p.season, notes: p.notes || '' }); setPlayModal(true); }}>Edit</button>
-                            <button className="btn btn-danger btn-sm" onClick={() => deletePlay(p.id)}>Delete</button>
+                            <button className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }} onClick={() => deletePlay(p.id)}>✕</button>
                           </div>
                         </div>
                       ))
