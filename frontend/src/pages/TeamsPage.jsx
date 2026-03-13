@@ -88,20 +88,22 @@ async function leaveTeam(e, teamId) {
 
   return (
     <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title">My Teams</div>
-          <div className="page-subtitle">Manage your squads and track the season</div>
+      {teams.length > 0 && (
+        <div className="page-header">
+          <div>
+            <div className="page-title">My Teams</div>
+            <div className="page-subtitle">Manage your squads and track the season</div>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button className="btn btn-secondary" onClick={() => { setShowJoinModal(true); setError(''); }}>
+              Join Team
+            </button>
+            <button className="btn btn-primary" onClick={() => { setShowCreateModal(true); setError(''); }}>
+              + New Team
+            </button>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn btn-secondary" onClick={() => { setShowJoinModal(true); setError(''); }}>
-            Join Team
-          </button>
-          <button className="btn btn-primary" onClick={() => { setShowCreateModal(true); setError(''); }}>
-            + New Team
-          </button>
-        </div>
-      </div>
+      )}
 
       {teams.length === 0 ? (
         <div className="empty-state">
