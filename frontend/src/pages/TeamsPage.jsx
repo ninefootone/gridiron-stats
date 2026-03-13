@@ -106,7 +106,7 @@ async function leaveTeam(e, teamId) {
       {teams.length === 0 ? (
         <div className="empty-state">
           <div className="icon" style={{ filter: 'none', opacity: 1 }}>🏈</div>
-          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', marginBottom: 8, color: '#ffffff' }}>Welcome to Gridiron Stats</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, text-transform: uppercase, fontSize: '2.05rem', marginBottom: 8, color: '#ffffff' }}>Welcome to Gridiron Stats</p>
           <p style={{ color: 'var(--gray-300)', marginBottom: 24 }}>The fastest way to track player stats, manage your roster, and follow your team's season from the sideline.</p>
           <button className="btn btn-primary" style={{ marginBottom: 12 }} onClick={() => { setShowCreateModal(true); setError(''); }}>+ Create Your First Team</button>
           <div style={{ marginBottom: 12 }}>
