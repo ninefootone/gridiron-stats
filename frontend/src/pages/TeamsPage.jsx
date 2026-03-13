@@ -119,6 +119,7 @@ async function leaveTeam(e, teamId) {
           <button className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-400)', fontSize: '0.85rem' }} onClick={openHelp}>How does it work?</button>
         </div>
       ) : (
+        <>
         <div className={styles.grid}>
           {teams.map(team => (
             <div key={team.id} className={styles.teamCard} onClick={() => navigate(`/teams/${team.id}`)}>
@@ -153,6 +154,7 @@ async function leaveTeam(e, teamId) {
           ))}
         </div>
         <InstallBanner />
+	</>
       )}
 
       {showCreateModal && (
