@@ -41,6 +41,16 @@ export default function GamePage() {
   const [sfNotes, setSfNotes] = useState('');
   const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
 
+  async function refreshGame() {
+  const [g, s] = await Promise.all([
+    api.get(`/games/${gameId}`),
+    api.get(`/stats?game_id=${gameId}`),
+  ]);
+  setGame(g);
+  setStats(s);
+  setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' });
+}
+
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
     setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1); setSfPlay(null);
@@ -163,7 +173,10 @@ export default function GamePage() {
 
   return (
     <div>
-      <button className="btn btn-ghost btn-sm" style={{ marginBottom: 16 }} onClick={() => navigate(`/teams/${teamId}?tab=games`)}>← All Games</button>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/teams/${teamId}?tab=games`)}>← All Games</button>
+        <button className="btn btn-ghost btn-sm" onClick={refreshGame}>↻ Refresh</button>
+      </div>
 
       {/* Game Header */}
       <div className={styles.gameHeader}>
