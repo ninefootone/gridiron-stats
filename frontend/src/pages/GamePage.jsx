@@ -67,8 +67,8 @@ export default function GamePage() {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
       }
       const results = await Promise.all(toLog.map(({ player, stat_type }) =>
-        api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: 1, notes: sfNotes || null, play_id: sfPlay || null })
-          .then(s => ({ ...s, player_name: player.name, player_number: player.number }))
+      api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: 1, notes: sfNotes || null, play_id: sfPlay || null })
+          .then(s => ({ ...s, player_name: player.name, player_number: player.number, play_name: plays.find(p => p.id === sfPlay)?.name || null }))
       ));
       setStats(prev => [...results.reverse(), ...prev]);
       setStatFirstModal(false);
@@ -116,7 +116,8 @@ export default function GamePage() {
         notes: statNotes || null,
         play_id: selectedPlay || null,
       });
-      setStats(prev => [{ ...s, player_name: selectedPlayer.name, player_number: selectedPlayer.number, player_position: selectedPlayer.position }, ...prev]);
+      const play = plays.find(p => p.id === selectedPlay);
+      setStats(prev => [{ ...s, player_name: selectedPlayer.name, player_number: selectedPlayer.number, player_position: selectedPlayer.position, play_name: play?.name || null }, ...prev]);
       setStatModal(false);
     } catch (err) { alert(err.message); }
     finally { setSaving(false); }
