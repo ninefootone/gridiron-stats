@@ -235,3 +235,8 @@
 .bottomNavPadding {
   height: 80px;
 }
+
+@media (min-width: 769px) {
+  .bottomNav { display: none; }
+  .bottomNavPadding { display: none; }
+}
