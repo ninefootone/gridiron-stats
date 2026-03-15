@@ -103,7 +103,7 @@ export default function GamePage() {
   useGameSocket(gameId, {
     stat_added: ({ stat }) => {
       setStats(prev => {
-        if (prev.find(s => s.id === stat.id)) return prev;
+        if (prev.find(s => Number(s.id) === Number(stat.id))) return prev;
         return [stat, ...prev];
       });
       if (stat.our_score !== null && stat.our_score !== undefined) {
@@ -118,7 +118,7 @@ export default function GamePage() {
     },
     opponent_score_added: ({ stat, opponent_score }) => {
       setOpponentStats(prev => {
-        if (prev.find(s => s.id === stat.id)) return prev;
+        if (prev.find(s => Number(s.id) === Number(stat.id))) return prev;
         return [stat, ...prev];
       });
       setGame(prev => ({ ...prev, opponent_score }));
@@ -129,7 +129,7 @@ export default function GamePage() {
     },
     adjustment_added: ({ adjustment, our_score, opponent_score }) => {
       setScoreAdjustments(prev => {
-        if (prev.find(a => a.id === adjustment.id)) return prev;
+        if (prev.find(a => Number(a.id) === Number(adjustment.id))) return prev;
         return [...prev, adjustment];
       });
       if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
