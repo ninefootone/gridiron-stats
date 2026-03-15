@@ -21,6 +21,9 @@ export default function GamePage() {
   const [plays, setPlays] = useState([]);
   const [selectedPlay, setSelectedPlay] = useState(null);
   const [sfPlay, setSfPlay] = useState(null);
+  const [opponentStats, setOpponentStats] = useState([]);
+  const [opponentModal, setOpponentModal] = useState(false);
+  const [opponentSaving, setOpponentSaving] = useState(false);
 
   // Stat logging
   const [statModal, setStatModal] = useState(false);
@@ -40,16 +43,6 @@ export default function GamePage() {
   const [sfReturnPlayer, setSfReturnPlayer] = useState(null);
   const [sfNotes, setSfNotes] = useState('');
   const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
-
-  async function refreshGame() {
-  const [g, s] = await Promise.all([
-    api.get(`/games/${gameId}`),
-    api.get(`/stats?game_id=${gameId}`),
-  ]);
-  setGame(g);
-  setStats(s);
-  setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' });
-}
 
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
@@ -86,6 +79,43 @@ export default function GamePage() {
     finally { setSaving(false); }
   }
 
+  async function refreshGame() {
+    const [g, s, os] = await Promise.all([
+      api.get(`/games/${gameId}`),
+      api.get(`/stats?game_id=${gameId}`),
+      api.get(`/opponent-stats?game_id=${gameId}`),
+    ]);
+    setGame(g);
+    setStats(s);
+    setOpponentStats(os);
+    setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' });
+  }
+
+  const OPPONENT_SCORE_TYPES = [
+    { key: 'touchdown', label: 'Touchdown', value: 6, icon: '🏈' },
+    { key: 'one_xp', label: '1XP', value: 1, icon: '🎯' },
+    { key: 'two_xp', label: '2XP', value: 2, icon: '💪' },
+    { key: 'safety', label: 'Safety', value: 2, icon: '🛡️' },
+    { key: 'field_goal', label: 'Field Goal', value: 3, icon: '🏹' },
+  ];
+
+  async function logOpponentScore(stat_type) {
+    setOpponentSaving(true);
+    try {
+      const { stat, opponent_score } = await api.post('/opponent-stats', { game_id: Number(gameId), stat_type });
+      setOpponentStats(prev => [stat, ...prev]);
+      setGame(prev => ({ ...prev, opponent_score }));
+    } catch (err) { alert(err.message); }
+    finally { setOpponentSaving(false); setOpponentModal(false); }
+  }
+
+  async function deleteOpponentStat(id) {
+    if (!confirm('Remove this opponent score?')) return;
+    const { opponent_score } = await api.del(`/opponent-stats/${id}`);
+    setOpponentStats(prev => prev.filter(s => s.id !== id));
+    setGame(prev => ({ ...prev, opponent_score }));
+  }
+
   // Score edit
   const [scoreModal, setScoreModal] = useState(false);
   const [scoreForm, setScoreForm] = useState({ our_score: 0, opponent_score: 0, game_type: 'regular' });
@@ -97,7 +127,8 @@ export default function GamePage() {
       api.get(`/stats?game_id=${gameId}`),
       api.get(`/teams/${teamId}`),
       api.get(`/plays?team_id=${teamId}`),
-    ]).then(([g, p, s, t, pl]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setPlays(pl); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
+      api.get(`/opponent-stats?game_id=${gameId}`),
+    ]).then(([g, p, s, t, pl, os]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setPlays(pl); setOpponentStats(os); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -206,8 +237,11 @@ export default function GamePage() {
       </div>
 
       {!isViewer && (
-        <div style={{ margin: '12px 0' }}>
+        <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className={`btn btn-primary ${styles.logStatBtn}`} onClick={openStatFirst}>⚡ Log Stat</button>
+          {isAdmin && (
+            <button className={`btn btn-secondary ${styles.logStatBtn}`} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
+          )}
         </div>
       )}
 
@@ -259,6 +293,28 @@ export default function GamePage() {
             </div>
           )}
 
+	  {/* Opponent score events in feed */}
+          {opponentStats.length > 0 && (
+            <div style={{ marginTop: 8 }}>
+              {opponentStats.map(os => {
+                const type = OPPONENT_SCORE_TYPES.find(t => t.key === os.stat_type);
+                return (
+                  <div key={os.id} className={styles.statRow} style={{ background: 'rgba(255,0,0,0.06)', borderLeft: '3px solid rgba(255,80,80,0.4)' }}>
+                    <span className={styles.statIcon}>{type?.icon || '🏈'}</span>
+                    <div className={styles.statContent}>
+                      <div className={styles.statMainRow}>
+                        <span className={styles.statPlayer} style={{ color: 'var(--gray-300)' }}>Opponent</span>
+                        <span className={styles.statLabel}>{type?.label}</span>
+                        <span className={styles.statVal}>+{os.value}</span>
+                      </div>
+                    </div>
+                    {isAdmin && <button className={styles.statDel} onClick={() => deleteOpponentStat(os.id)}>✕</button>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {/* Summary by player */}
           {Object.keys(statsByPlayer).length > 0 && (
             <div style={{ marginTop: 24 }}>
@@ -284,6 +340,53 @@ export default function GamePage() {
           )}
         </div>
       </div>
+
+      {/* Opponent Scoring Section */}
+      {opponentStats.length > 0 && (
+        <div style={{ marginTop: 24, background: 'rgba(255,0,0,0.05)', border: '1px solid rgba(255,80,80,0.2)', borderRadius: 'var(--radius-lg)', padding: 16 }}>
+          <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Opponent Scoring</div>
+          {opponentStats.map(os => {
+            const type = OPPONENT_SCORE_TYPES.find(t => t.key === os.stat_type);
+            return (
+              <div key={os.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span>{type?.icon}</span>
+                <span style={{ flex: 1, fontSize: '0.9rem' }}>{type?.label}</span>
+                <span style={{ color: 'var(--gray-300)', fontSize: '0.85rem' }}>+{os.value} pts</span>
+                {isAdmin && (
+                  <button className={styles.statDel} onClick={() => deleteOpponentStat(os.id)}>✕</button>
+                )}
+              </div>
+            );
+          })}
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,80,80,0.2)', fontWeight: 700, fontSize: '0.9rem' }}>
+            Total: {opponentStats.reduce((acc, os) => acc + os.value, 0)} pts
+          </div>
+        </div>
+      )}
+
+      {/* Opponent Score Modal */}
+      {opponentModal && (
+        <Modal title="Log Opponent Score" onClose={() => setOpponentModal(false)}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            {OPPONENT_SCORE_TYPES.map(type => (
+              <button
+                key={type.key}
+                className="btn btn-secondary"
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 8px' }}
+                disabled={opponentSaving}
+                onClick={() => logOpponentScore(type.key)}
+              >
+                <span style={{ fontSize: '1.6rem' }}>{type.icon}</span>
+                <span style={{ fontWeight: 700 }}>{type.label}</span>
+                <span style={{ fontSize: '0.78rem', color: 'var(--gray-400)' }}>+{type.value} pts</span>
+              </button>
+            ))}
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={() => setOpponentModal(false)}>Cancel</button>
+          </div>
+        </Modal>
+      )}
 
       {/* Log Stat Modal */}
       {statModal && selectedPlayer && (
