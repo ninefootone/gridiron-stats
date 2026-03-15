@@ -6,6 +6,7 @@ import { STAT_CATEGORIES, COUNTING_STATS, getStatInfo, ALL_STATS } from '../util
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import styles from './GamePage.module.css';
+import { useGameSocket } from '../hooks/useGameSocket';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -98,6 +99,48 @@ export default function GamePage() {
     setScoreAdjustments(sa);
     setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' });
   }
+
+  useGameSocket(gameId, {
+    stat_added: ({ stat }) => {
+      setStats(prev => {
+        if (prev.find(s => s.id === stat.id)) return prev;
+        return [stat, ...prev];
+      });
+      if (stat.our_score !== null && stat.our_score !== undefined) {
+        setGame(prev => ({ ...prev, our_score: stat.our_score }));
+      }
+    },
+    stat_deleted: ({ stat_id, our_score }) => {
+      setStats(prev => prev.filter(s => s.id !== stat_id));
+      if (our_score !== null && our_score !== undefined) {
+        setGame(prev => ({ ...prev, our_score }));
+      }
+    },
+    opponent_score_added: ({ stat, opponent_score }) => {
+      setOpponentStats(prev => {
+        if (prev.find(s => s.id === stat.id)) return prev;
+        return [stat, ...prev];
+      });
+      setGame(prev => ({ ...prev, opponent_score }));
+    },
+    opponent_score_deleted: ({ stat_id, opponent_score }) => {
+      setOpponentStats(prev => prev.filter(s => s.id !== stat_id));
+      setGame(prev => ({ ...prev, opponent_score }));
+    },
+    adjustment_added: ({ adjustment, our_score, opponent_score }) => {
+      setScoreAdjustments(prev => {
+        if (prev.find(a => a.id === adjustment.id)) return prev;
+        return [...prev, adjustment];
+      });
+      if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
+      if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
+    },
+    adjustment_deleted: ({ adjustment_id, our_score, opponent_score }) => {
+      setScoreAdjustments(prev => prev.filter(a => a.id !== adjustment_id));
+      if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
+      if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
+    },
+  });
 
   const OPPONENT_SCORE_TYPES = [
     { key: 'touchdown', label: 'Touchdown', value: 6, icon: '🏈' },
@@ -219,9 +262,15 @@ export default function GamePage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/teams/${teamId}?tab=games`)}>← All Games</button>
         <button className="btn btn-ghost btn-sm" onClick={refreshGame}>↻ Refresh</button>
+        {isAdmin && (
+          <button className="btn btn-ghost btn-sm" onClick={() => {
+            navigator.clipboard.writeText(`https://gridiron-stats.app/live/${gameId}`);
+            alert('Live view link copied!');
+          }}>🔗 Share Live View</button>
+        )}
       </div>
 
       {/* Game Header */}

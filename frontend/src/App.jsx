@@ -8,6 +8,7 @@ import TeamDetailPage from './pages/TeamDetailPage';
 import GamePage from './pages/GamePage';
 import PlayerPage from './pages/PlayerPage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import LivePage from './pages/LivePage';
 
 function PrivateRoute({ children }) {
   const { isLoaded, isSignedIn } = useAuth();
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="teams/:teamId/leaderboard" element={<LeaderboardPage />} />
 	<Route path="admin" element={<AdminPage />} />
       </Route>
+      <Route path="/live/:gameId" element={<LivePage />} />
     </Routes>
   );
 }
