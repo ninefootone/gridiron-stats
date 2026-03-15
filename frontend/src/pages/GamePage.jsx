@@ -78,7 +78,6 @@ export default function GamePage() {
       api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: 1, notes: sfNotes || null, play_id: sfPlay || null })
           .then(s => ({ ...s, player_name: player.name, player_number: player.number, play_name: plays.find(p => p.id === sfPlay)?.name || null }))
       ));
-      setStats(prev => [...results.reverse(), ...prev]);
       const lastWithScore = results.slice().reverse().find(r => r.our_score !== null && r.our_score !== undefined);
       if (lastWithScore) setGame(prev => ({ ...prev, our_score: lastWithScore.our_score }));
       setStatFirstModal(false);
@@ -209,8 +208,6 @@ export default function GamePage() {
         notes: statNotes || null,
         play_id: selectedPlay || null,
       });
-      const play = plays.find(p => p.id === selectedPlay);
-      setStats(prev => [{ ...s, player_name: selectedPlayer.name, player_number: selectedPlayer.number, player_position: selectedPlayer.position, play_name: play?.name || null }, ...prev]);
       if (s.our_score !== null && s.our_score !== undefined) {
         setGame(prev => ({ ...prev, our_score: s.our_score }));
       }
