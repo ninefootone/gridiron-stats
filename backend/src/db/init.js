@@ -116,6 +116,25 @@ async function initDB() {
     `);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_opponent_stats_game_id ON opponent_stats(game_id)`);
     await pool.query(`ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS play_id INTEGER REFERENCES plays(id) ON DELETE SET NULL`);
+
+// score_locked on games
+    await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS score_locked BOOLEAN DEFAULT false`);
+    // Lock all existing games so their manual scores are preserved
+    await pool.query(`UPDATE games SET score_locked = true WHERE score_locked = false AND (our_score > 0 OR opponent_score > 0)`);
+    // score_adjustments table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS score_adjustments (
+        id SERIAL PRIMARY KEY,
+        game_id INTEGER REFERENCES games(id) ON DELETE CASCADE,
+        team VARCHAR(10) NOT NULL CHECK (team IN ('ours', 'opponent')),
+        adjustment INTEGER NOT NULL,
+        reason TEXT NOT NULL,
+        logged_by INTEGER REFERENCES users(id),
+        logged_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_score_adjustments_game_id ON score_adjustments(game_id)`);
+
     console.log('✅ Database schema ready');
   } finally {
     client.release();

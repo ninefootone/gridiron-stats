@@ -2,6 +2,7 @@ const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
+const { recalculateOurScore } = require('../utils/scoring');
 
 // GET /api/stats?game_id=X or ?player_id=X
 router.get('/', requireAuth, async (req, res, next) => {
@@ -91,7 +92,13 @@ router.post('/', requireAuth, async (req, res, next) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [game_id, player_id, stat_type, value ?? 1, notes || null, req.dbUser.id, play_id || null]
     );
-    res.status(201).json(rows[0]);
+    // Recalculate our score if game is not locked
+    const { rows: gameRows } = await pool.query(`SELECT score_locked FROM games WHERE id = $1`, [game_id]);
+    let our_score = null;
+    if (gameRows.length && !gameRows[0].score_locked) {
+      our_score = await recalculateOurScore(pool, game_id);
+    }
+    res.status(201).json({ ...rows[0], our_score });
   } catch (err) {
     next(err);
   }
@@ -100,8 +107,18 @@ router.post('/', requireAuth, async (req, res, next) => {
 // DELETE /api/stats/:id
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
-    await pool.query(`DELETE FROM player_stats WHERE id = $1`, [req.params.id]);
-    res.json({ success: true });
+    const { rows } = await pool.query(
+      `DELETE FROM player_stats WHERE id = $1 RETURNING game_id`,
+      [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    const game_id = rows[0].game_id;
+    const { rows: gameRows } = await pool.query(`SELECT score_locked FROM games WHERE id = $1`, [game_id]);
+    let our_score = null;
+    if (gameRows.length && !gameRows[0].score_locked) {
+      our_score = await recalculateOurScore(pool, game_id);
+    }
+    res.json({ success: true, our_score });
   } catch (err) {
     next(err);
   }

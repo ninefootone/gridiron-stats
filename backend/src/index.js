@@ -15,6 +15,7 @@ const usersRouter = require('./routes/users');
 const feedbackRouter = require('./routes/feedback');
 const playsRouter = require('./routes/plays');
 const opponentStatsRouter = require('./routes/opponentStats');
+const scoreAdjustmentsRouter = require('./routes/scoreAdjustments');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -43,6 +44,7 @@ app.use('/api/stats', statsRouter);
 app.use('/api/feedback', feedbackRouter);
 app.use('/api/plays', playsRouter);
 app.use('/api/opponent-stats', opponentStatsRouter);
+app.use('/api/score-adjustments', scoreAdjustmentsRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
