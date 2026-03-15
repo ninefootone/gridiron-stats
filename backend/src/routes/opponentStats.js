@@ -2,6 +2,7 @@ const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
+const { broadcast } = require('../ws');
 
 const SCORE_VALUES = {
   touchdown: 6,
@@ -44,7 +45,9 @@ router.post('/', requireAuth, async (req, res, next) => {
       `UPDATE games SET opponent_score = $1 WHERE id = $2`,
       [totals[0].total, game_id]
     );
-    res.status(201).json({ stat: rows[0], opponent_score: Number(totals[0].total) });
+    const opponent_score = Number(totals[0].total);
+    broadcast(game_id, { type: 'opponent_score_added', stat: rows[0], opponent_score });
+    res.status(201).json({ stat: rows[0], opponent_score });
   } catch (err) { next(err); }
 });
 
@@ -66,7 +69,9 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       `UPDATE games SET opponent_score = $1 WHERE id = $2`,
       [totals[0].total, game_id]
     );
-    res.json({ success: true, opponent_score: Number(totals[0].total) });
+    const opponent_score = Number(totals[0].total);
+    broadcast(rows[0].game_id, { type: 'opponent_score_deleted', stat_id: Number(req.params.id), opponent_score });
+    res.json({ success: true, opponent_score });
   } catch (err) { next(err); }
 });
 

@@ -3,6 +3,7 @@ const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const { recalculateOurScore } = require('../utils/scoring');
 const router = express.Router();
+const { broadcast } = require('../ws');
 
 // GET /api/score-adjustments?game_id=X
 router.get('/', requireAuth, async (req, res, next) => {
@@ -54,6 +55,7 @@ router.post('/', requireAuth, async (req, res, next) => {
       opponent_score = Number(oppRows[0].total) + Number(adjRows[0].total);
       await pool.query(`UPDATE games SET opponent_score = $1 WHERE id = $2`, [Math.max(0, opponent_score), game_id]);
     }
+    broadcast(game_id, { type: 'adjustment_added', adjustment: rows[0], our_score, opponent_score });
     res.status(201).json({ adjustment: rows[0], our_score, opponent_score });
   } catch (err) { next(err); }
 });
@@ -85,6 +87,7 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       opponent_score = Number(oppRows[0].total) + Number(adjRows[0].total);
       await pool.query(`UPDATE games SET opponent_score = $1 WHERE id = $2`, [Math.max(0, opponent_score), game_id]);
     }
+    broadcast(game_id, { type: 'adjustment_deleted', adjustment_id: Number(req.params.id), our_score, opponent_score });
     res.json({ success: true, our_score, opponent_score });
   } catch (err) { next(err); }
 });

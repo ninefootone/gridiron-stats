@@ -3,6 +3,7 @@ const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
 const { recalculateOurScore } = require('../utils/scoring');
+const { broadcast } = require('../ws');
 
 // GET /api/stats?game_id=X or ?player_id=X
 router.get('/', requireAuth, async (req, res, next) => {
@@ -98,6 +99,17 @@ router.post('/', requireAuth, async (req, res, next) => {
     if (gameRows.length && !gameRows[0].score_locked) {
       our_score = await recalculateOurScore(pool, game_id);
     }
+    const { rows: playerRows } = await pool.query(`SELECT name, number FROM players WHERE id = $1`, [player_id]);
+    const player = playerRows[0] || {};
+    broadcast(game_id, {
+      type: 'stat_added',
+      stat: {
+        ...rows[0],
+        our_score,
+        player_name: player.name,
+        player_number: player.number,
+      }
+    });
     res.status(201).json({ ...rows[0], our_score });
   } catch (err) {
     next(err);
@@ -118,6 +130,7 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
     if (gameRows.length && !gameRows[0].score_locked) {
       our_score = await recalculateOurScore(pool, game_id);
     }
+    broadcast(game_id, { type: 'stat_deleted', stat_id: Number(req.params.id), our_score });
     res.json({ success: true, our_score });
   } catch (err) {
     next(err);

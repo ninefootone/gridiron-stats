@@ -1,12 +1,13 @@
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const { clerkAuth } = require('./middleware/auth');
 const { initDB } = require('./db/init');
-
+const { setupWebSocket } = require('./ws');
 const teamsRouter = require('./routes/teams');
 const playersRouter = require('./routes/players');
 const gamesRouter = require('./routes/games');
@@ -16,8 +17,10 @@ const feedbackRouter = require('./routes/feedback');
 const playsRouter = require('./routes/plays');
 const opponentStatsRouter = require('./routes/opponentStats');
 const scoreAdjustmentsRouter = require('./routes/scoreAdjustments');
+const publicRouter = require('./routes/public');
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3001;
 
 app.use(helmet());
@@ -27,15 +30,13 @@ app.use(express.json());
 const allowedOrigins = process.env.FRONTEND_URL
   ? [process.env.FRONTEND_URL]
   : ['http://localhost:5173', 'http://localhost:3000'];
-
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
+app.use('/api/public', publicRouter);
 app.use(clerkAuth);
-
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
 app.use('/api/users', usersRouter);
 app.use('/api/teams', teamsRouter);
 app.use('/api/players', playersRouter);
@@ -52,7 +53,8 @@ app.use((err, req, res, next) => {
 });
 
 initDB().then(() => {
-  app.listen(PORT, () => {
+  setupWebSocket(server);
+  server.listen(PORT, () => {
     console.log(`🏈 Gridiron Stats API running on port ${PORT}`);
   });
 }).catch(err => {
