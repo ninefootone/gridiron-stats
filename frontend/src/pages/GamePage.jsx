@@ -152,8 +152,7 @@ export default function GamePage() {
   async function logOpponentScore(stat_type) {
     setOpponentSaving(true);
     try {
-      const { stat, opponent_score } = await api.post('/opponent-stats', { game_id: Number(gameId), stat_type });
-      setOpponentStats(prev => [stat, ...prev]);
+      const { opponent_score } = await api.post('/opponent-stats', { game_id: Number(gameId), stat_type });
       setGame(prev => ({ ...prev, opponent_score }));
     } catch (err) { alert(err.message); }
     finally { setOpponentSaving(false); setOpponentModal(false); }
