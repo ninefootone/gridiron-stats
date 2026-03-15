@@ -57,3 +57,97 @@ export const POSITIONS = [
   'K', 'P', 'LS', 'KR', 'PR',
   'Defense', 'Offense',
 ];
+
+export function getStatNarrative(stat, allStats) {
+  const name = `#${stat.player_number} ${stat.player_name}`;
+  const val = stat.value;
+
+  // Find a paired stat (same game, logged within 3 seconds)
+  function findPaired(type) {
+    return allStats.find(s =>
+      s.id !== stat.id &&
+      s.stat_type === type &&
+      s.game_id === stat.game_id &&
+      Math.abs(new Date(s.logged_at) - new Date(stat.logged_at)) < 3000
+    );
+  }
+
+  switch (stat.stat_type) {
+    case 'td_passing': {
+      const rec = findPaired('td_receiving');
+      return rec
+        ? `🏈 ${name} threw a TD pass to #${rec.player_number} ${rec.player_name}`
+        : `🏈 ${name} threw a touchdown pass`;
+    }
+    case 'td_receiving': {
+      const pass = findPaired('td_passing');
+      return pass ? null : `🏈 ${name} caught a touchdown pass`;
+    }
+    case 'td_rushing':
+      return `🏈 ${name} ran for a rushing touchdown`;
+    case 'td_return':
+      return `🏆 ${name} returned the ball for a touchdown`;
+
+    case 'two_pt_pass': {
+      const rec = findPaired('two_pt_rec');
+      return rec
+        ? `✌️ ${name} converted the 2PT pass to #${rec.player_number} ${rec.player_name}`
+        : `✌️ ${name} threw a 2PT conversion pass`;
+    }
+    case 'two_pt_rec': {
+      const pass = findPaired('two_pt_pass');
+      return pass ? null : `✌️ ${name} caught a 2PT conversion`;
+    }
+    case 'two_pt_carry':
+      return `✌️ ${name} ran in a 2PT conversion`;
+
+    case 'one_pt_pass': {
+      const rec = findPaired('one_pt_rec');
+      return rec
+        ? `1️⃣ ${name} converted the PAT pass to #${rec.player_number} ${rec.player_name}`
+        : `1️⃣ ${name} threw a PAT pass`;
+    }
+    case 'one_pt_rec': {
+      const pass = findPaired('one_pt_pass');
+      return pass ? null : `1️⃣ ${name} caught a PAT conversion`;
+    }
+
+    case 'reception':
+      return `👐 ${name} made a reception`;
+    case 'passing_yds':
+      return `💫 ${name} threw for ${val} yards`;
+    case 'rushing_yds':
+      return `💨 ${name} ran for ${val} yards`;
+    case 'receiving_yds':
+      return `📡 ${name} caught for ${val} yards`;
+
+    case 'tackle':
+      return `💪 ${name} made a tackle`;
+    case 'tackle_assist':
+      return `🤝 ${name} assisted on a tackle`;
+    case 'tfl':
+      return `📉 ${name} made a tackle for loss`;
+    case 'sack':
+      return `🔨 ${name} sacked the quarterback`;
+    case 'interception':
+      return `🎯 ${name} picked off the pass`;
+    case 'pbu':
+      return `✋ ${name} broke up the pass`;
+    case 'fumble_rec':
+      return `💎 ${name} recovered the fumble`;
+    case 'forced_fumble':
+      return `💥 ${name} forced a fumble`;
+
+    case 'kick_return_yds':
+      return `🔄 ${name} returned the kick for ${val} yards`;
+    case 'punt_return_yds':
+      return `⬆️ ${name} returned the punt for ${val} yards`;
+    case 'pat_kick':
+      return `🦵 ${name} kicked the extra point`;
+    case 'field_goal':
+      return `🥅 ${name} made a field goal`;
+
+    default:
+      return `📊 ${name} — ${getStatInfo(stat.stat_type).label}`;
+  }
+}
