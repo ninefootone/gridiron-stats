@@ -105,6 +105,17 @@ async function initDB() {
     await client.query(SCHEMA);
     await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS stat_count INTEGER DEFAULT 0`);
     await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS game_type TEXT NOT NULL DEFAULT 'regular'`);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS opponent_stats (
+        id SERIAL PRIMARY KEY,
+        game_id INTEGER REFERENCES games(id) ON DELETE CASCADE,
+        stat_type VARCHAR(50) NOT NULL,
+        value INTEGER NOT NULL,
+        logged_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_opponent_stats_game_id ON opponent_stats(game_id)`);
+    await pool.query(`ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS play_id INTEGER REFERENCES plays(id) ON DELETE SET NULL`);
     console.log('✅ Database schema ready');
   } finally {
     client.release();
