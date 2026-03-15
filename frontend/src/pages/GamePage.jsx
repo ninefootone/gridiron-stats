@@ -809,6 +809,74 @@ export default function GamePage() {
               y += 6;
             });
 
+	    
+
+            // Opponent scoring log
+            if (opponentStats.length > 0) {
+              if (y > 260) { doc.addPage(); y = 20; }
+              y += 4;
+              doc.setDrawColor(200);
+              doc.line(14, y, pageWidth - 14, y);
+              y += 8;
+
+              doc.setFontSize(13);
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(0);
+              doc.text('Opponent Scoring', 14, y);
+              y += 8;
+
+              const OPPONENT_LABELS = { touchdown: 'Touchdown', one_xp: '1XP', two_xp: '2XP', safety: 'Safety', field_goal: 'Field Goal' };
+              opponentStats.slice().reverse().forEach(os => {
+                if (y > 275) { doc.addPage(); y = 20; }
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60);
+                doc.text(OPPONENT_LABELS[os.stat_type] || os.stat_type, 14, y);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(0);
+                doc.text(`+${os.value} pts`, 70, y);
+                y += 6;
+              });
+
+              doc.setFontSize(10);
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(0);
+              const oppTotal = opponentStats.reduce((acc, os) => acc + os.value, 0);
+              doc.text(`Total: ${oppTotal} pts`, 14, y);
+              y += 8;
+            }
+
+            // Score adjustments log
+            if (scoreAdjustments.length > 0) {
+              if (y > 260) { doc.addPage(); y = 20; }
+              y += 4;
+              doc.setDrawColor(200);
+              doc.line(14, y, pageWidth - 14, y);
+              y += 8;
+
+              doc.setFontSize(13);
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(0);
+              doc.text('Score Adjustments', 14, y);
+              y += 8;
+
+              scoreAdjustments.forEach(sa => {
+                if (y > 275) { doc.addPage(); y = 20; }
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(60);
+                doc.text(`${sa.team === 'ours' ? 'Our score' : 'Opponent score'}`, 14, y);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(0);
+                doc.text(`${sa.adjustment >= 0 ? '+' : ''}${sa.adjustment} pts`, 70, y);
+                doc.setFont('helvetica', 'italic');
+                doc.setTextColor(100);
+                const reasonLines = doc.splitTextToSize(sa.reason, pageWidth - 130);
+                doc.text(reasonLines, 100, y);
+                y += Math.max(6, reasonLines.length * 5);
+              });
+            }
+
             // Footer
             doc.setFontSize(8);
             doc.setTextColor(150);
