@@ -24,6 +24,10 @@ export default function GamePage() {
   const [opponentStats, setOpponentStats] = useState([]);
   const [opponentModal, setOpponentModal] = useState(false);
   const [opponentSaving, setOpponentSaving] = useState(false);
+  const [scoreAdjustments, setScoreAdjustments] = useState([]);
+  const [adjustModal, setAdjustModal] = useState(false);
+  const [adjustForm, setAdjustForm] = useState({ team: 'ours', adjustment: '', reason: '' });
+  const [adjustSaving, setAdjustSaving] = useState(false);
 
   // Stat logging
   const [statModal, setStatModal] = useState(false);
@@ -74,20 +78,24 @@ export default function GamePage() {
           .then(s => ({ ...s, player_name: player.name, player_number: player.number, play_name: plays.find(p => p.id === sfPlay)?.name || null }))
       ));
       setStats(prev => [...results.reverse(), ...prev]);
+      const lastWithScore = results.slice().reverse().find(r => r.our_score !== null && r.our_score !== undefined);
+      if (lastWithScore) setGame(prev => ({ ...prev, our_score: lastWithScore.our_score }));
       setStatFirstModal(false);
     } catch (err) { alert(err.message); }
     finally { setSaving(false); }
   }
 
   async function refreshGame() {
-    const [g, s, os] = await Promise.all([
+    const [g, s, os, sa] = await Promise.all([
       api.get(`/games/${gameId}`),
       api.get(`/stats?game_id=${gameId}`),
       api.get(`/opponent-stats?game_id=${gameId}`),
+      api.get(`/score-adjustments?game_id=${gameId}`),
     ]);
     setGame(g);
     setStats(s);
     setOpponentStats(os);
+    setScoreAdjustments(sa);
     setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' });
   }
 
@@ -128,7 +136,8 @@ export default function GamePage() {
       api.get(`/teams/${teamId}`),
       api.get(`/plays?team_id=${teamId}`),
       api.get(`/opponent-stats?game_id=${gameId}`),
-    ]).then(([g, p, s, t, pl, os]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setPlays(pl); setOpponentStats(os); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
+      api.get(`/score-adjustments?game_id=${gameId}`),
+    ]).then(([g, p, s, t, pl, os, sa]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -159,6 +168,9 @@ export default function GamePage() {
       });
       const play = plays.find(p => p.id === selectedPlay);
       setStats(prev => [{ ...s, player_name: selectedPlayer.name, player_number: selectedPlayer.number, player_position: selectedPlayer.position, play_name: play?.name || null }, ...prev]);
+      if (s.our_score !== null && s.our_score !== undefined) {
+        setGame(prev => ({ ...prev, our_score: s.our_score }));
+      }
       setStatModal(false);
     } catch (err) { alert(err.message); }
     finally { setSaving(false); }
@@ -166,8 +178,11 @@ export default function GamePage() {
 
   async function deleteStat(id) {
     if (!confirm('Remove this stat?')) return;
-    await api.del(`/stats/${id}`);
+    const { our_score } = await api.del(`/stats/${id}`);
     setStats(prev => prev.filter(s => s.id !== id));
+    if (our_score !== null && our_score !== undefined) {
+      setGame(prev => ({ ...prev, our_score }));
+    }
   }
 
   async function updateScore(e) {
@@ -222,14 +237,13 @@ export default function GamePage() {
             {game.game_type === 'friendly' && <span className="tag tag-gray" style={{ marginLeft: 4 }}>Doesn't count for leaderboard</span>}
           </div>
         </div>
-        <div className={styles.scoreBox} onClick={() => teamRole === 'admin' && setScoreModal(true)} style={teamRole !== 'admin' ? { cursor: 'default' } : {}}>
+        <div className={styles.scoreBox} style={{ cursor: 'default' }}>
           <div className={styles.scoreInner}>
             <div className={styles.scoreNum}>{game.our_score}</div>
             <div className={styles.scoreDash}>–</div>
             <div className={styles.scoreNum}>{game.opponent_score}</div>
           </div>
-          {teamRole === 'admin' && <div className={styles.scoreTap}>Tap to update score & type</div>}
-
+          {game.score_locked && <div style={{ fontSize: '0.7rem', color: 'var(--gray-500)', marginTop: 2 }}>🔒 Score locked</div>}
           <span className={`tag ${isToday ? 'tag-gold' : isPast ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
             {isToday ? '🔴 Live' : isPast ? 'Final' : 'Scheduled'}
           </span>
@@ -241,6 +255,9 @@ export default function GamePage() {
           <button className={`btn btn-primary ${styles.logStatBtn}`} onClick={openStatFirst}>⚡ Log Stat</button>
           {isAdmin && (
             <button className={`btn btn-secondary ${styles.logStatBtn}`} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
+          )}
+          {isAdmin && (
+            <button className={`btn btn-ghost ${styles.logStatBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
           )}
         </div>
       )}
@@ -290,6 +307,31 @@ export default function GamePage() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+	  {/* Score adjustment events in feed */}
+          {scoreAdjustments.length > 0 && (
+            <div style={{ marginTop: 8 }}>
+              {scoreAdjustments.map(sa => (
+                <div key={sa.id} className={styles.statRow} style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '3px solid rgba(255,255,255,0.15)' }}>
+                  <span className={styles.statIcon}>⚙️</span>
+                  <div className={styles.statContent}>
+                    <div className={styles.statMainRow}>
+                      <span className={styles.statPlayer} style={{ color: 'var(--gray-400)' }}>{sa.team === 'ours' ? 'Our' : 'Opponent'} score adjusted</span>
+                      <span className={styles.statVal} style={{ color: sa.adjustment >= 0 ? 'var(--gold)' : 'var(--danger)' }}>{sa.adjustment >= 0 ? '+' : ''}{sa.adjustment}</span>
+                    </div>
+                    <div className={styles.statNotes}>{sa.reason}</div>
+                  </div>
+                  {isAdmin && <button className={styles.statDel} onClick={async () => {
+                    if (!confirm('Remove this adjustment?')) return;
+                    const { our_score, opponent_score } = await api.del(`/score-adjustments/${sa.id}`);
+                    setScoreAdjustments(prev => prev.filter(a => a.id !== sa.id));
+                    if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
+                    if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
+                  }}>✕</button>}
+                </div>
+              ))}
             </div>
           )}
 
@@ -384,6 +426,66 @@ export default function GamePage() {
           </div>
           <div className="modal-footer">
             <button className="btn btn-secondary" onClick={() => setOpponentModal(false)}>Cancel</button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Score Adjustment Modal */}
+      {adjustModal && (
+        <Modal title="Adjust Score" onClose={() => setAdjustModal(false)}>
+          <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', marginBottom: 16 }}>
+            Use this to correct the score if a stat was missed or logged incorrectly. The adjustment will be recorded with your reason.
+          </p>
+          <div className="form-group" style={{ marginBottom: 14 }}>
+            <label>Adjust</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="button" className={`btn btn-sm ${adjustForm.team === 'ours' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdjustForm(p => ({ ...p, team: 'ours' }))}>Our Score</button>
+              <button type="button" className={`btn btn-sm ${adjustForm.team === 'opponent' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setAdjustForm(p => ({ ...p, team: 'opponent' }))}>Opponent Score</button>
+            </div>
+          </div>
+          <div className="form-group" style={{ marginBottom: 14 }}>
+            <label>Amount (use negative to subtract e.g. -6)</label>
+            <input
+              className="form-control"
+              type="number"
+              value={adjustForm.adjustment}
+              onChange={e => setAdjustForm(p => ({ ...p, adjustment: e.target.value }))}
+              placeholder="e.g. 6 or -6"
+            />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label>Reason *</label>
+            <input
+              className="form-control"
+              value={adjustForm.reason}
+              onChange={e => setAdjustForm(p => ({ ...p, reason: e.target.value }))}
+              placeholder="e.g. Missed TD in Q3"
+            />
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={() => setAdjustModal(false)}>Cancel</button>
+            <button
+              className="btn btn-primary"
+              disabled={adjustSaving || !adjustForm.adjustment || !adjustForm.reason.trim()}
+              onClick={async () => {
+                setAdjustSaving(true);
+                try {
+                  const { adjustment, our_score, opponent_score } = await api.post('/score-adjustments', {
+                    game_id: Number(gameId),
+                    team: adjustForm.team,
+                    adjustment: Number(adjustForm.adjustment),
+                    reason: adjustForm.reason,
+                  });
+                  setScoreAdjustments(prev => [...prev, adjustment]);
+                  if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
+                  if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
+                  setAdjustModal(false);
+                } catch (err) { alert(err.message); }
+                finally { setAdjustSaving(false); }
+              }}
+            >
+              {adjustSaving ? 'Saving...' : 'Apply Adjustment'}
+            </button>
           </div>
         </Modal>
       )}
