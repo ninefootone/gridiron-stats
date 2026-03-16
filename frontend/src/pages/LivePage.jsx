@@ -92,12 +92,17 @@ export default function LivePage() {
     );
   }
 
-  // Build narrative feed — filter out null (paired receiver stats)
+  const OPPONENT_LABELS = { touchdown: 'Touchdown', one_xp: '1XP', two_xp: '2XP', safety: 'Safety', field_goal: 'Field Goal' };
+
+  // Build merged feed sorted by logged_at
   const narrativeFeed = stats
     .map(s => ({ ...s, narrative: getStatNarrative(s, stats) }))
     .filter(s => s.narrative !== null);
 
-  const OPPONENT_LABELS = { touchdown: 'Touchdown', one_xp: '1XP', two_xp: '2XP', safety: 'Safety', field_goal: 'Field Goal' };
+  const mergedLiveFeed = [
+    ...narrativeFeed.map(s => ({ ...s, _type: 'stat' })),
+    ...opponentStats.map(s => ({ ...s, _type: 'opponent' })),
+  ].sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
 
   return (
     <div style={{ minHeight: '100vh', background: '#1a3a2a', color: 'white', fontFamily: 'var(--font-body, sans-serif)', padding: '24px 16px', maxWidth: 600, margin: '0 auto' }}>
@@ -142,23 +147,27 @@ export default function LivePage() {
         Play by Play
       </div>
 
-      {narrativeFeed.length === 0 && opponentStats.length === 0 ? (
+      {mergedLiveFeed.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.3)' }}>
           No plays logged yet
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {narrativeFeed.map(s => (
-            <div key={s.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 14px', fontSize: '0.9rem', lineHeight: 1.5 }}>
-              {s.narrative}
-              {s.notes && <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{s.notes}</div>}
-            </div>
-          ))}
-          {opponentStats.map(os => (
-            <div key={`opp-${os.id}`} style={{ background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.2)', borderRadius: 10, padding: '10px 14px', fontSize: '0.9rem', color: 'rgba(255,200,200,0.9)' }}>
-              🏈 Opponent — {OPPONENT_LABELS[os.stat_type] || os.stat_type} (+{os.value} pts)
-            </div>
-          ))}
+          {mergedLiveFeed.map(item => {
+            if (item._type === 'opponent') {
+              return (
+                <div key={`opp-${item.id}`} style={{ background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.2)', borderRadius: 10, padding: '10px 14px', fontSize: '0.9rem', color: 'rgba(255,200,200,0.9)' }}>
+                  🏈 Opponent — {OPPONENT_LABELS[item.stat_type] || item.stat_type} (+{item.value} pts)
+                </div>
+              );
+            }
+            return (
+              <div key={item.id} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 14px', fontSize: '0.9rem', lineHeight: 1.5 }}>
+                {item.narrative}
+                {item.notes && <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{item.notes}</div>}
+              </div>
+            );
+          })}
         </div>
       )}
 
