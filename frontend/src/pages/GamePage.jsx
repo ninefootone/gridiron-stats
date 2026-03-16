@@ -242,6 +242,12 @@ export default function GamePage() {
   if (loading) return <div className="spinner" />;
   if (!game) return <div>Game not found</div>;
 
+  // Merged feed — combine stats and opponent stats, sorted by logged_at descending
+  const mergedFeed = [
+    ...stats.map(s => ({ ...s, _type: 'stat' })),
+    ...opponentStats.map(s => ({ ...s, _type: 'opponent' })),
+  ].sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
+
   // Group stats by player
   const statsByPlayer = {};
   stats.forEach(s => {
@@ -341,34 +347,50 @@ export default function GamePage() {
 
         {/* Live stat feed */}
         <div className={styles.feed}>
-          <div className={styles.sectionTitle}>Live Stats ({stats.length})</div>
-          {stats.length === 0 ? (
+          <div className={styles.sectionTitle}>Live Stats ({mergedFeed.length})</div>
+          {mergedFeed.length === 0 ? (
             <div className="empty-state" style={{ padding: '30px' }}>
               <p>No stats yet. Tap a player to log a play.</p>
             </div>
           ) : (
             <div className={styles.statList}>
-              {stats.map(s => {
-                const info = getStatInfo(s.stat_type);
+              {mergedFeed.map(item => {
+                if (item._type === 'opponent') {
+                  const type = OPPONENT_SCORE_TYPES.find(t => t.key === item.stat_type);
+                  return (
+                    <div key={`opp-${item.id}`} className={styles.statRow} style={{ background: 'rgba(255,0,0,0.06)', borderLeft: '3px solid rgba(255,80,80,0.4)' }}>
+                      <span className={styles.statIcon}>{type?.icon || '🏈'}</span>
+                      <div className={styles.statContent}>
+                        <div className={styles.statMainRow}>
+                          <span className={styles.statPlayer} style={{ color: 'var(--gray-300)' }}>Opponent</span>
+                          <span className={styles.statLabel}>{type?.label}</span>
+                          <span className={styles.statVal}>+{item.value}</span>
+                        </div>
+                      </div>
+                      {isAdmin && <button className={styles.statDel} onClick={() => deleteOpponentStat(item.id)}>✕</button>}
+                    </div>
+                  );
+                }
+                const info = getStatInfo(item.stat_type);
                 return (
-                  <div key={s.id} className={styles.statRow}>
+                  <div key={item.id} className={styles.statRow}>
                     <span className={styles.statIcon}>{info.icon}</span>
                     <div className={styles.statContent}>
                       <div className={styles.statMainRow}>
-                        <span className={styles.statPlayer}>#{s.player_number} {s.player_name}</span>
+                        <span className={styles.statPlayer}>#{item.player_number} {item.player_name}</span>
                         <span className={styles.statLabel}>{info.label}</span>
-                        {info.unit && <span className={styles.statVal}>{s.value} {info.unit}</span>}
+                        {info.unit && <span className={styles.statVal}>{item.value} {info.unit}</span>}
                       </div>
-                      {s.notes && <div className={styles.statNotes}>{s.notes}</div>}
+                      {item.notes && <div className={styles.statNotes}>{item.notes}</div>}
                     </div>
-                    {!isViewer && <button className={styles.statDel} onClick={() => deleteStat(s.id)}>✕</button>}
+                    {!isViewer && <button className={styles.statDel} onClick={() => deleteStat(item.id)}>✕</button>}
                   </div>
                 );
               })}
             </div>
           )}
 
-	  {/* Score adjustment events in feed */}
+          {/* Score adjustment events in feed */}
           {scoreAdjustments.length > 0 && (
             <div style={{ marginTop: 8 }}>
               {scoreAdjustments.map(sa => (
@@ -390,28 +412,6 @@ export default function GamePage() {
                   }}>✕</button>}
                 </div>
               ))}
-            </div>
-          )}
-
-	  {/* Opponent score events in feed */}
-          {opponentStats.length > 0 && (
-            <div style={{ marginTop: 8 }}>
-              {opponentStats.map(os => {
-                const type = OPPONENT_SCORE_TYPES.find(t => t.key === os.stat_type);
-                return (
-                  <div key={os.id} className={styles.statRow} style={{ background: 'rgba(255,0,0,0.06)', borderLeft: '3px solid rgba(255,80,80,0.4)' }}>
-                    <span className={styles.statIcon}>{type?.icon || '🏈'}</span>
-                    <div className={styles.statContent}>
-                      <div className={styles.statMainRow}>
-                        <span className={styles.statPlayer} style={{ color: 'var(--gray-300)' }}>Opponent</span>
-                        <span className={styles.statLabel}>{type?.label}</span>
-                        <span className={styles.statVal}>+{os.value}</span>
-                      </div>
-                    </div>
-                    {isAdmin && <button className={styles.statDel} onClick={() => deleteOpponentStat(os.id)}>✕</button>}
-                  </div>
-                );
-              })}
             </div>
           )}
 
