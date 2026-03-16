@@ -441,29 +441,6 @@ export default function GamePage() {
         </div>
       </div>
 
-      {/* Opponent Scoring Section */}
-      {opponentStats.length > 0 && (
-        <div style={{ marginTop: 24, background: 'rgba(255,0,0,0.05)', border: '1px solid rgba(255,80,80,0.2)', borderRadius: 'var(--radius-lg)', padding: 16 }}>
-          <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Opponent Scoring</div>
-          {opponentStats.map(os => {
-            const type = OPPONENT_SCORE_TYPES.find(t => t.key === os.stat_type);
-            return (
-              <div key={os.id} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <span>{type?.icon}</span>
-                <span style={{ flex: 1, fontSize: '0.9rem' }}>{type?.label}</span>
-                <span style={{ color: 'var(--gray-300)', fontSize: '0.85rem' }}>+{os.value} pts</span>
-                {isAdmin && (
-                  <button className={styles.statDel} onClick={() => deleteOpponentStat(os.id)}>✕</button>
-                )}
-              </div>
-            );
-          })}
-          <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(255,80,80,0.2)', fontWeight: 700, fontSize: '0.9rem' }}>
-            Total: {opponentStats.reduce((acc, os) => acc + os.value, 0)} pts
-          </div>
-        </div>
-      )}
-
       {/* Opponent Score Modal */}
       {opponentModal && (
         <Modal title="Log Opponent Score" onClose={() => setOpponentModal(false)}>
