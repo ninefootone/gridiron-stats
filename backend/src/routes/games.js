@@ -1,6 +1,7 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
+const { broadcast } = require('../ws');
 
 const router = express.Router();
 
@@ -86,6 +87,23 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// PATCH /api/games/:id/status
+router.patch('/:id/status', requireAuth, async (req, res, next) => {
+  const { status } = req.body;
+  if (!['scheduled', 'active', 'ended'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  try {
+    const { rows } = await pool.query(
+      `UPDATE games SET game_status = $1 WHERE id = $2 RETURNING *`,
+      [status, req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Game not found' });
+    broadcast(String(req.params.id), { type: 'game_status_changed', game_status: status });
+    res.json(rows[0]);
+  } catch (err) { next(err); }
 });
 
 module.exports = router;

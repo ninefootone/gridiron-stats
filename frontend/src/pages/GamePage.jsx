@@ -139,6 +139,9 @@ export default function GamePage() {
       if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
       if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
     },
+    game_status_changed: ({ game_status }) => {
+      setGame(prev => ({ ...prev, game_status }));
+    },
   });
 
   const OPPONENT_SCORE_TYPES = [
@@ -260,7 +263,18 @@ export default function GamePage() {
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/teams/${teamId}?tab=games`)}>← All Games</button>
-        <button className="btn btn-ghost btn-sm" onClick={refreshGame}>↻ Refresh</button>
+        {(isAdmin || teamRole === 'member') && isToday && (
+          <button
+            className={`btn btn-sm ${game.game_status === 'active' ? 'btn-danger' : 'btn-primary'}`}
+            onClick={async () => {
+              const newStatus = game.game_status === 'active' ? 'ended' : game.game_status === 'ended' ? 'active' : 'active';
+              const g = await api.patch(`/games/${gameId}/status`, { status: newStatus });
+              setGame(g);
+            }}
+          >
+            {game.game_status === 'active' ? '⏹ End Game' : game.game_status === 'ended' ? '▶️ Restart Game' : '▶️ Start Game'}
+          </button>
+        )}
         {isAdmin && (
           <button className="btn btn-ghost btn-sm" onClick={() => {
             navigator.clipboard.writeText(`https://gridiron-stats.app/live/${gameId}`);
@@ -288,8 +302,8 @@ export default function GamePage() {
             <div className={styles.scoreDash}>–</div>
             <div className={styles.scoreNum}>{game.opponent_score}</div>
           </div>
-          <span className={`tag ${isToday ? 'tag-gold' : isPast ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
-            {isToday ? '🔴 Live' : isPast ? 'Final' : 'Scheduled'}
+          <span className={`tag ${game.game_status === 'active' ? 'tag-gold' : isPast || game.game_status === 'ended' ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
+            {game.game_status === 'active' ? '🟢 Live' : game.game_status === 'ended' ? 'Final' : isToday ? `Today${game.game_time ? ' · ' + game.game_time : ''}` : isPast ? 'Final' : 'Scheduled'}
           </span>
         </div>
       </div>
@@ -766,7 +780,8 @@ export default function GamePage() {
         </Modal>
       )}
     {isAdmin && (
-        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'center' }}>
+        <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <button className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-400)' }} onClick={refreshGame}>↻ Refresh</button>
           <button className="btn btn-secondary btn-sm" onClick={() => {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();

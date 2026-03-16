@@ -135,6 +135,7 @@ async function initDB() {
     `);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_score_adjustments_game_id ON score_adjustments(game_id)`);
 
+    await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS game_status VARCHAR(20) DEFAULT 'scheduled'`);
     console.log('✅ Database schema ready');
   } finally {
     client.release();

@@ -57,6 +57,9 @@ export default function LivePage() {
       if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
       if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
     },
+    game_status_changed: ({ game_status }) => {
+      setGame(prev => ({ ...prev, game_status }));
+    },
   });
 
   if (loading) return (
@@ -76,7 +79,7 @@ export default function LivePage() {
   const isToday = gameDate.getTime() === today.getTime();
   const isPast = gameDate < today;
 
-  if (!isToday && !isPast) {
+  if (!isToday && !isPast && game.game_status === 'scheduled') {
     return (
       <div style={{ minHeight: '100vh', background: '#1a3a2a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'sans-serif', padding: 24 }}>
         <div style={{ fontSize: '3rem', marginBottom: 16 }}>🏈</div>
@@ -121,8 +124,16 @@ export default function LivePage() {
           <div style={{ fontSize: '2.5rem', color: 'rgba(255,255,255,0.3)' }}>–</div>
           <div style={{ fontFamily: 'var(--font-display, sans-serif)', fontSize: '4rem', fontWeight: 900, color: '#f5a623', lineHeight: 1 }}>{game.opponent_score}</div>
         </div>
-        <div style={{ marginTop: 8, fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          {isPast ? 'Final Score' : '🔴 Live'}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            {game.game_status === 'ended' || isPast ? 'Final Score' : game.game_status === 'active' ? '🟢 Live' : `Today${game.game_time ? ' · ' + game.game_time : ''}`}
+          </span>
+          {game.game_status === 'active' && (
+            <span style={{ fontSize: '0.75rem', background: 'rgba(100,220,100,0.15)', color: '#6edb8a', padding: '1px 8px', borderRadius: 99, border: '1px solid rgba(100,220,100,0.3)' }}>In Progress</span>
+          )}
+          {game.game_status === 'ended' && (
+            <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', padding: '1px 8px', borderRadius: 99 }}>Full Time</span>
+          )}
         </div>
       </div>
 
