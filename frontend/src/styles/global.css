@@ -82,6 +82,7 @@ input, select, textarea {
   letter-spacing: 0.06em;
   transition: all 0.15s;
   white-space: nowrap;
+  line-height: 1;
 }
 .btn-sm {
   padding: 6px 12px;
