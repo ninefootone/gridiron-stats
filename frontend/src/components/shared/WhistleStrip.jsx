@@ -2,7 +2,7 @@ export default function WhistleStrip({ whistleState, connected }) {
   if (!whistleState || !whistleState.gameStarted || whistleState.gameEnded) {
     return (
       <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '6px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {connected ? 'Whistle connected — waiting for game to start' : 'Whistle connecting...'}
+        {!connected ? 'Whistle connecting...' : whistleState?.gameEnded ? 'Whistle connected — game has ended' : 'Whistle connected — waiting for game to start'}
       </div>
     );
   }
