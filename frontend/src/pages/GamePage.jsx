@@ -340,7 +340,7 @@ export default function GamePage() {
       {isAdmin && (
         <div style={{ marginTop: 6, marginBottom: 4 }}>
           <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem', color: whistleGameId ? 'var(--gold)' : 'var(--gray-500)' }} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
-            {whistleGameId ? '🎮 Whistle connected · change' : '🎮 Connect Whistle'}
+            {whistleGameId ? 'Whistle connected · change' : 'Connect Whistle'}
           </button>
         </div>
       )}

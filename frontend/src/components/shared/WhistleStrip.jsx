@@ -2,7 +2,7 @@ export default function WhistleStrip({ whistleState, connected }) {
   if (!whistleState || !whistleState.gameStarted || whistleState.gameEnded) {
     return (
       <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '6px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {connected ? '🎮 Whistle connected — waiting for game to start' : '🎮 Whistle connecting...'}
+        {connected ? 'Whistle connected — waiting for game to start' : 'Whistle connecting...'}
       </div>
     );
   }
@@ -42,8 +42,7 @@ export default function WhistleStrip({ whistleState, connected }) {
       fontSize: '0.8rem',
       marginTop: 8,
     }}>
-      <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>🎮 Whistle</span>
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 900, color: whistleState.gameClockRunning ? 'var(--gold)' : 'var(--white)' }}>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 900, color: whistleState.gameClockRunning ? 'var(--gold)' : 'var(--white)' }}>
         {formatTime(whistleState.gameTimeLeft)}
       </span>
       <span style={{ color: 'var(--gray-300)' }}>{getPeriod(whistleState.currentHalf)}</span>
