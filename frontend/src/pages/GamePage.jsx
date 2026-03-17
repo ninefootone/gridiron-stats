@@ -277,7 +277,7 @@ export default function GamePage() {
     statsByPlayer[key].stats.push(s);
   });
 
-  const homeAway = game.home_away === 'home' ? '🏠 Home' : game.home_away === 'away' ? '✈️ Away' : '⚖️ Neutral';
+  const homeAway = game.home_away === 'home' ? 'Home' : game.home_away === 'away' ? 'Away' : 'Neutral';
   const isViewer = teamRole === 'viewer';
   const isAdmin = teamRole === 'admin';
   const gameTypeLabel = { friendly: 'Friendly', playoff: 'Playoff', finals: 'Finals' }[game.game_type];
@@ -299,14 +299,14 @@ export default function GamePage() {
               setGame(g);
             }}
           >
-            {game.game_status === 'active' ? '⏹ End Game' : game.game_status === 'ended' ? '▶️ Restart Game' : '▶️ Start Game'}
+            {game.game_status === 'active' ? 'End Game' : game.game_status === 'ended' ? 'Restart Game' : 'Start Game'}
           </button>
         )}
         {isAdmin && (
           <button className="btn btn-ghost btn-sm" onClick={() => {
             navigator.clipboard.writeText(`https://gridiron-stats.app/live/${gameId}`);
             alert('Live view link copied!');
-          }}>↗ Live View</button>
+          }}>Live View</button>
         )}
       </div>
 
@@ -317,10 +317,9 @@ export default function GamePage() {
           <div className={styles.gameMeta}>
             {format(new Date(game.game_date), 'EEEE d MMMM yyyy')}
             {game.game_time && ` · ${game.game_time}`}
-            {game.location && ` · 📍 ${game.location}`}
+            {game.location && ` · ${game.location}`}
             {` · ${homeAway}`}
             {gameTypeLabel && <span className="tag tag-gold" style={{ marginLeft: 8 }}>{gameTypeLabel}</span>}
-            {game.game_type === 'friendly' && <span className="tag tag-gray" style={{ marginLeft: 4 }}>Doesn't count for leaderboard</span>}
           </div>
         </div>
         <div className={styles.scoreBox} style={{ cursor: 'default' }}>
