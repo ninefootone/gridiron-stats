@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
 import styles from './TeamsPage.module.css';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/react';
 import { useHelp } from '../context/HelpContext';
 import InstallBanner from '../components/shared/InstallBanner';
 

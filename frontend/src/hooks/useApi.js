@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/react';
 import { useCallback } from 'react';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '';
