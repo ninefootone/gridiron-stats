@@ -334,6 +334,16 @@ export default function GamePage() {
           </span>
         </div>
       </div>   
+      {whistleGameId && (
+        <>
+          <div className={styles.whistleFooterMobile}>
+            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+          </div>
+          <div className={styles.whistleFooterDesktop}>
+            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+          </div>
+        </>
+      )}
       {isAdmin && (
         <div style={{ marginTop: 6, marginBottom: 4 }}>
           <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem', color: whistleGameId ? 'var(--gold)' : 'var(--gray-500)' }} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
