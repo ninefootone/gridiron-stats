@@ -7,6 +7,8 @@ import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import styles from './GamePage.module.css';
 import { useGameSocket } from '../hooks/useGameSocket';
+import { useWhistleSocket } from '../hooks/useWhistleSocket';
+import WhistleStrip from '../components/shared/WhistleStrip';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -29,6 +31,10 @@ export default function GamePage() {
   const [adjustModal, setAdjustModal] = useState(false);
   const [adjustForm, setAdjustForm] = useState({ team: 'ours', adjustment: '', reason: '' });
   const [adjustSaving, setAdjustSaving] = useState(false);
+  const [whistleGameId, setWhistleGameId] = useState(null);
+  const [whistleModal, setWhistleModal] = useState(false);
+  const [whistleInput, setWhistleInput] = useState('');
+  const [whistleSaving, setWhistleSaving] = useState(false);
 
   // Stat logging
   const [statModal, setStatModal] = useState(false);
@@ -144,6 +150,17 @@ export default function GamePage() {
     },
   });
 
+  const { whistleState, connected: whistleConnected } = useWhistleSocket(whistleGameId);
+
+  function parseWhistleId(input) {
+    try {
+      const url = new URL(input);
+      return url.pathname.split('/game/')[1]?.split('?')[0] || null;
+    } catch {
+      return input.trim() || null;
+    }
+  }
+
   const OPPONENT_SCORE_TYPES = [
     { key: 'touchdown', label: 'Touchdown', value: 6, icon: '🏈' },
     { key: 'one_xp', label: '1XP', value: 1, icon: '🎯' },
@@ -171,6 +188,10 @@ export default function GamePage() {
   // Score edit
   const [scoreModal, setScoreModal] = useState(false);
   const [scoreForm, setScoreForm] = useState({ our_score: 0, opponent_score: 0, game_type: 'regular' });
+
+  useEffect(() => {
+    if (game?.whistle_game_id) setWhistleGameId(game.whistle_game_id);
+  }, [game?.whistle_game_id]);
 
   useEffect(() => {
     Promise.all([
@@ -313,7 +334,16 @@ export default function GamePage() {
           </span>
         </div>
       </div>
-
+      {whistleGameId && (
+        <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+      )}
+      {isAdmin && (
+        <div style={{ marginTop: 6, marginBottom: 4 }}>
+          <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem', color: whistleGameId ? 'var(--gold)' : 'var(--gray-500)' }} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
+            {whistleGameId ? '🎮 Whistle connected · change' : '🎮 Connect Whistle'}
+          </button>
+        </div>
+      )}
       {!isViewer && (
         <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className={`btn btn-primary ${styles.logStatBtn}`} onClick={openStatFirst}>⚡ Log Stat</button>
@@ -520,6 +550,56 @@ export default function GamePage() {
               }}
             >
               {adjustSaving ? 'Saving...' : 'Apply Adjustment'}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Whistle Modal */}
+      {whistleModal && (
+        <Modal title="Connect Whistle" onClose={() => setWhistleModal(false)}>
+          <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', marginBottom: 16 }}>
+            Paste the Whistle share URL to show the live game clock, down and timeouts alongside your stats.
+          </p>
+          <div className="form-group" style={{ marginBottom: 14 }}>
+            <label>Whistle URL or Game Code</label>
+            <input
+              className="form-control"
+              value={whistleInput}
+              onChange={e => setWhistleInput(e.target.value)}
+              placeholder="https://www.whistle-app.co.uk/game/abc123 or abc123"
+              autoFocus
+            />
+          </div>
+          {whistleGameId && (
+            <div style={{ marginBottom: 14 }}>
+              <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', fontSize: '0.85rem' }} onClick={async () => {
+                await api.put(`/games/${gameId}`, { whistle_game_id: null });
+                setWhistleGameId(null);
+                setWhistleModal(false);
+              }}>
+                Disconnect Whistle
+              </button>
+            </div>
+          )}
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={() => setWhistleModal(false)}>Cancel</button>
+            <button
+              className="btn btn-primary"
+              disabled={whistleSaving || !whistleInput.trim()}
+              onClick={async () => {
+                setWhistleSaving(true);
+                try {
+                  const parsed = parseWhistleId(whistleInput);
+                  if (!parsed) { alert('Could not parse a game ID from that input'); return; }
+                  await api.put(`/games/${gameId}`, { whistle_game_id: parsed });
+                  setWhistleGameId(parsed);
+                  setWhistleModal(false);
+                } catch (err) { alert(err.message); }
+                finally { setWhistleSaving(false); }
+              }}
+            >
+              {whistleSaving ? 'Connecting...' : 'Connect'}
             </button>
           </div>
         </Modal>
