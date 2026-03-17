@@ -1,7 +1,9 @@
+import styles from './WhistleStrip.module.css';
+
 export default function WhistleStrip({ whistleState, connected }) {
   if (!whistleState || !whistleState.gameStarted || whistleState.gameEnded) {
     return (
-      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '6px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className={styles.waiting}>
         {!connected ? 'Whistle connecting...' : whistleState?.gameEnded ? 'Whistle connected — game has ended' : 'Whistle connected — waiting for game to start'}
       </div>
     );
@@ -26,37 +28,31 @@ export default function WhistleStrip({ whistleState, connected }) {
     return `${d}${suffix[(d - 1)] || 'th'}`;
   };
 
-  const timeoutsLeft1 = (whistleState.timeoutsPerHalf || 3) - (whistleState.timeoutsUsed?.['1'] || 0);
-  const timeoutsLeft2 = (whistleState.timeoutsPerHalf || 3) - (whistleState.timeoutsUsed?.['2'] || 0);
+  const timeoutsPerHalf = whistleState.timeoutsPerHalf || 3;
+  const timeoutsLeft1 = timeoutsPerHalf - (whistleState.timeoutsUsed?.['1'] || 0);
+  const timeoutsLeft2 = timeoutsPerHalf - (whistleState.timeoutsUsed?.['2'] || 0);
 
   return (
-    <div style={{
-      padding: '8px 14px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 16,
-      flexWrap: 'wrap',
-      fontSize: '0.8rem',
-    }}>
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 900, color: whistleState.gameClockRunning ? 'var(--gold)' : 'var(--white)' }}>
+    <div className={styles.strip}>
+      <span className={`${styles.clock} ${whistleState.gameClockRunning ? styles.clockRunning : styles.clockStopped}`}>
         {formatTime(whistleState.gameTimeLeft)}
       </span>
-      <span style={{ color: 'var(--gray-300)' }}>{getPeriod(whistleState.currentHalf)}</span>
+      <span className={styles.period}>{getPeriod(whistleState.currentHalf)}</span>
       {whistleState.currentDown && (
-        <span style={{ color: 'var(--gray-300)' }}>{getDown(whistleState.currentDown)} down</span>
+        <span className={styles.down}>{getDown(whistleState.currentDown)} down</span>
       )}
-      <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem' }}>
-        Play: <strong style={{ color: 'var(--white)' }}>{whistleState.playTimeLeft ?? '--'}</strong>
+      <span className={styles.playClock}>
+        Play: <strong className={styles.playClockVal}>{whistleState.playTimeLeft ?? '--'}</strong>
       </span>
-      <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
-        {Array.from({ length: whistleState.timeoutsPerHalf || 3 }).map((_, i) => (
-          <span key={`t1-${i}`} style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: i < timeoutsLeft1 ? 'var(--gold)' : 'rgba(255,255,255,0.15)' }} />
+      <div className={styles.timeouts}>
+        {Array.from({ length: timeoutsPerHalf }).map((_, i) => (
+          <span key={`t1-${i}`} className={`${styles.dot} ${i < timeoutsLeft1 ? styles.dotActive : styles.dotUsed}`} />
         ))}
-        <span style={{ margin: '0 4px', color: 'rgba(255,255,255,0.2)' }}>·</span>
-        {Array.from({ length: whistleState.timeoutsPerHalf || 3 }).map((_, i) => (
-          <span key={`t2-${i}`} style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: i < timeoutsLeft2 ? 'var(--gold)' : 'rgba(255,255,255,0.15)' }} />
+        <span className={styles.separator}>·</span>
+        {Array.from({ length: timeoutsPerHalf }).map((_, i) => (
+          <span key={`t2-${i}`} className={`${styles.dot} ${i < timeoutsLeft2 ? styles.dotActive : styles.dotUsed}`} />
         ))}
-      </span>
+      </div>
     </div>
   );
 }

@@ -149,6 +149,13 @@ input, select, textarea {
   color: var(--gray-300);
   margin-bottom: 10px;
 }
+.label-xs {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-300);
+}
 .text-meta {
   font-size: 0.82rem;
   color: var(--gray-300);

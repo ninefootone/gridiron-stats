@@ -366,7 +366,7 @@ export default function GamePage() {
         {/* Player roster */}
         <div className={styles.roster}>
           <div className={styles.rosterHeader}>
-            <div className={styles.sectionTitle} style={{ marginBottom: 0 }}>{isViewer ? 'Roster' : 'Roster — Tap to Log Stat'}</div>
+            <div className="section-label" style={{ marginBottom: 0 }}>{isViewer ? 'Roster' : 'Roster — Tap to Log Stat'}</div>
             <div className={styles.rosterSort}>
               <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}>#</button>
               <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
@@ -383,7 +383,7 @@ export default function GamePage() {
 
         {/* Live stat feed */}
         <div className={styles.feed}>
-          <div className={styles.sectionTitle}>Live Stats ({mergedFeed.length})</div>
+          <div className="section-label">Live Stats ({mergedFeed.length})</div>
           {mergedFeed.length === 0 ? (
             <div className="empty-state" style={{ padding: '30px' }}>
               <p>No stats yet. Tap a player to log a play.</p>
@@ -454,7 +454,7 @@ export default function GamePage() {
           {/* Summary by player */}
           {Object.keys(statsByPlayer).length > 0 && (
             <div style={{ marginTop: 24 }}>
-              <div className={styles.sectionTitle} style={{ marginBottom: 12 }}>Game Summary</div>
+              <div className="section-label" style={{ marginBottom: 12 }}>Game Summary</div>
               {Object.values(statsByPlayer).map(({ player_name, player_number, stats: ps }) => (
                 <div key={player_name} className={styles.summaryCard}>
                   <div className={styles.summaryPlayer}>#{player_number} {player_name}</div>
@@ -843,7 +843,7 @@ export default function GamePage() {
         </Modal>
       )}
     {isAdmin && (
-        <div style={{ marginTop: 40, paddingTop: 24, paddingBottom: 80, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="section-divider" style={{ paddingBottom: 80, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-sm btn-ghost" style={{ color: 'var(--gray-400)' }} onClick={refreshGame}>↻ Refresh</button>
           <button className="btn btn-sm btn-secondary" onClick={() => {
             const doc = new jsPDF();

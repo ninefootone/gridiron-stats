@@ -158,7 +158,7 @@ export default function PlayerPage() {
 
       {/* Season totals */}
       <div className={styles.section}>
-        <div className={styles.sectionTitle}>Season Totals</div>
+        <div className="section-label">Season Totals</div>
         {Object.keys(totals).length === 0 ? (
           <p style={{ color: 'var(--gray-500)' }}>No stats recorded yet.</p>
         ) : (
@@ -288,7 +288,7 @@ export default function PlayerPage() {
       {/* By game */}
       {Object.keys(byGame).length > 0 && (
         <div className={styles.section}>
-          <div className={styles.sectionTitle}>Game Log</div>
+          <div className="section-label">Game Log</div>
           {Object.values(byGame).sort((a, b) => new Date(b.game_date) - new Date(a.game_date)).map(({ opponent_name, game_date, stats: gs }) => (
             <div key={opponent_name + game_date} className={styles.gameLogCard}>
               <div className={styles.gameLogHeader}>

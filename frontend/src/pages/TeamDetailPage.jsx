@@ -398,7 +398,7 @@ async function loadMembers() {
               ))}
             {players.filter(p => !p.active).length > 0 && (
                 <>
-                  <div style={{ width: '100%', fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 16, marginBottom: 4 }}>Inactive / Injured</div>
+                  <div className="label-xs" style={{ width: '100%', marginTop: 16, marginBottom: 4 }}>Inactive / Injured</div>
                   {players.filter(p => !p.active).map(p => (
                     <div key={p.id} className={styles.playerCard} style={{ opacity: 0.5 }} onClick={() => navigate(`/teams/${teamId}/players/${p.id}`)}>
                       <div className={styles.playerNum}>#{p.number ?? '—'}</div>
@@ -578,11 +578,11 @@ async function loadMembers() {
         <div>
           <div style={{ marginBottom: 16 }}>
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Join Code (members)</div>
+              <div className="label-xs" style={{ marginBottom: 8 }}>Join Code (members)</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)' }}>{team.join_code}</div>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>View Code (read-only)</div>
+              <div className="label-xs" style={{ marginBottom: 8 }}>View Code (read-only)</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)' }}>{team.view_code}</div>
             </div>
           </div>
@@ -626,8 +626,8 @@ async function loadMembers() {
       )}
 
       {isAdmin && tab !== 'members' && tab !== 'plays' && (
-        <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Export</div>
+        <div className="section-divider" style={{ marginTop: 48 }}>
+          <div className="label-xs" style={{ marginBottom: 12 }}>Export</div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
             {(tab === 'players') && (
               <button
@@ -854,7 +854,7 @@ async function loadMembers() {
           {importError && <div className="alert alert-error" style={{ marginBottom: 12 }}>{importError}</div>}
           {importPreview.length > 0 && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+              <div className="label-xs" style={{ marginBottom: 8 }}>
                 Preview — {importPreview.length} players found
               </div>
               <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>

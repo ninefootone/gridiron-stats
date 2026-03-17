@@ -23,16 +23,6 @@
 
 .section { margin-bottom: 32px; }
 
-.sectionTitle {
-  font-family: var(--font-display);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--gray-300);
-  margin-bottom: 14px;
-}
-
 .totalsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));

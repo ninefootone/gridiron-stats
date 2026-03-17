@@ -1,0 +1,74 @@
+.strip {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.waiting {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  padding: 6px 14px;
+}
+
+.clock {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.clockRunning {
+  color: var(--gold);
+}
+
+.clockStopped {
+  color: var(--white);
+}
+
+.period {
+  color: var(--gray-300);
+}
+
+.down {
+  color: var(--gray-300);
+}
+
+.playClock {
+  color: var(--gray-400);
+  font-size: 0.75rem;
+}
+
+.playClockVal {
+  color: var(--white);
+  font-weight: 700;
+}
+
+.timeouts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dotActive {
+  background: var(--gold);
+}
+
+.dotUsed {
+  background: rgba(255,255,255,0.15);
+}
+
+.separator {
+  margin: 0 4px;
+  color: rgba(255,255,255,0.2);
+}
