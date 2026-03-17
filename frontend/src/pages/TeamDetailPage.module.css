@@ -186,73 +186,6 @@
   flex-shrink: 0;
 }
 
-.bottomNav {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .tabs {
-    display: none;
-  }
-
-  .bottomNav {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 68px;
-    background: var(--turf);
-    border-top: 2px solid rgba(255,255,255,0.12);
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
-    z-index: 50;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .bottomNavItem {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    background: none;
-    border: none;
-    color: rgba(255,255,255,0.5);
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: color 0.15s;
-    padding: 0;
-  }
-
-  .bottomNavItem:hover { color: var(--white); }
-
-  .bottomNavActive {
-    color: var(--gold) !important;
-  }
-
-  .bottomNavIcon {
-    font-size: 0;
-    line-height: 1;
-    width: 22px;
-    height: 22px;
-  }
-
-  .bottomNavPadding {
-    height: 84px;
-  }
-}
-
-@media (min-width: 769px) {
-  .bottomNavPadding {
-    display: none;
-  }
-}
-
 @media (min-width: 600px) {
   .memberControls {
     flex-basis: auto !important;
@@ -298,3 +231,9 @@
 .playSeason { font-size: 0.75rem; color: var(--gold); font-family: var(--font-display); font-weight: 700; }
 .playNotes { font-size: 0.82rem; color: var(--gray-300); margin-top: 4px; }
 .playActions { display: flex; gap: 6px; flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .tabs {
+    display: none;
+  }
+}
