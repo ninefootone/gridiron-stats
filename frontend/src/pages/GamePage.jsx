@@ -306,7 +306,7 @@ export default function GamePage() {
           <button className="btn btn-ghost btn-sm" onClick={() => {
             navigator.clipboard.writeText(`https://gridiron-stats.app/live/${gameId}`);
             alert('Live view link copied!');
-          }}>🔗 Share Live View</button>
+          }}>↗ Live View</button>
         )}
       </div>
 
@@ -333,10 +333,7 @@ export default function GamePage() {
             {game.game_status === 'active' ? '🟢 Live' : game.game_status === 'ended' ? 'Final' : isToday ? `Today${game.game_time ? ' · ' + game.game_time : ''}` : isPast ? 'Final' : 'Scheduled'}
           </span>
         </div>
-      </div>
-      {whistleGameId && (
-        <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
-      )}
+      </div>   
       {isAdmin && (
         <div style={{ marginTop: 6, marginBottom: 4 }}>
           <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem', color: whistleGameId ? 'var(--gold)' : 'var(--gray-500)' }} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
@@ -1007,6 +1004,11 @@ export default function GamePage() {
             await api.del(`/games/${gameId}`);
             navigate(`/teams/${teamId}`);
           }}>Delete Game</button>
+        </div>
+      )}
+    {whistleGameId && (
+        <div style={{ position: 'fixed', bottom: 64, left: 0, right: 0, zIndex: 99, padding: '0 8px' }}>
+          <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
         </div>
       )}
     <nav className={styles.bottomNav}>
