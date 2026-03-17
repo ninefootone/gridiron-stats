@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getStatNarrative, getStatInfo } from '../utils/stats';
 import { useGameSocket } from '../hooks/useGameSocket';
+import { useWhistleSocket } from '../hooks/useWhistleSocket';
+import WhistleStrip from '../components/shared/WhistleStrip';
 import { format } from 'date-fns';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -61,6 +63,8 @@ export default function LivePage() {
       setGame(prev => ({ ...prev, game_status }));
     },
   });
+
+  const { whistleState, connected: whistleConnected } = useWhistleSocket(game?.whistle_game_id || null);
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#1a3a2a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -141,6 +145,12 @@ export default function LivePage() {
           )}
         </div>
       </div>
+
+      {game?.whistle_game_id && (
+        <div style={{ marginBottom: 16 }}>
+          <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+        </div>
+      )}
 
       {/* Stat feed */}
       <div style={{ marginBottom: 8, fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)' }}>
