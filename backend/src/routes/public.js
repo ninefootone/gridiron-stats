@@ -7,7 +7,7 @@ router.get('/games/:id', async (req, res, next) => {
   try {
     const { rows } = await pool.query(
       `SELECT id, opponent_name, game_date, game_time, home_away,
-              our_score, opponent_score, game_type, location, game_status
+              our_score, opponent_score, game_type, location, game_status, whistle_game_id
        FROM games WHERE id = $1`,
       [req.params.id]
     );

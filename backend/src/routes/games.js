@@ -55,7 +55,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
 // PUT /api/games/:id
 router.put('/:id', requireAuth, async (req, res, next) => {
-  const { opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, game_type } = req.body;
+  const { opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, game_type, whistle_game_id } = req.body;
   try {
     const { rows } = await pool.query(
       `UPDATE games SET
@@ -68,9 +68,10 @@ router.put('/:id', requireAuth, async (req, res, next) => {
          opponent_score = COALESCE($7, opponent_score),
          status = COALESCE($8, status),
          notes = COALESCE($9, notes),
-         game_type = COALESCE($10, game_type)
-       WHERE id = $11 RETURNING *`,
-      [opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, game_type, req.params.id]
+         game_type = COALESCE($10, game_type),
+         whistle_game_id = COALESCE($11, whistle_game_id)
+       WHERE id = $12 RETURNING *`,
+      [opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, game_type, whistle_game_id || null, req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Game not found' });
     res.json(rows[0]);
