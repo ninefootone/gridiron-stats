@@ -9,6 +9,7 @@ import styles from './GamePage.module.css';
 import { useGameSocket } from '../hooks/useGameSocket';
 import { useWhistleSocket } from '../hooks/useWhistleSocket';
 import WhistleStrip from '../components/shared/WhistleStrip';
+import BottomNav from '../components/shared/BottomNav';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -1015,31 +1016,14 @@ export default function GamePage() {
           }}>Delete Game</button>
         </div>
       )}
-    <nav className="bottom-nav">
-        <button className="bottom-nav-item bottom-nav-active" onClick={() => navigate(`/teams/${teamId}?tab=games`)}>
-          <svg className="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-          Games
-        </button>
-        {!isViewer && (
-          <button className="bottom-nav-item" onClick={openStatFirst}>
-            <svg className="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-            Log Stat
-          </button>
-        )}
-        {isAdmin && (
-          <button className="bottom-nav-item" onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>
-            <svg className="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-            </svg>
-            Score
-          </button>
-        )}
-      </nav>
-      <div className="bottom-nav-padding" />
+    <BottomNav
+      activeKey="games"
+      items={[
+        { key: 'games', label: 'Games', onClick: () => navigate(`/teams/${teamId}?tab=games`), icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
+        ...(!isViewer ? [{ key: 'log', label: 'Log Stat', onClick: openStatFirst, icon: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></> }] : []),
+        ...(isAdmin ? [{ key: 'score', label: 'Score', onClick: () => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }, icon: <><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></> }] : []),
+      ]}
+    />
     </div>
   );
 }
