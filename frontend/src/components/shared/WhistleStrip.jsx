@@ -31,16 +31,12 @@ export default function WhistleStrip({ whistleState, connected }) {
 
   return (
     <div style={{
-      background: 'rgba(0,0,0,0.2)',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: 'var(--radius)',
       padding: '8px 14px',
       display: 'flex',
       alignItems: 'center',
       gap: 16,
       flexWrap: 'wrap',
       fontSize: '0.8rem',
-      marginTop: 8,
     }}>
       <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 900, color: whistleState.gameClockRunning ? 'var(--gold)' : 'var(--white)' }}>
         {formatTime(whistleState.gameTimeLeft)}
