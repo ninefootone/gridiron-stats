@@ -844,8 +844,8 @@ export default function GamePage() {
       )}
     {isAdmin && (
         <div style={{ marginTop: 40, paddingTop: 24, paddingBottom: 80, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-ghost" style={{ color: 'var(--gray-400)', fontSize: '0.875rem', padding: '8px 16px' }} onClick={refreshGame}>↻ Refresh</button>
-          <button className="btn btn-secondary" style={{ fontSize: '0.875rem', padding: '8px 16px' }} onClick={() => {
+          <button className="btn btn-sm btn-ghost" style={{ color: 'var(--gray-400)' }} onClick={refreshGame}>↻ Refresh</button>
+          <button className="btn btn-sm btn-secondary" onClick={() => {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
             let y = 20;
@@ -1008,7 +1008,7 @@ export default function GamePage() {
           }}>
             ⬇ Export PDF
           </button>
-          <button className="btn btn-danger" style={{ fontSize: '0.875rem', padding: '8px 16px' }} onClick={async () => {
+          <button className="btn btn-sm btn-danger" onClick={async () => {
             if (!confirm('Delete this game and all its stats? This cannot be undone.')) return;
             await api.del(`/games/${gameId}`);
             navigate(`/teams/${teamId}`);
