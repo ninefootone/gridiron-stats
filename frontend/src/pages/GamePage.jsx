@@ -1007,7 +1007,7 @@ export default function GamePage() {
         </div>
       )}
     {whistleGameId && (
-        <div style={{ position: 'fixed', bottom: 64, left: 0, right: 0, zIndex: 99, padding: '0 8px' }}>
+        <div className={styles.whistleFooter}>
           <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
         </div>
       )}

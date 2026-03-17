@@ -240,3 +240,20 @@
   .bottomNav { display: none; }
   .bottomNavPadding { display: none; }
 }
+
+.whistleFooter {
+  position: fixed;
+  bottom: 64px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  padding: 0 8px;
+  background: var(--field-green);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+@media (min-width: 769px) {
+  .whistleFooter {
+    display: none;
+  }
+}
