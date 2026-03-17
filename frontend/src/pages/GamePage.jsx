@@ -1007,9 +1007,14 @@ export default function GamePage() {
         </div>
       )}
     {whistleGameId && (
-        <div className={styles.whistleFooter}>
-          <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
-        </div>
+        <>
+          <div className={styles.whistleFooterMobile}>
+            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+          </div>
+          <div className={styles.whistleFooterDesktop}>
+            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+          </div>
+        </>
       )}
     <nav className={styles.bottomNav}>
         <button className={`${styles.bottomNavItem} ${styles.bottomNavActive}`} onClick={() => navigate(`/teams/${teamId}?tab=games`)}>

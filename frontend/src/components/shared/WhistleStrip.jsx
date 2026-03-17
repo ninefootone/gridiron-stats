@@ -48,10 +48,14 @@ export default function WhistleStrip({ whistleState, connected }) {
       <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem' }}>
         Play: <strong style={{ color: 'var(--white)' }}>{whistleState.playTimeLeft ?? '--'}</strong>
       </span>
-      <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem', marginLeft: 'auto' }}>
-        TOs: {'●'.repeat(timeoutsLeft1)}{'○'.repeat(Math.max(0, (whistleState.timeoutsPerHalf || 3) - timeoutsLeft1))}
-        {' · '}
-        {'●'.repeat(timeoutsLeft2)}{'○'.repeat(Math.max(0, (whistleState.timeoutsPerHalf || 3) - timeoutsLeft2))}
+      <span style={{ color: 'var(--gray-400)', fontSize: '0.75rem', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+        {Array.from({ length: whistleState.timeoutsPerHalf || 3 }).map((_, i) => (
+          <span key={`t1-${i}`} style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: i < timeoutsLeft1 ? 'var(--gold)' : 'rgba(255,255,255,0.15)' }} />
+        ))}
+        <span style={{ margin: '0 4px', color: 'rgba(255,255,255,0.2)' }}>·</span>
+        {Array.from({ length: whistleState.timeoutsPerHalf || 3 }).map((_, i) => (
+          <span key={`t2-${i}`} style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: i < timeoutsLeft2 ? 'var(--gold)' : 'rgba(255,255,255,0.15)' }} />
+        ))}
       </span>
     </div>
   );

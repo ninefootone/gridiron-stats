@@ -241,7 +241,7 @@
   .bottomNavPadding { display: none; }
 }
 
-.whistleFooter {
+.whistleFooterMobile {
   position: fixed;
   bottom: 64px;
   left: 0;
@@ -252,12 +252,20 @@
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
+.whistleFooterDesktop {
+  display: none;
+}
+
 @media (min-width: 769px) {
-  .whistleFooter {
-    position: static;
+  .whistleFooterMobile {
+    display: none;
+  }
+  .whistleFooterDesktop {
+    display: block;
     margin-top: 8px;
     margin-bottom: 4px;
-    border-radius: var(--radius);
+    background: rgba(0,0,0,0.2);
     border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
   }
 }
