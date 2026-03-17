@@ -1015,16 +1015,6 @@ export default function GamePage() {
           }}>Delete Game</button>
         </div>
       )}
-    {whistleGameId && (
-        <>
-          <div className={styles.whistleFooterMobile}>
-            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
-          </div>
-          <div className={styles.whistleFooterDesktop}>
-            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
-          </div>
-        </>
-      )}
     <nav className="bottom-nav">
         <button className="bottom-nav-item bottom-nav-active" onClick={() => navigate(`/teams/${teamId}?tab=games`)}>
           <svg className="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

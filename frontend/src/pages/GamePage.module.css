@@ -191,21 +191,6 @@
 }
 
 .whistleFooterMobile {
-  position: fixed;
-  bottom: 64px;
-  left: 0;
-  right: 0;
-  z-index: 99;
-  background: #1a3a2a;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-.whistleFooterDesktop {
-  display: none;
-}
-
-.whistleFooterMobile {
   display: none;
 }
 
