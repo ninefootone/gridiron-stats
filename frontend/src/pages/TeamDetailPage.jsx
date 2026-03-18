@@ -331,6 +331,7 @@ async function loadMembers() {
           ...(isAdmin ? [{ key: 'members', label: 'Members', onClick: () => { setTab('members'); loadMembers(); }, icon: <><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></> }] : []),
         ]}
       />
+      <div className="bottom-nav-padding" />
 
       {tab === 'players' && (
         <div>
