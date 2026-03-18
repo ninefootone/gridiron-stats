@@ -291,7 +291,7 @@ async function loadMembers() {
       <div className={styles.header}>
         <div className={styles.teamInfo}>
           <div className="page-title">{team.name}</div>
-          {team.season && <span className="tag tag-gold">{team.season}</span>}
+          {team.season && <span style={{ color: 'var(--gold)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.06em' }}>{team.season}</span>}
         </div>
         <div className={styles.record}>
           <span className={styles.recordNum}>{wins}</span><span className={styles.recordSep}>-</span><span className={styles.recordNum}>{losses}</span>
@@ -417,7 +417,7 @@ async function loadMembers() {
                     </div>
                     <div className={styles.gameVs}>
                       <div className={styles.gameOpponent}>vs {g.opponent_name}</div>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2, alignItems: 'center' }}>
                         {g.location && <span className={styles.gameLocation}>📍 {g.location}</span>}
                         {g.game_type === 'friendly' && <span className="tag tag-gray" style={{ fontSize: '0.7rem' }}>Friendly</span>}
                         {g.game_type === 'playoff' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Playoff</span>}
