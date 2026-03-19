@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
@@ -10,6 +10,7 @@ import { useGameSocket } from '../hooks/useGameSocket';
 import { useWhistleSocket } from '../hooks/useWhistleSocket';
 import WhistleStrip from '../components/shared/WhistleStrip';
 import BottomNav from '../components/shared/BottomNav';
+import jsQR from 'jsqr';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -36,6 +37,10 @@ export default function GamePage() {
   const [whistleModal, setWhistleModal] = useState(false);
   const [whistleInput, setWhistleInput] = useState('');
   const [whistleSaving, setWhistleSaving] = useState(false);
+  const [qrScanning, setQrScanning] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const scanIntervalRef = useRef(null);
 
   // Stat logging
   const [statModal, setStatModal] = useState(false);
@@ -160,6 +165,44 @@ export default function GamePage() {
     } catch {
       return input.trim() || null;
     }
+  }
+
+  function startQrScan() {
+    setQrScanning(true);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+          scanIntervalRef.current = setInterval(() => {
+            if (!videoRef.current || !canvasRef.current) return;
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            if (code) {
+              stopQrScan();
+              setWhistleInput(code.data);
+            }
+          }, 200);
+        }
+      })
+      .catch(() => {
+        setQrScanning(false);
+        alert('Camera access denied or not available.');
+      });
+  }
+
+  function stopQrScan() {
+    clearInterval(scanIntervalRef.current);
+    if (videoRef.current?.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach(t => t.stop());
+      videoRef.current.srcObject = null;
+    }
+    setQrScanning(false);
   }
 
   const OPPONENT_SCORE_TYPES = [
@@ -564,7 +607,7 @@ export default function GamePage() {
 
       {/* Whistle Modal */}
       {whistleModal && (
-        <Modal title="Connect Whistle" onClose={() => setWhistleModal(false)}>
+        <Modal title="Connect Whistle" onClose={() => { stopQrScan(); setWhistleModal(false); }}>
           <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', marginBottom: 16 }}>
             Paste the Whistle share URL to show the live game clock, down and timeouts alongside your stats.
           </p>
@@ -575,9 +618,19 @@ export default function GamePage() {
               value={whistleInput}
               onChange={e => setWhistleInput(e.target.value)}
               placeholder="https://www.whistle-app.co.uk/game/abc123 or abc123"
-              autoFocus
             />
           </div>
+          {qrScanning ? (
+            <div style={{ marginBottom: 14 }}>
+              <video ref={videoRef} style={{ width: '100%', borderRadius: 'var(--radius)', background: '#000' }} playsInline muted />
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
+              <button className="btn btn-ghost btn-sm" style={{ marginTop: 8 }} onClick={stopQrScan}>Cancel scan</button>
+            </div>
+          ) : (
+            <button className="btn btn-ghost btn-sm" style={{ marginBottom: 14 }} onClick={startQrScan}>
+              📷 Scan QR Code
+            </button>
+          )}
           {whistleGameId && (
             <div style={{ marginBottom: 14 }}>
               <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', fontSize: '0.85rem' }} onClick={async () => {
