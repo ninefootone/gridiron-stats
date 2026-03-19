@@ -41,6 +41,7 @@ export default function GamePage() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const scanIntervalRef = useRef(null);
+  const [qrSuccess, setQrSuccess] = useState(false);
 
   // Stat logging
   const [statModal, setStatModal] = useState(false);
@@ -186,8 +187,10 @@ export default function GamePage() {
             if (code) {
               stopQrScan();
               setWhistleInput(code.data);
+              setQrSuccess(true);
+              setTimeout(() => setQrSuccess(false), 2000);
             }
-          }, 200);
+          }, 500);
         }
       })
       .catch(() => {
@@ -620,6 +623,11 @@ export default function GamePage() {
               placeholder="https://www.whistle-app.co.uk/game/abc123 or abc123"
             />
           </div>
+          {qrSuccess && (
+            <div className="alert alert-success" style={{ marginBottom: 14 }}>
+              ✓ QR code scanned successfully
+            </div>
+          )}
           {qrScanning ? (
             <div style={{ marginBottom: 14 }}>
               <video ref={videoRef} style={{ width: '100%', borderRadius: 'var(--radius)', background: '#000' }} playsInline muted />
