@@ -10,7 +10,6 @@ export default function LoginPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.backdrop} />
       <div className={styles.content}>
         <div className={styles.brand}>
           <div className={styles.icon}>
@@ -21,6 +20,7 @@ export default function LoginPage() {
         </div>
         <SignIn routing="hash" />
       </div>
+      <div className={styles.backdrop} />
     </div>
   );
 }
