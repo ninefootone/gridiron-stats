@@ -182,7 +182,7 @@ export default function LivePage() {
       )}
 
       <div style={{ textAlign: 'center', marginTop: 40, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>
-        Powered by Gridiron Stats · gridiron-stats.app
+        Powered by Gridiron Stats · gridiron-stats.co
       </div>
     </div>
   );
