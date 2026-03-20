@@ -31,7 +31,7 @@ export default function Layout() {
       <header className={styles.header}>
         <div className={styles.logoArea}>
           <div className={styles.logo} onClick={() => navigate('/teams')}>
-            <span className={styles.logoIcon}>🏈</span>
+            <img src="/football.svg" alt="" className={styles.logoIcon} />
             <div>
               <div className={styles.logoTitle}>Gridiron Stats</div>
             </div>
