@@ -13,7 +13,9 @@ export default function LoginPage() {
       <div className={styles.backdrop} />
       <div className={styles.content}>
         <div className={styles.brand}>
-          <div className={styles.icon}>🏈</div>
+          <div className={styles.icon}>
+		<img src="/football.svg" alt="" style={{ width: 64, height: 64 }} />
+	  </div>
           <h1 className={styles.title}>Gridiron Stats</h1>
           <p className={styles.subtitle}>Track every yard, every play, every player — all season long.</p>
         </div>
