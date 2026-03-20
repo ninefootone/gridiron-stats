@@ -47,6 +47,7 @@
   color: var(--gold);
   margin-bottom: 12px;
   text-align:center;
+  Line-height:0.9em;
 }
 
 .subtitle {
