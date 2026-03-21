@@ -405,8 +405,8 @@ export default function GamePage() {
               <button className={`btn btn-secondary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
             )}
           </div>
-          {isAdmin && (
-            <button className={`btn btn-ghost ${styles.logStatBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)', width: '100%' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
+                    {isAdmin && (
+            <button className={`btn btn-ghost ${styles.logStatBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
           )}
         </div>
       )}
