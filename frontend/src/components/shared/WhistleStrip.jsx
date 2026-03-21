@@ -2,7 +2,7 @@ import { useState } from 'react';
 import styles from './WhistleStrip.module.css';
 import Modal from './Modal';
 
-export default function WhistleStrip({ whistleState, connected }) {
+export default function WhistleStrip({ whistleState, connected, onDisconnect }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   if (!whistleState || !whistleState.gameStarted || whistleState.gameEnded) {
@@ -116,8 +116,14 @@ export default function WhistleStrip({ whistleState, connected }) {
 
           </div>
           <div className="modal-footer">
+            {onDisconnect && (
+              <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', marginRight: 'auto' }} onClick={() => { setModalOpen(false); onDisconnect(); }}>
+                Disconnect Whistle
+              </button>
+            )}
             <button className="btn btn-primary" onClick={() => setModalOpen(false)}>Close</button>
           </div>
+
         </Modal>
       )}
     </>

@@ -383,19 +383,13 @@ export default function GamePage() {
       {whistleGameId && (
         <>
           <div className={styles.whistleFooterMobile}>
-            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+            <WhistleStrip whistleState={whistleState} connected={whistleConnected} onDisconnect={async () => { await api.put(`/games/${gameId}`, { whistle_game_id: null }); setWhistleGameId(null); }} />
+
           </div>
           <div className={styles.whistleFooterDesktop}>
-            <WhistleStrip whistleState={whistleState} connected={whistleConnected} />
+            <WhistleStrip whistleState={whistleState} connected={whistleConnected} onDisconnect={async () => { await api.put(`/games/${gameId}`, { whistle_game_id: null }); setWhistleGameId(null); }} />
           </div>
         </>
-      )}
-      {isAdmin && (
-        <div style={{ marginTop: 6, marginBottom: 4 }}>
-          <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem', color: whistleGameId ? 'var(--gold)' : 'var(--gray-500)' }} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
-            {whistleGameId ? 'Whistle connected · change' : 'Connect Whistle'}
-          </button>
-        </div>
       )}
       {!isViewer && (
         <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -404,12 +398,18 @@ export default function GamePage() {
             {isAdmin && (
               <button className={`btn btn-secondary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
             )}
+            {isAdmin && (
+              <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.whistleBtn}`} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
+                {whistleGameId ? '🎮' : 'Whistle'}
+              </button>
+            )}
           </div>
-                    {isAdmin && (
-            <button className={`btn btn-ghost ${styles.logStatBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
+          {isAdmin && (
+            <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
           )}
         </div>
       )}
+
 
 
       <div className={styles.layout}>

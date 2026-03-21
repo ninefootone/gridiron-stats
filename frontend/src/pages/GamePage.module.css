@@ -224,3 +224,32 @@
     font-size: 0.95rem !important;
   }
 }
+
+.whistleBtn {
+  flex: none !important;
+  min-height: 64px;
+  font-size: 0.85rem !important;
+  color: var(--gray-400);
+  white-space: nowrap;
+}
+
+.adjustBtn {
+  width: auto;
+}
+
+@media (max-width: 768px) {
+  .whistleBtn {
+    flex: 1 !important;
+    min-height: 48px;
+    order: 3;
+    flex-basis: calc(50% - 4px) !important;
+  }
+  .adjustBtn {
+    flex: 1;
+    min-height: 48px;
+    flex-basis: calc(50% - 4px) !important;
+  }
+  .actionButtons {
+    flex-wrap: wrap;
+  }
+}
