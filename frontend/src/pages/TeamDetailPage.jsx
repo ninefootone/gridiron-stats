@@ -542,7 +542,7 @@ async function loadMembers() {
         <div>
           <div style={{ marginBottom: 16 }}>
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
-              <div className="label-xs" style={{ marginBottom: 8 }}>Join Code (members)</div>
+              <div className="label-xs" style={{ marginBottom: 8 }}>Join Code (coaches)</div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)' }}>{team.join_code}</div>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
@@ -565,15 +565,15 @@ async function loadMembers() {
                       style={{ width: 'auto', opacity: members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 0.5 : 1 }}
                       value={m.role}
                       disabled={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin'}
-                      title={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 'Promote another member to admin first before changing this role' : undefined}
+                      title={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 'Promote another coach to admin first before changing this role' : undefined}
                       onChange={e => updateMemberRole(m.id, e.target.value)}
                     >
                       <option value="admin">Admin</option>
-                      <option value="member">Member</option>
+                      <option value="member">Coach</option>
                       <option value="viewer">Viewer</option>
                     </select>
                     {members.filter(x => x.role === 'admin').length === 1 && m.role === 'admin' ? (
-                      <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>Promote another admin first</span>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>Promote another coach to admin first</span>
                     ) : (
                       <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
                     )}

@@ -69,7 +69,7 @@ export default function AdminPage() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <span className="stat-badge">{team.member_count} members</span>
+              <span className="stat-badge">{team.member_count} coaches</span>
               <span className="stat-badge">{team.player_count} players</span>
               <span className="stat-badge">{team.game_count} games</span>
             </div>

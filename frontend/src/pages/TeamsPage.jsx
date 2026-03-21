@@ -131,7 +131,7 @@ async function leaveTeam(e, teamId) {
                 <span className="stat-badge">{team.player_count} players</span>
                 <span className="stat-badge">{team.game_count} games</span>
                 {team.my_role === 'admin' && <span className="tag tag-gold" style={{ alignSelf: 'center' }}>Admin</span>}
-		{team.my_role === 'member' && <span className="tag tag-gray" style={{ alignSelf: 'center' }}>Member</span>}
+		{team.my_role === 'member' && <span className="tag tag-gray" style={{ alignSelf: 'center' }}>Coach</span>}
               </div>
               {team.my_role === 'admin' && (
                 <button
@@ -334,7 +334,7 @@ async function leaveTeam(e, teamId) {
       {shareTeam && (
         <Modal title={`Share — ${shareTeam.name}`} onClose={() => { setShareTeam(null); setCopiedCode(null); }}>
           <p style={{ color: 'var(--gray-300)', fontSize: '0.9rem', marginBottom: 20 }}>
-            Share these codes with your squad. The join code lets members log stats; the view code is read-only.
+            Share these codes with your squad. The join code lets coaches log stats; the view code is read-only.
           </p>
           {shareTeam.join_code && (
             <div style={{ marginBottom: 16 }}>

@@ -37,7 +37,7 @@ export function HelpProvider({ children }) {
               <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 8 }}>Roles</div>
               {[
                 { role: 'Admin', desc: 'Full access including managing players, logging stats, exporting and connecting Whistle' },
-                { role: 'Member', desc: "Can log stats and control game status (Start/End Game) but can't manage the roster or settings" },
+                { role: 'Coach', desc: "Can log stats and control game status (Start/End Game) but can't manage the roster or settings" },
                 { role: 'Viewer', desc: 'Read-only access, great for parents and supporters' },
               ].map(({ role, desc }) => (
                 <div key={role} style={{ marginBottom: 10 }}>
