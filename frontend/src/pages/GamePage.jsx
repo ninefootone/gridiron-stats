@@ -622,8 +622,10 @@ export default function GamePage() {
             <input
               className="form-control"
               value={whistleInput}
-              onChange={e => setWhistleInput(e.target.value)}
+              onChange={e => setWhistleInput(e.target.value.toLowerCase())}
               placeholder="https://www.whistle-app.co.uk/game/abc123 or abc123"
+              autoCapitalize="none"
+              autoCorrect="off"
             />
           </div>
           {qrSuccess && (
