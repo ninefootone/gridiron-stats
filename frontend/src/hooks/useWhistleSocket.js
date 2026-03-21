@@ -16,7 +16,7 @@ export function useWhistleSocket(whistleGameId) {
     }
 
     function connect() {
-      const ws = new WebSocket(`wss://${WHISTLE_HOST}/game/${whistleGameId}`);
+      const ws = new WebSocket(`wss://${WHISTLE_HOST}/game/${whistleGameId}?role=5hd74h`);
       wsRef.current = ws;
 
       ws.onopen = () => {
