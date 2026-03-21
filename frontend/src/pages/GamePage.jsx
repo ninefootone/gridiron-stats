@@ -392,23 +392,25 @@ export default function GamePage() {
         </>
       )}
       {!isViewer && (
-        <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'stretch' }}>
           <div className={styles.actionButtons}>
             <button className={`btn btn-primary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={openStatFirst}>⚡ Log Stat</button>
             {isAdmin && (
               <button className={`btn btn-secondary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
             )}
-            {isAdmin && (
-              <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.whistleBtn}`} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
-                {whistleGameId ? '🎮' : 'Whistle'}
-              </button>
-            )}
           </div>
           {isAdmin && (
             <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
           )}
+          {isAdmin && (
+            <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.whistleBtn}`} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
+              <img src="/whistle-icon.svg" alt="" style={{ width: 18, height: 18, opacity: whistleGameId ? 1 : 0.5 }} />
+              {whistleGameId ? 'Whistle' : 'Connect Whistle'}
+            </button>
+          )}
         </div>
       )}
+
 
 
 

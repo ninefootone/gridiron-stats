@@ -226,8 +226,7 @@
 }
 
 .whistleBtn {
-  flex: none !important;
-  min-height: 64px;
+  margin-left: auto;
   font-size: 0.85rem !important;
   color: var(--gray-400);
   white-space: nowrap;
@@ -235,21 +234,24 @@
 
 .adjustBtn {
   width: auto;
+  font-size: 0.85rem;
+  color: var(--gray-300);
 }
 
 @media (max-width: 768px) {
+  .actionButtons {
+    flex-wrap: wrap;
+    width: 100%;
+  }
   .whistleBtn {
-    flex: 1 !important;
+    margin-left: 0;
+    flex: 1;
     min-height: 48px;
-    order: 3;
     flex-basis: calc(50% - 4px) !important;
   }
   .adjustBtn {
     flex: 1;
     min-height: 48px;
     flex-basis: calc(50% - 4px) !important;
-  }
-  .actionButtons {
-    flex-wrap: wrap;
   }
 }
