@@ -5,7 +5,19 @@
   gap: 14px;
   flex-wrap: wrap;
   font-size: 0.9rem;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-top: 0;
+  justify-content: center;
 }
+
+.strip:hover { opacity: 0.85; }
 
 .waiting {
   font-size: 0.75rem;
@@ -18,41 +30,34 @@
   font-size: 2rem;
   font-weight: 900;
   line-height: 1;
-  Min-width:65px;
+  min-width: 65px;
+  text-align: center;
 }
 
-.clockRunning {
-  color: var(--gold);
-}
-
-.clockStopped {
-  color: var(--white);
-}
+.clockRunning { color: var(--gold); }
+.clockStopped { color: var(--white); }
 
 .period {
   color: var(--gray-300);
+  font-size: 0.85rem;
 }
 
 .down {
   color: var(--gray-300);
+  font-size: 0.85rem;
 }
 
-.playClock {
-  color: var(--gray-400);
-  font-size: 0.9rem;
-  display:none;
+.tapHint {
+  font-size: 0.7rem;
+  color: var(--gray-500);
+  margin-left: auto;
+  font-style: italic;
 }
 
-.playClockVal {
-  color: var(--white);
-  font-weight: 700;
-}
-
-.timeouts {
+.dotRow {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-left: auto;
 }
 
 .dot {
@@ -62,15 +67,91 @@
   border-radius: 50%;
 }
 
-.dotActive {
-  background: var(--gold);
+.dotActive { background: var(--gold); }
+.dotUsed { background: rgba(255,255,255,0.15); }
+
+/* Modal */
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.dotUsed {
-  background: rgba(255,255,255,0.15);
+.modalClock {
+  text-align: center;
+  padding: 8px 0;
 }
 
-.separator {
-  margin: 0 4px;
-  color: rgba(255,255,255,0.2);
+.modalClockTime {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.modalClockMeta {
+  color: var(--gray-300);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.modalDivider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+.modalRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modalLabel {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.modalVal {
+  color: var(--gray-300);
+  font-size: 0.85rem;
+}
+
+.modalScore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.modalScoreTeam {
+  text-align: center;
+}
+
+.modalScoreName {
+  font-size: 0.78rem;
+  color: var(--gray-300);
+  margin-bottom: 4px;
+}
+
+.modalScoreNum {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.modalScoreDash {
+  font-size: 2rem;
+  color: var(--gray-500);
+}
+
+.modalScoreNote {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  text-align: center;
+  font-style: italic;
 }
