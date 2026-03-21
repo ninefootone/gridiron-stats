@@ -240,18 +240,23 @@
 
 @media (max-width: 768px) {
   .actionButtons {
-    flex-wrap: wrap;
     width: 100%;
+    flex-wrap: nowrap;
   }
   .whistleBtn {
     margin-left: 0;
-    flex: 1;
-    min-height: 48px;
-    flex-basis: calc(50% - 4px) !important;
+    flex: 1 1 calc(50% - 4px);
+    min-height: 44px;
+    max-height: 44px;
+    font-size: 0.8rem !important;
   }
   .adjustBtn {
-    flex: 1;
-    min-height: 48px;
-    flex-basis: calc(50% - 4px) !important;
+    flex: 1 1 calc(50% - 4px);
+    min-height: 44px;
+    max-height: 44px;
+    font-size: 0.8rem !important;
+  }
+  .actionButtons {
+    flex-basis: 100%;
   }
 }
