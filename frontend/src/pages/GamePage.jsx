@@ -399,15 +399,18 @@ export default function GamePage() {
       )}
       {!isViewer && (
         <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className={`btn btn-primary ${styles.logStatBtn}`} onClick={openStatFirst}>⚡ Log Stat</button>
+          <div style={{ display: 'flex', gap: 8, flex: 1 }}>
+            <button className={`btn btn-primary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={openStatFirst}>⚡ Log Stat</button>
+            {isAdmin && (
+              <button className={`btn btn-secondary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
+            )}
+          </div>
           {isAdmin && (
-            <button className={`btn btn-secondary ${styles.logStatBtn}`} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
-          )}
-          {isAdmin && (
-            <button className={`btn btn-ghost ${styles.logStatBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
+            <button className={`btn btn-ghost ${styles.logStatBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)', width: '100%' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
           )}
         </div>
       )}
+
 
       <div className={styles.layout}>
         {/* Player roster */}
