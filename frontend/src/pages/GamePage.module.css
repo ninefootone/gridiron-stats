@@ -208,3 +208,19 @@
     display: none;
   }
 }
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+@media (min-width: 769px) {
+  .actionButtons {
+    flex: none;
+  }
+  .actionButtons button {
+    min-height: unset !important;
+    font-size: 0.95rem !important;
+  }
+}
