@@ -64,8 +64,8 @@ export default function GamePage() {
 
   const [teamType, setTeamType] = useState(null);
   const [showMoreStats, setShowMoreStats] = useState(false);
-
-
+  console.log('showMoreStats:', showMoreStats);
+  
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
     setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1); setSfPlay(null);
