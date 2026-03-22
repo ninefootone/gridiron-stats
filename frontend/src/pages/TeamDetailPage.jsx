@@ -117,6 +117,8 @@ export default function TeamDetailPage() {
   const [copyPlaysModal, setCopyPlaysModal] = useState(false);
   const [copyFromSeason, setCopyFromSeason] = useState('');
   const [copyToSeason, setCopyToSeason] = useState('');
+  const [editTeamModal, setEditTeamModal] = useState(false);
+  const [editTeamForm, setEditTeamForm] = useState({ name: '', season: '', description: '', team_type: null });
 
   useEffect(() => {
     Promise.all([
@@ -652,7 +654,16 @@ async function loadMembers() {
               </button>
             )}
           </div>
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                setEditTeamForm({ name: team.name, season: team.season || '', description: team.description || '', team_type: team.team_type || null });
+                setEditTeamModal(true);
+              }}
+            >
+              Edit Team
+            </button>
             <button
               className="btn btn-danger btn-sm"
               onClick={async () => {
@@ -664,7 +675,61 @@ async function loadMembers() {
               Delete Team
             </button>
           </div>
+
         </div>
+      )}
+
+            {editTeamModal && (
+        <Modal title="Edit Team" onClose={() => setEditTeamModal(false)}>
+          <form onSubmit={async e => {
+            e.preventDefault();
+            const updated = await api.put(`/teams/${teamId}`, editTeamForm);
+            setTeam(updated);
+            setEditTeamModal(false);
+          }}>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Team Name *</label>
+              <input className="form-control" value={editTeamForm.name} onChange={e => setEditTeamForm(p => ({ ...p, name: e.target.value }))} required />
+            </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Season</label>
+              <input className="form-control" value={editTeamForm.season} onChange={e => setEditTeamForm(p => ({ ...p, season: e.target.value }))} placeholder="e.g. 2025" maxLength={4} />
+            </div>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Game Type</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${editTeamForm.team_type === 'flag' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setEditTeamForm(p => ({ ...p, team_type: p.team_type === 'flag' ? null : 'flag' }))}
+                >
+                  🚩 Flag
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${editTeamForm.team_type === 'contact' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setEditTeamForm(p => ({ ...p, team_type: p.team_type === 'contact' ? null : 'contact' }))}
+                >
+                  🏈 Contact
+                </button>
+                {editTeamForm.team_type && (
+                  <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)' }} onClick={() => setEditTeamForm(p => ({ ...p, team_type: null }))}>
+                    Clear
+                  </button>
+                )}
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', marginTop: 6 }}>Filters positions and stats for your game type</p>
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>Description</label>
+              <textarea className="form-control" rows={2} value={editTeamForm.description} onChange={e => setEditTeamForm(p => ({ ...p, description: e.target.value }))} placeholder="Optional notes" />
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setEditTeamModal(false)}>Cancel</button>
+              <button type="submit" className="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       {addPlayerMenuModal && (

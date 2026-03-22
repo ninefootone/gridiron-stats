@@ -166,12 +166,16 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
 // PUT /api/teams/:id
 router.put('/:id', requireAuth, async (req, res, next) => {
-  const { name, season, description } = req.body;
+  const { name, season, description, team_type } = req.body;
   try {
     const { rows } = await pool.query(
-      `UPDATE teams SET name = COALESCE($1, name), season = COALESCE($2, season), description = COALESCE($3, description)
-       WHERE id = $4 AND created_by = $5 RETURNING *`,
-      [name, season, description, req.params.id, req.dbUser.id]
+      `UPDATE teams SET
+        name = COALESCE($1, name),
+        season = COALESCE($2, season),
+        description = COALESCE($3, description),
+        team_type = $4
+       WHERE id = $5 AND created_by = $6 RETURNING *`,
+      [name, season, description, team_type ?? null, req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Team not found or not authorised' });
     res.json(rows[0]);

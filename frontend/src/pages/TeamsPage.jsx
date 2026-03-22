@@ -14,7 +14,7 @@ export default function TeamsPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
-  const [form, setForm] = useState({ name: '', season: '', description: '' });
+  const [form, setForm] = useState({ name: '', season: '', description: '', team_type: null });
   const [joinCode, setJoinCode] = useState('');
   const [joinType, setJoinType] = useState('join');
   const [saving, setSaving] = useState(false);
@@ -180,10 +180,36 @@ async function leaveTeam(e, teamId) {
                 maxLength={4}
               />
             </div>
+                        <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Game Type</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${form.team_type === 'flag' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setForm(p => ({ ...p, team_type: p.team_type === 'flag' ? null : 'flag' }))}
+                >
+                  🚩 Flag
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm ${form.team_type === 'contact' ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => setForm(p => ({ ...p, team_type: p.team_type === 'contact' ? null : 'contact' }))}
+                >
+                  🏈 Contact
+                </button>
+                {form.team_type && (
+                  <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)' }} onClick={() => setForm(p => ({ ...p, team_type: null }))}>
+                    Clear
+                  </button>
+                )}
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', marginTop: 6 }}>Optional — filters positions and stats for your game type</p>
+            </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Description</label>
               <textarea className="form-control" rows={2} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Optional notes" />
             </div>
+
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setShowCreateModal(false)}>Cancel</button>
               <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Creating...' : 'Create Team'}</button>
