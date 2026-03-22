@@ -6,7 +6,6 @@ import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType } from '../utils/
 import { format } from 'date-fns';
 import styles from './TeamDetailPage.module.css';
 import lbStyles from './LeaderboardPage.module.css';
-import { getStatInfo, STAT_CATEGORIES } from '../utils/stats';
 import BottomNav from '../components/shared/BottomNav';
 import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType } from '../utils/stats';
 
