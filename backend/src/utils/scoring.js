@@ -4,10 +4,14 @@ const SCORING_STATS = {
   td_return: 6,
   one_pt_rec: 1,
   one_pt_carry: 1,
+  return_1pt: 1,
   two_pt_rec: 2,
   two_pt_carry: 2,
+  return_2pt: 2,
   safety: 2,
 };
+
+
 
 async function recalculateOurScore(pool, game_id) {
   // Sum scoring stats
