@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
-import { STAT_CATEGORIES, COUNTING_STATS, getStatInfo, ALL_STATS } from '../utils/stats';
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import styles from './GamePage.module.css';
