@@ -689,11 +689,10 @@ export default function GamePage() {
         <Modal title={`Log Stat — #${selectedPlayer.number} ${selectedPlayer.name}`} onClose={() => setStatModal(false)} wide>
           <form onSubmit={logStat}>
             <div className={styles.statCategories}>
-              {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
-                const filteredStats = cat.stats.filter(s => {
-                  const allowed = getStatsForTeamType(teamType, showMoreStats);
-                  return allowed.find(a => a.key === s.key);
-                });
+              {(() => {
+                const allowed = getStatsForTeamType(teamType, showMoreStats);
+                return Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
+                  const filteredStats = cat.stats.filter(s => allowed.find(a => a.key === s.key));
                 if (!filteredStats.length) return null;
                 return (
                 <div key={catKey}>
@@ -714,8 +713,9 @@ export default function GamePage() {
                     ))}
                   </div>
                 </div>
-                );
-              })}
+              );
+              });
+              })()}
               {teamType === 'flag' && (
                 <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)', fontSize: '0.8rem' }} onClick={() => setShowMoreStats(p => !p)}>
                   {showMoreStats ? 'Show fewer stats' : 'Show more stats'}
@@ -764,9 +764,10 @@ export default function GamePage() {
             <div>
               <div style={{ marginBottom: 12, color: 'var(--gray-300)', fontSize: '0.9rem' }}>Choose a stat type:</div>
               <div className={styles.statCategories}>
-                {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
+                {(() => {
                   const allowed = getStatsForTeamType(teamType, showMoreStats);
-                  const countingInCat = cat.stats.filter(s => s.unit === null && !s.excludeFromStatFirst && allowed.find(a => a.key === s.key));
+                  return Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
+                    const countingInCat = cat.stats.filter(s => s.unit === null && !s.excludeFromStatFirst && allowed.find(a => a.key === s.key));
                   if (!countingInCat.length) return null;
                   return (
                     <div key={catKey}>
@@ -787,7 +788,8 @@ export default function GamePage() {
                       </div>
                     </div>
                   );
-                })}
+                });
+              })()}
               </div>
               <div className="modal-footer">
                 {teamType === 'flag' && (
