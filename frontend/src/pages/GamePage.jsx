@@ -10,7 +10,7 @@ import { useWhistleSocket } from '../hooks/useWhistleSocket';
 import WhistleStrip from '../components/shared/WhistleStrip';
 import BottomNav from '../components/shared/BottomNav';
 import jsQR from 'jsqr';
-import { STAT_CATEGORIES, COUNTING_STATS, getStatInfo, ALL_STATS, getStatsForTeamType, getPositionsForTeamType } from '../utils/stats';
+import { STAT_CATEGORIES, getStatInfo, ALL_STATS, getStatsForTeamType } from '../utils/stats';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();

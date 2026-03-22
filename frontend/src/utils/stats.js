@@ -57,13 +57,16 @@ export function getStatInfo(key) {
 // Filter stats by team type
 export function getStatsForTeamType(teamType, showMore = false) {
   return ALL_STATS.filter(s => {
-    if (s.show_more && !showMore) return false;
-    if (!teamType) return true; // null = show all
-    if (teamType === 'flag') return s.flag;
+    if (!teamType) return true;
+    if (teamType === 'flag') {
+      if (s.show_more) return showMore; // show_more stats only shown when toggled
+      return s.flag;
+    }
     if (teamType === 'contact') return s.contact;
     return true;
   });
 }
+
 
 // All positions
 export const POSITIONS = [
