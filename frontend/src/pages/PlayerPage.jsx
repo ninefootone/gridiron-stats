@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
-import { getStatInfo, POSITIONS } from '../utils/stats';
+import { getStatInfo, POSITIONS, getPositionsForTeamType } from '../utils/stats';
 import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import styles from './PlayerPage.module.css';
@@ -19,6 +19,7 @@ export default function PlayerPage() {
   const [editForm, setEditForm] = useState({ name: '', number: '', positions: [] });
   const [saving, setSaving] = useState(false);
   const [teamRole, setTeamRole] = useState(null);
+  const [team, setTeam] = useState(null);
   const isAdmin = teamRole === 'admin';
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function PlayerPage() {
       api.get(`/teams/${teamId}`),
     ]).then(([players, s, t]) => {
       setTeamRole(t.my_role);
+      setTeam(t);
       const p = players.find(p => String(p.id) === String(playerId));
       setPlayer(p);
       if (p) setEditForm({ name: p.name, number: p.number || '', positions: p.positions || [] });
@@ -113,7 +115,7 @@ export default function PlayerPage() {
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Positions</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {POSITIONS.map(pos => (
+                    {getPositionsForTeamType(team?.team_type).map(pos => (
                       <button
                         key={pos}
                         type="button"

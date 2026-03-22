@@ -11,6 +11,7 @@ import { useWhistleSocket } from '../hooks/useWhistleSocket';
 import WhistleStrip from '../components/shared/WhistleStrip';
 import BottomNav from '../components/shared/BottomNav';
 import jsQR from 'jsqr';
+import { STAT_CATEGORIES, COUNTING_STATS, getStatInfo, ALL_STATS, getStatsForTeamType, getPositionsForTeamType } from '../utils/stats';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -61,6 +62,10 @@ export default function GamePage() {
   const [sfReturnPlayer, setSfReturnPlayer] = useState(null);
   const [sfNotes, setSfNotes] = useState('');
   const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
+
+  const [teamType, setTeamType] = useState(null);
+  const [showMoreStats, setShowMoreStats] = useState(false);
+
 
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
@@ -249,7 +254,7 @@ export default function GamePage() {
       api.get(`/plays?team_id=${teamId}`),
       api.get(`/opponent-stats?game_id=${gameId}`),
       api.get(`/score-adjustments?game_id=${gameId}`),
-    ]).then(([g, p, s, t, pl, os, sa]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
+    ]).then(([g, p, s, t, pl, os, sa]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setTeamType(t.team_type || null); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -685,11 +690,18 @@ export default function GamePage() {
         <Modal title={`Log Stat — #${selectedPlayer.number} ${selectedPlayer.name}`} onClose={() => setStatModal(false)} wide>
           <form onSubmit={logStat}>
             <div className={styles.statCategories}>
-              {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => (
+              {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
+                const filteredStats = cat.stats.filter(s => {
+                  const allowed = getStatsForTeamType(teamType, showMoreStats);
+                  return allowed.find(a => a.key === s.key);
+                });
+                if (!filteredStats.length) return null;
+                return (
                 <div key={catKey}>
                   <div className={styles.catLabel} style={{ color: cat.color }}>{cat.label}</div>
                   <div className={styles.statGrid}>
-                    {cat.stats.map(s => (
+                    {filteredStats.map(s => (
+
                       <button
                         key={s.key}
                         type="button"
@@ -703,8 +715,15 @@ export default function GamePage() {
                     ))}
                   </div>
                 </div>
-              ))}
+                );
+              })}
+              {teamType === 'flag' && (
+                <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)', fontSize: '0.8rem' }} onClick={() => setShowMoreStats(p => !p)}>
+                  {showMoreStats ? 'Show fewer stats' : 'Show more stats'}
+                </button>
+              )}
             </div>
+
 
             {selectedStat && getStatInfo(selectedStat).unit && (
               <div className="form-group" style={{ marginTop: 16 }}>
@@ -747,7 +766,8 @@ export default function GamePage() {
               <div style={{ marginBottom: 12, color: 'var(--gray-300)', fontSize: '0.9rem' }}>Choose a stat type:</div>
               <div className={styles.statCategories}>
                 {Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
-                  const countingInCat = cat.stats.filter(s => s.unit === null && !s.excludeFromStatFirst);
+                  const allowed = getStatsForTeamType(teamType, showMoreStats);
+                  const countingInCat = cat.stats.filter(s => s.unit === null && !s.excludeFromStatFirst && allowed.find(a => a.key === s.key));
                   if (!countingInCat.length) return null;
                   return (
                     <div key={catKey}>
@@ -771,6 +791,11 @@ export default function GamePage() {
                 })}
               </div>
               <div className="modal-footer">
+                {teamType === 'flag' && (
+                  <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)', fontSize: '0.8rem', marginRight: 'auto' }} onClick={() => setShowMoreStats(p => !p)}>
+                    {showMoreStats ? 'Show fewer stats' : 'Show more stats'}
+                  </button>
+                )}
                 <button type="button" className="btn btn-secondary" onClick={() => setStatFirstModal(false)}>Cancel</button>
               </div>
             </div>

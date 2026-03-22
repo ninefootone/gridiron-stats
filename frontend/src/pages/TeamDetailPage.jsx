@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
-import { POSITIONS } from '../utils/stats';
+import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType } from '../utils/stats';
 import { format } from 'date-fns';
 import styles from './TeamDetailPage.module.css';
 import lbStyles from './LeaderboardPage.module.css';
 import { getStatInfo, STAT_CATEGORIES } from '../utils/stats';
 import BottomNav from '../components/shared/BottomNav';
+import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType } from '../utils/stats';
 
 function LeaderboardTab({ teamId, onPlayerClick }) {
   const api = useApi();
@@ -776,8 +777,8 @@ async function loadMembers() {
             </div>
             <div className="form-group" style={{ marginBottom: 14 }}>
               <label>Positions</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {POSITIONS.map(pos => (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {getPositionsForTeamType(team?.team_type).map(pos => (
                     <button
                       key={pos}
                       type="button"
