@@ -64,7 +64,6 @@ export default function GamePage() {
 
   const [teamType, setTeamType] = useState(null);
   const [showMoreStats, setShowMoreStats] = useState(false);
-  console.log('showMoreStats:', showMoreStats);
   
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
@@ -691,6 +690,7 @@ export default function GamePage() {
             <div className={styles.statCategories}>
               {(() => {
                 const allowed = getStatsForTeamType(teamType, showMoreStats);
+                console.log('allowed count:', allowed.length, 'showMore:', showMoreStats, 'teamType:', teamType);
                 return Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
                   const filteredStats = cat.stats.filter(s => allowed.find(a => a.key === s.key));
                 if (!filteredStats.length) return null;
