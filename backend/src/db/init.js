@@ -137,6 +137,28 @@ async function initDB() {
 
     await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS game_status VARCHAR(20) DEFAULT 'scheduled'`);
     await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS whistle_game_id VARCHAR(20) DEFAULT NULL`);
+
+    // Team type (flag/contact)
+    await pool.query(`ALTER TABLE teams ADD COLUMN IF NOT EXISTS team_type VARCHAR(10) DEFAULT NULL`);
+
+    // Club players table — identity anchor for cross-team player tracking
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS club_players (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    // Link players to a club identity (nullable — existing players unaffected)
+    await pool.query(`ALTER TABLE players ADD COLUMN IF NOT EXISTS club_player_id INTEGER REFERENCES club_players(id) ON DELETE SET NULL`);
+
+    // Player retirement
+    await pool.query(`ALTER TABLE players ADD COLUMN IF NOT EXISTS retired_at TIMESTAMPTZ DEFAULT NULL`);
+
+    // New stat types — add to existing player_stats table via application logic only, no schema change needed
+
+    // New positions — handled in frontend stats.js, no schema change needed
+
     console.log('✅ Database schema ready');
   } finally {
     client.release();
