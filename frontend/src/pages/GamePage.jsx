@@ -620,7 +620,6 @@ export default function GamePage() {
                     adjustment: Number(adjustForm.adjustment),
                     reason: adjustForm.reason,
                   });
-                  setScoreAdjustments(prev => [...prev, adjustment]);
                   if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
                   if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
                   setAdjustModal(false);
