@@ -11,6 +11,7 @@ import WhistleStrip from '../components/shared/WhistleStrip';
 import BottomNav from '../components/shared/BottomNav';
 import jsQR from 'jsqr';
 import { STAT_CATEGORIES, getStatInfo, ALL_STATS, getStatsForTeamType } from '../utils/stats';
+import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -42,6 +43,8 @@ export default function GamePage() {
   const canvasRef = useRef(null);
   const scanIntervalRef = useRef(null);
   const [qrSuccess, setQrSuccess] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [alertModal, setAlertModal] = useState(null);
 
   // Stat logging
   const [statModal, setStatModal] = useState(false);
