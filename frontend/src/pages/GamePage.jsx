@@ -100,7 +100,7 @@ export default function GamePage() {
       const lastWithScore = results.slice().reverse().find(r => r.our_score !== null && r.our_score !== undefined);
       if (lastWithScore) setGame(prev => ({ ...prev, our_score: lastWithScore.our_score }));
       setStatFirstModal(false);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setAlertModal(err.message); }
     finally { setSaving(false); }
   }
 
@@ -201,7 +201,7 @@ export default function GamePage() {
       })
       .catch(() => {
         setQrScanning(false);
-        alert('Camera access denied or not available.');
+        setAlertModal('Camera access denied or not available.');
       });
   }
 
@@ -227,15 +227,19 @@ export default function GamePage() {
     try {
       const { opponent_score } = await api.post('/opponent-stats', { game_id: Number(gameId), stat_type });
       setGame(prev => ({ ...prev, opponent_score }));
-    } catch (err) { alert(err.message); }
+    } catch (err) { setAlertModal(err.message); }
     finally { setOpponentSaving(false); setOpponentModal(false); }
   }
 
-  async function deleteOpponentStat(id) {
-    if (!confirm('Remove this opponent score?')) return;
-    const { opponent_score } = await api.del(`/opponent-stats/${id}`);
-    setOpponentStats(prev => prev.filter(s => s.id !== id));
-    setGame(prev => ({ ...prev, opponent_score }));
+  function deleteOpponentStat(id) {
+    setConfirmModal({
+      message: 'Remove this opponent score?',
+      onConfirm: async () => {
+        const { opponent_score } = await api.del(`/opponent-stats/${id}`);
+        setOpponentStats(prev => prev.filter(s => s.id !== id));
+        setGame(prev => ({ ...prev, opponent_score }));
+      }
+    });
   }
 
   // Score edit
@@ -288,17 +292,21 @@ export default function GamePage() {
         setGame(prev => ({ ...prev, our_score: s.our_score }));
       }
       setStatModal(false);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setAlertModal(err.message); }
     finally { setSaving(false); }
   }
 
-  async function deleteStat(id) {
-    if (!confirm('Remove this stat?')) return;
-    const { our_score } = await api.del(`/stats/${id}`);
-    setStats(prev => prev.filter(s => s.id !== id));
-    if (our_score !== null && our_score !== undefined) {
-      setGame(prev => ({ ...prev, our_score }));
-    }
+  function deleteStat(id) {
+    setConfirmModal({
+      message: 'Remove this stat?',
+      onConfirm: async () => {
+        const { our_score } = await api.del(`/stats/${id}`);
+        setStats(prev => prev.filter(s => s.id !== id));
+        if (our_score !== null && our_score !== undefined) {
+          setGame(prev => ({ ...prev, our_score }));
+        }
+      }
+    });
   }
 
   async function updateScore(e) {
@@ -358,7 +366,7 @@ export default function GamePage() {
         {isAdmin && (
           <button className="btn btn-ghost btn-sm" onClick={() => {
             navigator.clipboard.writeText(`https://app.gridiron-stats.co/live/${gameId}`);
-            alert('Live view link copied!');
+            setAlertModal('Live view link copied!');
           }}>Live View</button>
         )}
       </div>
@@ -498,11 +506,15 @@ export default function GamePage() {
                     <div className={styles.statNotes}>{sa.reason}</div>
                   </div>
                   {isAdmin && <button className={styles.statDel} onClick={async () => {
-                    if (!confirm('Remove this adjustment?')) return;
-                    const { our_score, opponent_score } = await api.del(`/score-adjustments/${sa.id}`);
-                    setScoreAdjustments(prev => prev.filter(a => a.id !== sa.id));
-                    if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
-                    if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
+                    setConfirmModal({
+                      message: 'Remove this adjustment?',
+                      onConfirm: async () => {
+                        const { our_score, opponent_score } = await api.del(`/score-adjustments/${sa.id}`);
+                        setScoreAdjustments(prev => prev.filter(a => a.id !== sa.id));
+                        if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
+                        if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
+                      }
+                    });
                   }}>✕</button>}
                 </div>
               ))}
@@ -609,7 +621,7 @@ export default function GamePage() {
                   if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
                   if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
                   setAdjustModal(false);
-                } catch (err) { alert(err.message); }
+                } catch (err) { setAlertModal(err.message); }
                 finally { setAdjustSaving(false); }
               }}
             >
@@ -672,11 +684,11 @@ export default function GamePage() {
                 setWhistleSaving(true);
                 try {
                   const parsed = parseWhistleId(whistleInput);
-                  if (!parsed) { alert('Could not parse a game ID from that input'); return; }
+                  if (!parsed) { setAlertModal('Could not parse a game ID from that input'); return; }
                   await api.put(`/games/${gameId}`, { whistle_game_id: parsed });
                   setWhistleGameId(parsed);
                   setWhistleModal(false);
-                } catch (err) { alert(err.message); }
+                } catch (err) { setAlertModal(err.message); }
                 finally { setWhistleSaving(false); }
               }}
             >
@@ -1106,14 +1118,36 @@ export default function GamePage() {
             ⬇ Export PDF
           </button>
           <button className="btn btn-sm btn-danger" onClick={async () => {
-            if (!confirm('Delete this game and all its stats? This cannot be undone.')) return;
-            await api.del(`/games/${gameId}`);
-            navigate(`/teams/${teamId}`);
+            setConfirmModal({
+              message: 'Delete this game and all its stats? This cannot be undone.',
+              confirmLabel: 'Delete Game',
+              onConfirm: async () => {
+                await api.del(`/games/${gameId}`);
+                navigate(`/teams/${teamId}`);
+              }
+            });
           }}>Delete Game</button>
         </div>
       )}
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title || 'Are you sure?'}
+          message={confirmModal.message}
+          confirmLabel={confirmModal.confirmLabel || 'Confirm'}
+          confirmClass={confirmModal.confirmClass || 'btn-danger'}
+          onConfirm={confirmModal.onConfirm}
+          onClose={() => setConfirmModal(null)}
+        />
+      )}
+      {alertModal && (
+        <AlertModal
+          message={alertModal}
+          onClose={() => setAlertModal(null)}
+        />
+      )}
     <BottomNav
       activeKey="games"
+
       items={[
         { key: 'games', label: 'Games', onClick: () => navigate(`/teams/${teamId}?tab=games`), icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
         ...(!isViewer ? [{ key: 'log', label: 'Log Stat', onClick: openStatFirst, icon: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></> }] : []),
