@@ -102,6 +102,7 @@ export default function TeamDetailPage() {
   const [playerModal, setPlayerModal] = useState(false);
   const [gameModal, setGameModal] = useState(false);
   const [playerForm, setPlayerForm] = useState({ name: '', number: '', positions: [] });
+  const [showAllPositions, setShowAllPositions] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
   const [saving, setSaving] = useState(false);
@@ -248,8 +249,8 @@ async function loadMembers() {
       const vals = line.split(',').map(v => v.trim().replace(/['"]/g, ''));
       const obj = {};
       headers.forEach((h, i) => obj[h] = vals[i] || '');
-      const positions = obj.positions ? obj.positions.split('|').map(p => p.trim()).filter(Boolean).filter(p => POSITIONS.includes(p))
-        : obj.position ? [obj.position].filter(p => POSITIONS.includes(p)) : [];
+      const positions = obj.positions ? obj.positions.split('|').map(p => p.trim()).filter(Boolean)
+        : obj.position ? [obj.position] : [];
       return { name: obj.name || '', number: obj.number || '', positions };
     }).filter(p => p.name);
   }
@@ -774,9 +775,16 @@ async function loadMembers() {
               <input className="form-control" type="number" min="0" max="99" value={playerForm.number} onChange={e => setPlayerForm(p => ({ ...p, number: e.target.value }))} placeholder="e.g. 12" />
             </div>
             <div className="form-group" style={{ marginBottom: 14 }}>
-              <label>Positions</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label style={{ margin: 0 }}>Positions</label>
+                {team?.team_type === 'flag' && (
+                  <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }} onClick={() => setShowAllPositions(p => !p)}>
+                    {showAllPositions ? 'Show fewer' : 'Show all positions'}
+                  </button>
+                )}
+              </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {getPositionsForTeamType(team?.team_type).map(pos => (
+                  {getPositionsForTeamType(team?.team_type, showAllPositions).map(pos => (
                     <button
                       key={pos}
                       type="button"
