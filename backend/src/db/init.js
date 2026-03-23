@@ -115,6 +115,20 @@ async function initDB() {
       )
     `);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_opponent_stats_game_id ON opponent_stats(game_id)`);
+    
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS plays (
+        id SERIAL PRIMARY KEY,
+        team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
+        name VARCHAR(255) NOT NULL,
+        type VARCHAR(20) DEFAULT 'offense',
+        season VARCHAR(50),
+        notes TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_plays_team_id ON plays(team_id)`);
+    
     await pool.query(`ALTER TABLE player_stats ADD COLUMN IF NOT EXISTS play_id INTEGER REFERENCES plays(id) ON DELETE SET NULL`);
 
 // score_locked on games
