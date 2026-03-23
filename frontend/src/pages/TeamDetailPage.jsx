@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
-import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType } from '../utils/stats';
 import { format } from 'date-fns';
 import styles from './TeamDetailPage.module.css';
 import lbStyles from './LeaderboardPage.module.css';
