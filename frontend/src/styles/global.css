@@ -124,6 +124,12 @@ input, select, textarea {
 .btn-ghost:hover { background: rgba(255,255,255,0.14); }
 .btn-full { width: 100%; }
 
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
 /* ============================================
    TYPOGRAPHY
    ============================================ */

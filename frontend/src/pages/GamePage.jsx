@@ -168,11 +168,14 @@ export default function GamePage() {
   function parseWhistleId(input) {
     try {
       const url = new URL(input);
-      return url.pathname.split('/game/')[1]?.split('?')[0] || null;
+      const id = url.pathname.split('/game/')[1]?.split('?')[0];
+      return id && id.length >= 4 ? id : null;
     } catch {
-      return input.trim() || null;
+      const trimmed = input.trim();
+      return trimmed.length >= 4 && trimmed.length <= 10 && /^[a-z0-9]+$/.test(trimmed) ? trimmed : null;
     }
   }
+
 
   function startQrScan() {
     setQrScanning(true);
@@ -595,7 +598,7 @@ export default function GamePage() {
             />
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label>Reason *</label>
+            <label>Reason * <span style={{ color: 'var(--gray-500)', fontSize: '0.8rem', fontWeight: 400 }}>required</span></label>
             <input
               className="form-control"
               value={adjustForm.reason}
@@ -1147,7 +1150,6 @@ export default function GamePage() {
       )}
     <BottomNav
       activeKey="games"
-
       items={[
         { key: 'games', label: 'Games', onClick: () => navigate(`/teams/${teamId}?tab=games`), icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
         ...(!isViewer ? [{ key: 'log', label: 'Log Stat', onClick: openStatFirst, icon: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></> }] : []),
