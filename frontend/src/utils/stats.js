@@ -190,3 +190,36 @@ export function getStatNarrative(stat, allStats) {
       return `📊 ${name} — ${getStatInfo(stat.stat_type).label}`;
   }
 }
+
+export const POSITION_ALIASES = {
+  'G': 'OG',
+  'T': 'OT',
+  'OT': 'OT',
+  'OG': 'OG',
+  'GUARD': 'OG',
+  'TACKLE': 'OT',
+  'CORNER': 'CB',
+  'CORNERBACK': 'CB',
+  'SAFETY': 'S',
+  'LINEBACKER': 'LB',
+  'RUNNING BACK': 'RB',
+  'FULLBACK': 'FB',
+  'WIDE RECEIVER': 'WR',
+  'TIGHT END': 'TE',
+  'QUARTERBACK': 'QB',
+  'CENTER': 'C',
+  'DEFENSIVE END': 'DE',
+  'DEFENSIVE TACKLE': 'DT',
+  'FREE SAFETY': 'FS',
+  'STRONG SAFETY': 'SS',
+  'MIDDLE LINEBACKER': 'MLB',
+  'OUTSIDE LINEBACKER': 'OLB',
+  'KICKER': 'K',
+  'PUNTER': 'P',
+  'LONG SNAPPER': 'LS',
+};
+
+export function normalisePosition(pos) {
+  const upper = pos.trim().toUpperCase();
+  return POSITION_ALIASES[upper] || pos.trim();
+}

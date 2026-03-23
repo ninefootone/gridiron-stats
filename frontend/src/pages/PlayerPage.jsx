@@ -123,7 +123,10 @@ export default function PlayerPage() {
                   )}
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {getPositionsForTeamType(team?.team_type, showAllPositions).map(pos => (
+                    {[
+                      ...getPositionsForTeamType(team?.team_type, showAllPositions),
+                      ...((editForm.positions || []).filter(p => !getPositionsForTeamType(team?.team_type, true).includes(p)))
+                    ].map(pos => (
                       <button
                         key={pos}
                         type="button"

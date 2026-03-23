@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import styles from './TeamDetailPage.module.css';
 import lbStyles from './LeaderboardPage.module.css';
 import BottomNav from '../components/shared/BottomNav';
+import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType, normalisePosition } from '../utils/stats';
 
 function LeaderboardTab({ teamId, onPlayerClick }) {
   const api = useApi();
@@ -249,8 +250,8 @@ async function loadMembers() {
       const vals = line.split(',').map(v => v.trim().replace(/['"]/g, ''));
       const obj = {};
       headers.forEach((h, i) => obj[h] = vals[i] || '');
-      const positions = obj.positions ? obj.positions.split('|').map(p => p.trim()).filter(Boolean)
-        : obj.position ? [obj.position] : [];
+      const positions = obj.positions ? obj.positions.split('|').map(p => normalisePosition(p.trim())).filter(Boolean)
+        : obj.position ? [normalisePosition(obj.position)] : [];
       return { name: obj.name || '', number: obj.number || '', positions };
     }).filter(p => p.name);
   }
