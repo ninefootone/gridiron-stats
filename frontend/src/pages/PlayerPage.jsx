@@ -113,9 +113,16 @@ export default function PlayerPage() {
                 <input className="form-control" type="number" min="0" max="99" value={editForm.number} onChange={e => setEditForm(p => ({ ...p, number: e.target.value }))} />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Positions</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <label style={{ margin: 0 }}>Positions</label>
+                  {team?.team_type === 'flag' && (
+                    <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }} onClick={() => setShowAllPositions(p => !p)}>
+                      {showAllPositions ? 'Show fewer' : 'Show all positions'}
+                    </button>
+                  )}
+                </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {getPositionsForTeamType(team?.team_type).map(pos => (
+                    {getPositionsForTeamType(team?.team_type, showAllPositions).map(pos => (
                       <button
                         key={pos}
                         type="button"
