@@ -622,6 +622,8 @@ export default function GamePage() {
                   });
                   if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
                   if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
+                  if (our_score !== null && our_score !== undefined) setGame(prev => ({ ...prev, our_score }));
+                  if (opponent_score !== null && opponent_score !== undefined) setGame(prev => ({ ...prev, opponent_score }));
                   setAdjustModal(false);
                 } catch (err) { setAlertModal(err.message); }
                 finally { setAdjustSaving(false); }
