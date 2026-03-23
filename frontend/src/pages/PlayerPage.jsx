@@ -20,6 +20,7 @@ export default function PlayerPage() {
   const [saving, setSaving] = useState(false);
   const [teamRole, setTeamRole] = useState(null);
   const [team, setTeam] = useState(null);
+  const [showAllPositions, setShowAllPositions] = useState(false);
   const isAdmin = teamRole === 'admin';
 
   useEffect(() => {
