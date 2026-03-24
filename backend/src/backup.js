@@ -1,7 +1,5 @@
-const { exec } = require('child_process');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { promisify } = require('util');
-const execAsync = promisify(exec);
+const { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { Pool } = require('pg');
 
 const s3 = new S3Client({
   region: 'auto',
@@ -12,37 +10,43 @@ const s3 = new S3Client({
   },
 });
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
 async function runBackup() {
-  const date = new Date().toISOString().split('T')[0];
-  const filename = `backup-${date}.sql`;
-  const tmpPath = `/tmp/${filename}`;
+  const date = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `backup-${date}.json`;
 
   console.log(`Starting backup: ${filename}`);
 
   try {
-    // Run pg_dump
-    await execAsync(`pg_dump "${process.env.DATABASE_URL}" -f ${tmpPath} --no-password`);
-    console.log('pg_dump complete');
+    const tables = [
+      'users', 'teams', 'team_members', 'players', 'games',
+      'player_stats', 'plays', 'opponent_stats', 'score_adjustments',
+      'club_players'
+    ];
 
-    // Read the dump file
-    const fs = require('fs');
-    const fileContent = fs.readFileSync(tmpPath);
+    const backup = {};
+    for (const table of tables) {
+      const { rows } = await pool.query(`SELECT * FROM ${table}`);
+      backup[table] = rows;
+      console.log(`  ${table}: ${rows.length} rows`);
+    }
 
-    // Upload to R2
+    const content = JSON.stringify(backup, null, 2);
+
     await s3.send(new PutObjectCommand({
       Bucket: process.env.R2_BUCKET,
       Key: `backups/${filename}`,
-      Body: fileContent,
-      ContentType: 'application/sql',
+      Body: content,
+      ContentType: 'application/json',
     }));
 
     console.log(`✅ Backup uploaded: backups/${filename}`);
 
-    // Clean up temp file
-    fs.unlinkSync(tmpPath);
-
     // Delete backups older than 30 days
-    const { ListObjectsV2Command, DeleteObjectCommand } = require('@aws-sdk/client-s3');
     const list = await s3.send(new ListObjectsV2Command({
       Bucket: process.env.R2_BUCKET,
       Prefix: 'backups/',
@@ -61,8 +65,13 @@ async function runBackup() {
       }
     }
 
+    await pool.end();
+    console.log('Backup complete');
+    process.exit(0);
+
   } catch (err) {
     console.error('Backup failed:', err);
+    await pool.end();
     process.exit(1);
   }
 }
