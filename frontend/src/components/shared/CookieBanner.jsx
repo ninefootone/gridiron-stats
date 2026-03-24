@@ -48,7 +48,7 @@ export default function CookieBanner() {
   return (
     <div style={{
       position: 'fixed',
-      bottom: 80,
+      bottom: 16,
       left: 0,
       right: 0,
       zIndex: 9999,
