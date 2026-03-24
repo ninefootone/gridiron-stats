@@ -391,7 +391,8 @@ input[type="time"].form-control {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
   background: var(--turf);
   border-top: 1px solid rgba(255,255,255,0.1);
   display: flex;
@@ -424,7 +425,7 @@ input[type="time"].form-control {
   width: 22px;
   height: 22px;
 }
-.bottom-nav-padding { height: 80px; }
+.bottom-nav-padding { height: calc(80px + env(safe-area-inset-bottom)); }
 
 @media (min-width: 769px) {
   .bottom-nav { display: none; }
