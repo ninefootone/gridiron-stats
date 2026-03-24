@@ -5,9 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "backup": "node src/backup.js",
     "dev": "nodemon src/index.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1015.0",
     "@clerk/express": "^0.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
