@@ -9,6 +9,7 @@ import GamePage from './pages/GamePage';
 import PlayerPage from './pages/PlayerPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import LivePage from './pages/LivePage';
+import CookieBanner from './components/shared/CookieBanner';
 
 function PrivateRoute({ children }) {
   const { isLoaded, isSignedIn } = useAuth();
@@ -22,18 +23,21 @@ export default function App() {
   if (!isLoaded) return <div className="spinner" style={{ marginTop: '120px' }} />;
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-        <Route index element={<Navigate to="/teams" replace />} />
-        <Route path="teams" element={<TeamsPage />} />
-        <Route path="teams/:teamId" element={<TeamDetailPage />} />
-        <Route path="teams/:teamId/games/:gameId" element={<GamePage />} />
-        <Route path="teams/:teamId/players/:playerId" element={<PlayerPage />} />
-        <Route path="teams/:teamId/leaderboard" element={<LeaderboardPage />} />
-	<Route path="admin" element={<AdminPage />} />
-      </Route>
-      <Route path="/live/:gameId" element={<LivePage />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+          <Route index element={<Navigate to="/teams" replace />} />
+          <Route path="teams" element={<TeamsPage />} />
+          <Route path="teams/:teamId" element={<TeamDetailPage />} />
+          <Route path="teams/:teamId/games/:gameId" element={<GamePage />} />
+          <Route path="teams/:teamId/players/:playerId" element={<PlayerPage />} />
+          <Route path="teams/:teamId/leaderboard" element={<LeaderboardPage />} />
+          <Route path="admin" element={<AdminPage />} />
+        </Route>
+        <Route path="/live/:gameId" element={<LivePage />} />
+      </Routes>
+      <CookieBanner />
+    </>
   );
 }
