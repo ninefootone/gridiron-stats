@@ -245,17 +245,6 @@ async function loadMembers() {
     });
   }
 
-  function deletePlayer(id, e) {
-    e.stopPropagation();
-    setConfirmModal({
-      message: 'Remove this player?',
-      onConfirm: async () => {
-        await api.del(`/players/${id}`);
-        setPlayers(prev => prev.filter(p => p.id !== id));
-      },
-    });
-  }
-
   function toggleActive(player, e) {
     e.stopPropagation();
     if (player.active) {

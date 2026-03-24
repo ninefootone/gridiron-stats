@@ -52,16 +52,21 @@ export default function PlayerPage() {
     finally { setSaving(false); }
   }
 
-  function deletePlayer() {
+  async function deletePlayer() {
+    const playerStats = await api.get(`/stats?player_id=${playerId}`);
+    const hasStats = playerStats.length > 0;
     setConfirmModal({
-      message: `Delete ${player.name}? This cannot be undone.`,
-      confirmLabel: 'Delete',
+      message: hasStats
+        ? `${player.name} has ${playerStats.length} stat${playerStats.length === 1 ? '' : 's'} recorded. Deleting them will permanently remove all their stats. Consider marking them as inactive instead.`
+        : `Delete ${player.name}? This cannot be undone.`,
+      confirmLabel: hasStats ? 'Delete anyway' : 'Delete',
       onConfirm: async () => {
         await api.del(`/players/${playerId}`);
         navigate(`/teams/${teamId}`);
       },
     });
   }
+
 
   if (loading) return <div className="spinner" />;
   if (!player) return <div>Player not found</div>;
