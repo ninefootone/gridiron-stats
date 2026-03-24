@@ -70,7 +70,7 @@ export default function CookieBanner() {
       }}>
         <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--gray-100, #f8f9fa)', lineHeight: 1.5 }}>
           We use cookies to understand how the app is used and improve it over time. See our{' '}
-          <a href="/privacy" style={{ color: 'var(--gold, #f5a623)' }}>privacy policy</a>.
+          <a href="https://gridiron-stats.co/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold, #f5a623)' }}>privacy policy</a>.
         </p>
         <div style={{ display: 'flex', gap: 10 }}>
           <button className="btn btn-primary btn-sm" onClick={accept}>Accept</button>
