@@ -425,7 +425,7 @@ input[type="time"].form-control {
   width: 22px;
   height: 22px;
 }
-.bottom-nav-padding { height: calc(64px + env(safe-area-inset-bottom)); }
+.bottom-nav-padding { height: calc(40px + env(safe-area-inset-bottom)); }
 
 @media (min-width: 769px) {
   .bottom-nav { display: none; }
