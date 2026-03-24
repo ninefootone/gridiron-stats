@@ -102,6 +102,7 @@ export default function TeamDetailPage() {
   // Modals
   const [playerModal, setPlayerModal] = useState(false);
   const [gameModal, setGameModal] = useState(false);
+  const [editingGame, setEditingGame] = useState(null);
   const [playerForm, setPlayerForm] = useState({ name: '', number: '', positions: [] });
   const [showAllPositions, setShowAllPositions] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
@@ -155,9 +156,15 @@ export default function TeamDetailPage() {
     e.preventDefault();
     setSaving(true); setError('');
     try {
-      const g = await api.post('/games', { team_id: Number(teamId), ...gameForm });
-      setGames(prev => [g, ...prev]);
+      if (editingGame) {
+        const g = await api.put(`/games/${editingGame.id}`, gameForm);
+        setGames(prev => prev.map(x => x.id === g.id ? g : x));
+      } else {
+        const g = await api.post('/games', { team_id: Number(teamId), ...gameForm });
+        setGames(prev => [g, ...prev]);
+      }
       setGameModal(false);
+      setEditingGame(null);
       setGameForm({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
@@ -459,9 +466,31 @@ async function loadMembers() {
                             ? <span className="tag tag-gray">Completed</span>
                             : <span className="tag tag-gray">Scheduled</span>
                       }
-                      <div className={styles.statCount}>{g.stat_count} stats</div>
+                    <div className={styles.statCount}>{g.stat_count} stats</div>
+                    {!isViewer && (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginTop: 4 }}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setEditingGame(g);
+                          setGameForm({
+                            opponent_name: g.opponent_name,
+                            location: g.location || '',
+                            game_date: g.game_date,
+                            game_time: g.game_time || '',
+                            home_away: g.home_away || 'home',
+                            notes: g.notes || '',
+                            game_type: g.game_type || 'regular',
+                          });
+                          setGameModal(true);
+                        }}
+                      >
+                        Edit
+                      </button>
+                    )}
                     </div>
-                  </div>
+                </div>
                 );
               })}
             </div>
@@ -840,7 +869,7 @@ async function loadMembers() {
 
       {/* Add Game Modal */}
       {gameModal && (
-        <Modal title="Add Game" onClose={() => setGameModal(false)}>
+        <Modal title={editingGame ? 'Edit Game' : 'Add Game'} onClose={() => { setGameModal(false); setEditingGame(null); }}>
           <form onSubmit={addGame}>
             {error && <div className="alert alert-error">{error}</div>}
             <div className="form-group" style={{ marginBottom: 14 }}>
@@ -884,7 +913,7 @@ async function loadMembers() {
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setGameModal(false)}>Cancel</button>
-              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Adding...' : 'Add Game'}</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : editingGame ? 'Save Changes' : 'Add Game'}</button>
             </div>
           </form>
         </Modal>

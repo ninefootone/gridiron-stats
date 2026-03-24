@@ -60,14 +60,14 @@ router.put('/:id', requireAuth, async (req, res, next) => {
     const { rows } = await pool.query(
       `UPDATE games SET
          opponent_name = COALESCE($1, opponent_name),
-         location = COALESCE($2, location),
+         location = $2,
          game_date = COALESCE($3, game_date),
-         game_time = COALESCE($4, game_time),
+         game_time = $4,
          home_away = COALESCE($5, home_away),
          our_score = COALESCE($6, our_score),
          opponent_score = COALESCE($7, opponent_score),
          status = COALESCE($8, status),
-         notes = COALESCE($9, notes),
+         notes = $9,
          game_type = COALESCE($10, game_type),
          whistle_game_id = COALESCE($11, whistle_game_id)
        WHERE id = $12 RETURNING *`,
