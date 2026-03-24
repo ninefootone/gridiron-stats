@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
+import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
 import { format } from 'date-fns';
 import styles from './TeamDetailPage.module.css';
 import lbStyles from './LeaderboardPage.module.css';
@@ -107,6 +108,8 @@ export default function TeamDetailPage() {
   const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [alertModal, setAlertModal] = useState(null);
   const [members, setMembers] = useState([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [plays, setPlays] = useState([]);
@@ -183,14 +186,18 @@ async function loadPlays() {
       setPlayModal(false);
       setEditingPlay(null);
       setPlayForm({ name: '', type: 'offense', season: team?.season || '', notes: '' });
-    } catch (err) { alert(err.message); }
+    } catch (err) { setAlertModal(err.message); }
     finally { setSaving(false); }
   }
 
-  async function deletePlay(id) {
-    if (!confirm('Delete this play?')) return;
-    await api.del(`/plays/${id}`);
-    setPlays(prev => prev.filter(p => p.id !== id));
+  function deletePlay(id) {
+    setConfirmModal({
+      message: 'Delete this play?',
+      onConfirm: async () => {
+        await api.del(`/plays/${id}`);
+        setPlays(prev => prev.filter(p => p.id !== id));
+      },
+    });
   }
 
   async function copyPlays(e) {
@@ -202,7 +209,7 @@ async function loadPlays() {
       setCopyPlaysModal(false);
       setCopyFromSeason('');
       setCopyToSeason('');
-    } catch (err) { alert(err.message); }
+    } catch (err) { setAlertModal(err.message); }
     finally { setSaving(false); }
   }
 
@@ -221,24 +228,41 @@ async function loadMembers() {
     setMembers(prev => prev.map(m => m.id === userId ? { ...m, role } : m));
   }
 
-  async function removeMember(userId, name) {
-    if (!confirm(`Remove ${name} from this team?`)) return;
-    await api.del(`/teams/${teamId}/members/${userId}`);
-    setMembers(prev => prev.filter(m => m.id !== userId));
+  function removeMember(userId, name) {
+    setConfirmModal({
+      message: `Remove ${name} from this team?`,
+      onConfirm: async () => {
+        await api.del(`/teams/${teamId}/members/${userId}`);
+        setMembers(prev => prev.filter(m => m.id !== userId));
+      },
+    });
   }
 
-  async function deletePlayer(id, e) {
+  function deletePlayer(id, e) {
     e.stopPropagation();
-    if (!confirm('Remove this player?')) return;
-    await api.del(`/players/${id}`);
-    setPlayers(prev => prev.filter(p => p.id !== id));
+    setConfirmModal({
+      message: 'Remove this player?',
+      onConfirm: async () => {
+        await api.del(`/players/${id}`);
+        setPlayers(prev => prev.filter(p => p.id !== id));
+      },
+    });
   }
 
-  async function toggleActive(player, e) {
+  function toggleActive(player, e) {
     e.stopPropagation();
-    if (player.active && !confirm(`Mark ${player.name} as inactive?`)) return;
-    const updated = await api.patch(`/players/${player.id}/active`, { active: !player.active });
-    setPlayers(prev => prev.map(p => p.id === updated.id ? updated : p));
+    if (player.active) {
+      setConfirmModal({
+        message: `Mark ${player.name} as inactive?`,
+        onConfirm: async () => {
+          const updated = await api.patch(`/players/${player.id}/active`, { active: false });
+          setPlayers(prev => prev.map(p => p.id === updated.id ? updated : p));
+        },
+      });
+    } else {
+      api.patch(`/players/${player.id}/active`, { active: true })
+        .then(updated => setPlayers(prev => prev.map(p => p.id === updated.id ? updated : p)));
+    }
   }
 
   function parseCSV(text) {
@@ -666,10 +690,15 @@ async function loadMembers() {
             </button>
             <button
               className="btn btn-danger btn-sm"
-              onClick={async () => {
-                if (!confirm(`Delete ${team.name}? This cannot be undone.`)) return;
-                await api.del(`/teams/${team.id}`);
-                navigate('/teams');
+              onClick={() => {
+                setConfirmModal({
+                  message: `Delete ${team.name}? This cannot be undone.`,
+                  confirmLabel: 'Delete',
+                  onConfirm: async () => {
+                    await api.del(`/teams/${team.id}`);
+                    navigate('/teams');
+                  },
+                });
               }}
             >
               Delete Team
@@ -914,6 +943,22 @@ async function loadMembers() {
             </button>
           </div>
         </Modal>
+      )}
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title || 'Are you sure?'}
+          message={confirmModal.message}
+          confirmLabel={confirmModal.confirmLabel || 'Confirm'}
+          confirmClass={confirmModal.confirmClass || 'btn-danger'}
+          onConfirm={confirmModal.onConfirm}
+          onClose={() => setConfirmModal(null)}
+        />
+      )}
+      {alertModal && (
+        <AlertModal
+          message={alertModal}
+          onClose={() => setAlertModal(null)}
+        />
       )}
       <BottomNav
         activeKey={tab}
