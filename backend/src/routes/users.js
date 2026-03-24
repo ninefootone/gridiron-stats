@@ -18,7 +18,7 @@ router.get('/admin/stats', requireAuth, async (req, res, next) => {
   const ADMIN_IDS = ['user_3AiQe1YxmWYTooEO5Ix0HnmJ9Tx', 'user_3AgGD3kALzcbzzPc0PHGo2lwwr8'];
   if (!ADMIN_IDS.includes(req.dbUser.auth0_id)) return res.status(403).json({ error: 'Forbidden' });
   try {
-    const [users, teamCount, teams, players, games] = await Promise.all([
+    const [users, teamCount, teams, players, games, plays] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM users'),
       pool.query('SELECT COUNT(*) FROM teams'),
       pool.query(`SELECT t.*, u.name as creator_name,
@@ -29,6 +29,7 @@ router.get('/admin/stats', requireAuth, async (req, res, next) => {
                   ORDER BY t.created_at DESC`),
       pool.query('SELECT COUNT(*) FROM players WHERE active = true'),
       pool.query('SELECT COUNT(*) FROM games'),
+      pool.query('SELECT COUNT(*) FROM plays'),
     ]);
     res.json({
       stats: {
@@ -36,9 +37,11 @@ router.get('/admin/stats', requireAuth, async (req, res, next) => {
         teams: Number(teamCount.rows[0].count),
         players: Number(players.rows[0].count),
         games: Number(games.rows[0].count),
+        plays: Number(plays.rows[0].count),
       },
       teams: teams.rows,
     });
+
   } catch (err) {
     next(err);
   }

@@ -34,6 +34,7 @@ export default function AdminPage() {
           { label: 'Teams', value: data.stats.teams },
           { label: 'Players', value: data.stats.players },
           { label: 'Games', value: data.stats.games },
+          { label: 'Plays', value: data.stats.plays },
         ].map(s => (
           <div key={s.label} style={{
             background: 'rgba(255,255,255,0.04)',

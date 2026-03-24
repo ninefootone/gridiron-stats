@@ -139,7 +139,9 @@ export default function TeamsPage() {
                 <span className="stat-badge">{team.player_count} players</span>
                 <span className="stat-badge">{team.game_count} games</span>
                 {team.my_role === 'admin' && <span className="tag tag-gold" style={{ alignSelf: 'center' }}>Admin</span>}
-		{team.my_role === 'member' && <span className="tag tag-gray" style={{ alignSelf: 'center' }}>Coach</span>}
+                {team.my_role === 'member' && <span className="tag tag-gray" style={{ alignSelf: 'center' }}>Coach</span>}
+                {team.team_type === 'flag' && <span className="tag tag-green" style={{ alignSelf: 'center' }}>🚩 Flag</span>}
+                {team.team_type === 'contact' && <span className="tag tag-green" style={{ alignSelf: 'center' }}>🏈 Contact</span>}
               </div>
               {team.my_role === 'admin' && (
                 <button
