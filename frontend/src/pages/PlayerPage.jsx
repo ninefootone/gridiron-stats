@@ -6,6 +6,7 @@ import { jsPDF } from 'jspdf';
 import { format } from 'date-fns';
 import styles from './PlayerPage.module.css';
 import BottomNav from '../components/shared/BottomNav';
+import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
 
 export default function PlayerPage() {
   const { teamId, playerId } = useParams();
@@ -18,6 +19,8 @@ export default function PlayerPage() {
   const [editModal, setEditModal] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', number: '', positions: [] });
   const [saving, setSaving] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [alertModal, setAlertModal] = useState(null);
   const [teamRole, setTeamRole] = useState(null);
   const [team, setTeam] = useState(null);
   const [showAllPositions, setShowAllPositions] = useState(false);
@@ -45,14 +48,19 @@ export default function PlayerPage() {
       const updated = await api.put(`/players/${playerId}`, { ...editForm, number: editForm.number ? Number(editForm.number) : null, positions: editForm.positions });
       setPlayer(updated);
       setEditModal(false);
-    } catch (err) { alert(err.message); }
+    } catch (err) { setAlertModal(err.message); }
     finally { setSaving(false); }
   }
 
-  async function deletePlayer() {
-    if (!confirm(`Delete ${player.name}? This cannot be undone.`)) return;
-    await api.del(`/players/${playerId}`);
-    navigate(`/teams/${teamId}`);
+  function deletePlayer() {
+    setConfirmModal({
+      message: `Delete ${player.name}? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        await api.del(`/players/${playerId}`);
+        navigate(`/teams/${teamId}`);
+      },
+    });
   }
 
   if (loading) return <div className="spinner" />;
@@ -159,10 +167,19 @@ export default function PlayerPage() {
           </div>
           <button
             className={`btn btn-sm ${player.active ? 'btn-success' : 'btn-secondary'}`}
-            onClick={async () => {
-              if (player.active && !confirm(`Mark ${player.name} as inactive?`)) return;
-              const updated = await api.patch(`/players/${playerId}/active`, { active: !player.active });
-              setPlayer(updated);
+            onClick={() => {
+              if (player.active) {
+                setConfirmModal({
+                  message: `Mark ${player.name} as inactive?`,
+                  onConfirm: async () => {
+                    const updated = await api.patch(`/players/${playerId}/active`, { active: false });
+                    setPlayer(updated);
+                  },
+                });
+              } else {
+                api.patch(`/players/${playerId}/active`, { active: true })
+                  .then(updated => setPlayer(updated));
+              }
             }}
           >
             {player.active ? 'Active' : 'Restore'}
@@ -324,6 +341,22 @@ export default function PlayerPage() {
         </div>
       )}
 
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title || 'Are you sure?'}
+          message={confirmModal.message}
+          confirmLabel={confirmModal.confirmLabel || 'Confirm'}
+          confirmClass={confirmModal.confirmClass || 'btn-danger'}
+          onConfirm={confirmModal.onConfirm}
+          onClose={() => setConfirmModal(null)}
+        />
+      )}
+      {alertModal && (
+        <AlertModal
+          message={alertModal}
+          onClose={() => setAlertModal(null)}
+        />
+      )}
       <BottomNav
         activeKey=""
         items={[

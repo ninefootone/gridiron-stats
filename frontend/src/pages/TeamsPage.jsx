@@ -6,6 +6,7 @@ import styles from './TeamsPage.module.css';
 import { useUser } from '@clerk/react';
 import { useHelp } from '../context/HelpContext';
 import InstallBanner from '../components/shared/InstallBanner';
+import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
 
 export default function TeamsPage() {
   const api = useApi();
@@ -19,6 +20,8 @@ export default function TeamsPage() {
   const [joinType, setJoinType] = useState('join');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [alertModal, setAlertModal] = useState(null);
   const [copiedCode, setCopiedCode] = useState(null);
   const [feedbackModal, setFeedbackModal] = useState(false);
   const [feedbackForm, setFeedbackForm] = useState({ name: '', email: '', message: '' });
@@ -72,11 +75,16 @@ export default function TeamsPage() {
     }
   }
 
-async function leaveTeam(e, teamId) {
+  function leaveTeam(e, teamId) {
     e.stopPropagation();
-    if (!confirm('Remove this team from your list? You can rejoin with the code later.')) return;
-    await api.del(`/teams/${teamId}/leave`);
-    setTeams(prev => prev.filter(t => t.id !== teamId));
+    setConfirmModal({
+      message: 'Remove this team from your list? You can rejoin with the code later.',
+      confirmLabel: 'Remove',
+      onConfirm: async () => {
+        await api.del(`/teams/${teamId}/leave`);
+        setTeams(prev => prev.filter(t => t.id !== teamId));
+      },
+    });
   }
 
   function copyCode(code, id) {
@@ -388,6 +396,22 @@ async function leaveTeam(e, teamId) {
             <button className="btn btn-primary" onClick={() => { setShareTeam(null); setCopiedCode(null); }}>Done</button>
           </div>
         </Modal>
+      )}
+      {confirmModal && (
+        <ConfirmModal
+          title={confirmModal.title || 'Are you sure?'}
+          message={confirmModal.message}
+          confirmLabel={confirmModal.confirmLabel || 'Confirm'}
+          confirmClass={confirmModal.confirmClass || 'btn-danger'}
+          onConfirm={confirmModal.onConfirm}
+          onClose={() => setConfirmModal(null)}
+        />
+      )}
+      {alertModal && (
+        <AlertModal
+          message={alertModal}
+          onClose={() => setAlertModal(null)}
+        />
       )}
     </div>
   );
