@@ -3,6 +3,32 @@ const { pool } = require('../db/init');
 
 const clerkAuth = clerkMiddleware();
 
+async function syncToBrevo(user) {
+  const res = await fetch('https://api.brevo.com/v3/contacts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+    },
+    body: JSON.stringify({
+      email: user.email,
+      attributes: {
+        FIRSTNAME: user.name?.split(' ')[0] || '',
+        LASTNAME: user.name?.split(' ').slice(1).join(' ') || '',
+        ROLE: 'admin',
+        PLAN: 'free',
+        APP: 'Gridiron Stats',
+      },
+      listIds: [2],
+      updateEnabled: false,
+    }),
+  });
+  if (!res.ok && res.status !== 204) {
+    const err = await res.json().catch(() => ({}));
+    console.error('Brevo sync failed:', err);
+  }
+}
+
 async function requireAuth(req, res, next) {
   try {
     const auth = getAuth(req);
@@ -27,6 +53,16 @@ async function requireAuth(req, res, next) {
     );
 
     req.dbUser = result.rows[0];
+
+    // Sync new users to Brevo
+    if (result.rows[0] && process.env.BREVO_API_KEY) {
+      const isNewUser = result.rows[0].created_at && 
+        (new Date() - new Date(result.rows[0].created_at)) < 5000;
+      if (isNewUser) {
+        syncToBrevo(result.rows[0]).catch(err => console.error('Brevo sync error:', err));
+      }
+    }
+
     next();
   } catch (err) {
     next(err);
