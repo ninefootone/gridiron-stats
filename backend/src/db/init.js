@@ -173,6 +173,24 @@ async function initDB() {
 
     // New positions — handled in frontend stats.js, no schema change needed
 
+    // Subscriptions table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS subscriptions (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        stripe_customer_id VARCHAR(255) UNIQUE,
+        stripe_subscription_id VARCHAR(255) UNIQUE,
+        plan VARCHAR(20) DEFAULT 'free' CHECK (plan IN ('free', 'individual', 'club')),
+        status VARCHAR(20) DEFAULT 'active',
+        current_period_end TIMESTAMPTZ,
+        cancel_at_period_end BOOLEAN DEFAULT false,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_customer_id ON subscriptions(stripe_customer_id)`);    
+
     console.log('✅ Database schema ready');
   } finally {
     client.release();

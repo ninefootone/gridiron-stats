@@ -18,6 +18,7 @@ const playsRouter = require('./routes/plays');
 const opponentStatsRouter = require('./routes/opponentStats');
 const scoreAdjustmentsRouter = require('./routes/scoreAdjustments');
 const publicRouter = require('./routes/public');
+const billingRouter = require('./routes/billing');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +26,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(helmet());
 app.use(morgan('combined'));
+app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 const allowedOrigins = process.env.FRONTEND_URL
@@ -46,6 +48,7 @@ app.use('/api/feedback', feedbackRouter);
 app.use('/api/plays', playsRouter);
 app.use('/api/opponent-stats', opponentStatsRouter);
 app.use('/api/score-adjustments', scoreAdjustmentsRouter);
+app.use('/api/billing', billingRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
