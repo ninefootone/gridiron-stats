@@ -133,12 +133,14 @@ export default function TeamsPage() {
             </button>
             <button className="btn btn-primary" onClick={async () => { 
               const sub = await api.get('/billing/subscription');
-              if (sub.plan === 'free') {
-                const { rows } = [teams].filter(t => t.my_role === 'admin');
-                if (teams.filter(t => t.my_role === 'admin').length >= 1) {
-                  setUpgradeModal({ limit: 'teams' });
-                  return;
-                }
+              const adminTeams = teams.filter(t => t.my_role === 'admin').length;
+              if (sub.plan === 'free' && adminTeams >= 1) {
+                setUpgradeModal({ limit: 'teams' });
+                return;
+              }
+              if (sub.plan === 'individual' && adminTeams >= 1) {
+                setUpgradeModal({ limit: 'club' });
+                return;
               }
               setShowCreateModal(true); setError(''); 
             }}>
