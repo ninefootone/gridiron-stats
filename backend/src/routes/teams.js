@@ -36,7 +36,8 @@ router.get('/', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/teams
-router.post('/', requireAuth, async (req, res, next) => {
+const { checkTeamLimit } = require('../middleware/checkPlan');
+router.post('/', requireAuth, checkTeamLimit, async (req, res, next) => {
   const { name, season, description } = req.body;
   if (!name) return res.status(400).json({ error: 'Team name required' });
   try {

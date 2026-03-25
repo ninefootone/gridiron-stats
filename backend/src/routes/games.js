@@ -25,7 +25,8 @@ router.get('/', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/games
-router.post('/', requireAuth, async (req, res, next) => {
+const { checkGameLimit } = require('../middleware/checkPlan');
+router.post('/', requireAuth, checkGameLimit, async (req, res, next) => {
   const { team_id, opponent_name, location, game_date, game_time, home_away, notes, game_type } = req.body;
   if (!team_id || !opponent_name || !game_date) {
     return res.status(400).json({ error: 'team_id, opponent_name and game_date required' });
