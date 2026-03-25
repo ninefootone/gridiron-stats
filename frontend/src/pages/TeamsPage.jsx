@@ -38,6 +38,14 @@ export default function TeamsPage() {
     api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
   }, []);
 
+    useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgraded') === 'true') {
+      window.history.replaceState({}, '', '/teams');
+      setShowCreateModal(true);
+    }
+  }, []);
+
   async function handleCreate(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
