@@ -29,7 +29,6 @@ function LeaderboardTab({ teamId, onPlayerClick }) {
 
   const availableStats = [...new Set(summary.map(r => r.stat_type))];
   const statInfo = getStatInfo(selectedStat);
-  const [upgradeModal, setUpgradeModal] = useState(null);
 
   if (loading) return <div className="spinner" />;
 
@@ -114,6 +113,7 @@ export default function TeamDetailPage() {
   const [error, setError] = useState('');
   const [confirmModal, setConfirmModal] = useState(null);
   const [alertModal, setAlertModal] = useState(null);
+  const [upgradeModal, setUpgradeModal] = useState(null);
   const [members, setMembers] = useState([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [plays, setPlays] = useState([]);
