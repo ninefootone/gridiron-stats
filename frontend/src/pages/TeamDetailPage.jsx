@@ -103,6 +103,7 @@ export default function TeamDetailPage() {
   const [playerModal, setPlayerModal] = useState(false);
   const [gameModal, setGameModal] = useState(false);
   const [editingGame, setEditingGame] = useState(null);
+  const [showCompletedGames, setShowCompletedGames] = useState(false);
   const [playerForm, setPlayerForm] = useState({ name: '', number: '', positions: [] });
   const [showAllPositions, setShowAllPositions] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
@@ -423,65 +424,94 @@ async function loadMembers() {
             <div className="empty-state"><div className="icon">🏈</div><p>No games yet. Add your schedule.</p></div>
           ) : (
             <div className={styles.gameList}>
-              {games.map(g => {
+              {(() => {
                 const today = new Date(); today.setHours(0,0,0,0);
-                const gameDate = new Date(g.game_date); gameDate.setHours(0,0,0,0);
-                const isToday = gameDate.getTime() === today.getTime();
-                const isPast = gameDate < today;
-                const isFuture = gameDate > today;
-                const won = isPast && g.our_score > g.opponent_score;
-                const lost = isPast && g.our_score < g.opponent_score;
-                return (
-                  <div key={g.id} className={styles.gameCard} onClick={() => navigate(`/teams/${teamId}/games/${g.id}`)}>
-                    <div className={styles.gameDate}>
-                      <span>{format(new Date(g.game_date), 'EEE d MMM')}</span>
-                      {g.game_time && <span className={styles.gameTime}>{g.game_time}</span>}
-                    </div>
-                    <div className={styles.gameVs}>
-                      <div className={styles.gameOpponent}>vs {g.opponent_name}</div>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2, alignItems: 'center' }}>
-                        {g.location && <span className={styles.gameLocation}>📍 {g.location}</span>}
-                        {g.game_type === 'friendly' && <span className="tag tag-gray" style={{ fontSize: '0.7rem' }}>Friendly</span>}
-                        {g.game_type === 'playoff' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Playoff</span>}
-                        {g.game_type === 'finals' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Finals</span>}
+                const upcoming = [...games]
+                  .filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d >= today; })
+                  .sort((a, b) => new Date(a.game_date) - new Date(b.game_date));
+                const completed = [...games]
+                  .filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today; })
+                  .sort((a, b) => new Date(b.game_date) - new Date(a.game_date));
+
+                const renderGame = g => {
+                  const gameDate = new Date(g.game_date); gameDate.setHours(0,0,0,0);
+                  const isToday = gameDate.getTime() === today.getTime();
+                  const isPast = gameDate < today;
+                  const won = isPast && g.our_score > g.opponent_score;
+                  const lost = isPast && g.our_score < g.opponent_score;
+                  return (
+                    <div key={g.id} className={styles.gameCard} onClick={() => navigate(`/teams/${teamId}/games/${g.id}`)}>
+                      <div className={styles.gameDate}>
+                        <span>{format(new Date(g.game_date), 'EEE d MMM')}</span>
+                        {g.game_time && <span className={styles.gameTime}>{g.game_time}</span>}
+                      </div>
+                      <div className={styles.gameVs}>
+                        <div className={styles.gameOpponent}>vs {g.opponent_name}</div>
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2, alignItems: 'center' }}>
+                          {g.location && <span className={styles.gameLocation}>📍 {g.location}</span>}
+                          {g.game_type === 'friendly' && <span className="tag tag-gray" style={{ fontSize: '0.7rem' }}>Friendly</span>}
+                          {g.game_type === 'playoff' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Playoff</span>}
+                          {g.game_type === 'finals' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Finals</span>}
+                        </div>
+                      </div>
+                      <div className={styles.gameRight}>
+                        {isPast && (g.our_score > 0 || g.opponent_score > 0)
+                          ? <div className={`${styles.score} ${won ? styles.win : lost ? styles.loss : ''}`}>{g.our_score}–{g.opponent_score}</div>
+                          : isToday
+                            ? <span className="tag tag-gold">🔴 Live</span>
+                            : isPast
+                              ? <span className="tag tag-gray">Completed</span>
+                              : <span className="tag tag-gray">Scheduled</span>
+                        }
+                        <div className={styles.statCount}>{g.stat_count} stats</div>
+                        {!isViewer && (
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginTop: 4 }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              setEditingGame(g);
+                              setGameForm({
+                                opponent_name: g.opponent_name,
+                                location: g.location || '',
+                                game_date: g.game_date,
+                                game_time: g.game_time || '',
+                                home_away: g.home_away || 'home',
+                                notes: g.notes || '',
+                                game_type: g.game_type || 'regular',
+                              });
+                              setGameModal(true);
+                            }}
+                          >
+                            Edit
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <div className={styles.gameRight}>
-                      {isPast && (g.our_score > 0 || g.opponent_score > 0)
-                        ? <div className={`${styles.score} ${won ? styles.win : lost ? styles.loss : ''}`}>{g.our_score}–{g.opponent_score}</div>
-                        : isToday
-                          ? <span className="tag tag-gold">🔴 Live</span>
-                          : isPast
-                            ? <span className="tag tag-gray">Completed</span>
-                            : <span className="tag tag-gray">Scheduled</span>
-                      }
-                    <div className={styles.statCount}>{g.stat_count} stats</div>
-                    {!isViewer && (
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginTop: 4 }}
-                        onClick={e => {
-                          e.stopPropagation();
-                          setEditingGame(g);
-                          setGameForm({
-                            opponent_name: g.opponent_name,
-                            location: g.location || '',
-                            game_date: g.game_date,
-                            game_time: g.game_time || '',
-                            home_away: g.home_away || 'home',
-                            notes: g.notes || '',
-                            game_type: g.game_type || 'regular',
-                          });
-                          setGameModal(true);
-                        }}
-                      >
-                        Edit
-                      </button>
+                  );
+                };
+
+                return (
+                  <>
+                    {upcoming.length === 0 && completed.length === 0 && (
+                      <div className="empty-state"><p>No games yet.</p></div>
                     )}
-                    </div>
-                </div>
+                    {upcoming.map(renderGame)}
+                    {completed.length > 0 && (
+                      <>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          style={{ color: 'var(--gray-400)', fontSize: '0.85rem', margin: '8px 0' }}
+                          onClick={() => setShowCompletedGames(p => !p)}
+                        >
+                          {showCompletedGames ? '↑ Hide' : '↓ Show'} {completed.length} completed game{completed.length === 1 ? '' : 's'}
+                        </button>
+                        {showCompletedGames && completed.map(renderGame)}
+                      </>
+                    )}
+                  </>
                 );
-              })}
+              })()}
             </div>
           )}
         </div>
