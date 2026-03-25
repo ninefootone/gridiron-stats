@@ -27,7 +27,7 @@ const PORT = process.env.PORT || 3001;
 app.set('trust proxy', 1);
 app.use(helmet());
 app.use(morgan('combined'));
-app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
+app.use('/api/billing/webhook', express.raw({ type: 'application/json' }), billingRouter);
 app.use(express.json());
 
 const allowedOrigins = process.env.FRONTEND_URL
@@ -36,8 +36,8 @@ const allowedOrigins = process.env.FRONTEND_URL
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 app.use('/api/public', publicRouter);
-app.use('/api/billing', billingRouter);
 app.use(clerkAuth);
+app.use('/api/billing', billingRouter);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
