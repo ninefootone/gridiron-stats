@@ -124,7 +124,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           subscription.id,
           plan,
           subscription.status,
-          new Date(subscription.current_period_end * 1000),
+          subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
         ]);
         break;
       }
@@ -142,7 +142,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         `, [
           plan,
           subscription.status,
-          new Date(subscription.current_period_end * 1000),
+          subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
           subscription.cancel_at_period_end,
           subscription.id,
         ]);
