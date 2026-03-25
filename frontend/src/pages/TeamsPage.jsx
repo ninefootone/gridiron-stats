@@ -61,6 +61,7 @@ export default function TeamsPage() {
       setShowCreateModal(false);
       setForm({ name: '', season: '', description: '' });
     } catch (err) {
+      console.log('Error:', err.message, 'upgrade_required:', err.upgrade_required, 'limit:', err.limit);
       if (err.upgrade_required) {
         setShowCreateModal(false);
         setUpgradeModal({ limit: err.limit });
