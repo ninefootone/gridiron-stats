@@ -240,6 +240,15 @@ async function loadMembers() {
     finally { setMembersLoading(false); }
   }
 
+  async function startCheckout(price_key) {
+    try {
+      const { url } = await api.post('/billing/checkout', { price_key });
+      window.location.href = url;
+    } catch (err) {
+      setAlertModal(err.message);
+    }
+  }  
+
   async function updateMemberRole(userId, role) {
     await api.put(`/teams/${teamId}/members/${userId}`, { role });
     setMembers(prev => prev.map(m => m.id === userId ? { ...m, role } : m));

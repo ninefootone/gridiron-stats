@@ -53,7 +53,12 @@ export default function TeamsPage() {
       setShowCreateModal(false);
       setForm({ name: '', season: '', description: '' });
     } catch (err) {
-      setError(err.message);
+      if (err.upgrade_required) {
+        setShowCreateModal(false);
+        setUpgradeModal({ limit: err.limit });
+      } else {
+        setError(err.message);
+      }
     } finally {
       setSaving(false);
     }
