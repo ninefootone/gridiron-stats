@@ -242,12 +242,19 @@ async function loadMembers() {
 
   async function startCheckout(price_key) {
     try {
-      const { url } = await api.post('/billing/checkout', { price_key });
-      window.location.href = url;
+      const sub = await api.get('/billing/subscription');
+      if (sub.stripe_customer_id) {
+        // Already a customer — use portal to upgrade
+        const { url } = await api.post('/billing/portal', {});
+        window.location.href = url;
+      } else {
+        const { url } = await api.post('/billing/checkout', { price_key });
+        window.location.href = url;
+      }
     } catch (err) {
       setAlertModal(err.message);
     }
-  }  
+  }
 
   async function updateMemberRole(userId, role) {
     await api.put(`/teams/${teamId}/members/${userId}`, { role });
