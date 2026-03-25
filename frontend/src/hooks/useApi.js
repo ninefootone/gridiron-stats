@@ -18,7 +18,10 @@ export function useApi() {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: res.statusText }));
-      throw new Error(err.error || 'Request failed');
+      const error = new Error(err.error || 'Request failed');
+      error.upgrade_required = err.upgrade_required || false;
+      error.limit = err.limit || null;
+      throw error;
     }
     return res.json();
   }, [getToken]);

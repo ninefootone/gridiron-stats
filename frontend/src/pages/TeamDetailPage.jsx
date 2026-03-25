@@ -8,6 +8,7 @@ import styles from './TeamDetailPage.module.css';
 import lbStyles from './LeaderboardPage.module.css';
 import BottomNav from '../components/shared/BottomNav';
 import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType, normalisePosition } from '../utils/stats';
+import UpgradeModal from '../components/shared/UpgradeModal';
 
 function LeaderboardTab({ teamId, onPlayerClick }) {
   const api = useApi();
@@ -28,6 +29,7 @@ function LeaderboardTab({ teamId, onPlayerClick }) {
 
   const availableStats = [...new Set(summary.map(r => r.stat_type))];
   const statInfo = getStatInfo(selectedStat);
+  const [upgradeModal, setUpgradeModal] = useState(null);
 
   if (loading) return <div className="spinner" />;
 
@@ -167,7 +169,14 @@ export default function TeamDetailPage() {
       setGameModal(false);
       setEditingGame(null);
       setGameForm({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
-    } catch (err) { setError(err.message); }
+    } catch (err) {
+      if (err.upgrade_required) {
+        setGameModal(false);
+        setUpgradeModal({ limit: err.limit });
+      } else {
+        setError(err.message);
+      }
+    }
     finally { setSaving(false); }
   }
 
@@ -991,6 +1000,13 @@ async function loadMembers() {
             </button>
           </div>
         </Modal>
+      )}
+      {upgradeModal && (
+        <UpgradeModal
+          limit={upgradeModal.limit}
+          onCheckout={startCheckout}
+          onClose={() => setUpgradeModal(null)}
+        />
       )}
       {confirmModal && (
         <ConfirmModal

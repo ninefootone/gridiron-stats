@@ -7,6 +7,7 @@ import { useUser } from '@clerk/react';
 import { useHelp } from '../context/HelpContext';
 import InstallBanner from '../components/shared/InstallBanner';
 import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
+import UpgradeModal from '../components/shared/UpgradeModal';
 
 export default function TeamsPage() {
   const api = useApi();
@@ -31,6 +32,7 @@ export default function TeamsPage() {
   const { user } = useUser();
   const { openHelp } = useHelp();
   const [shareTeam, setShareTeam] = useState(null);
+  const [upgradeModal, setUpgradeModal] = useState(null);
 
   useEffect(() => {
     api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
@@ -86,6 +88,15 @@ export default function TeamsPage() {
       },
     });
   }
+
+  async function startCheckout(price_key) {
+    try {
+      const { url } = await api.post('/billing/checkout', { price_key });
+      window.location.href = url;
+    } catch (err) {
+      setAlertModal(err.message);
+    }
+  }  
 
   function copyCode(code, id) {
     navigator.clipboard.writeText(code);
@@ -398,6 +409,13 @@ export default function TeamsPage() {
             <button className="btn btn-primary" onClick={() => { setShareTeam(null); setCopiedCode(null); }}>Done</button>
           </div>
         </Modal>
+      )}
+      {upgradeModal && (
+        <UpgradeModal
+          limit={upgradeModal.limit}
+          onCheckout={startCheckout}
+          onClose={() => setUpgradeModal(null)}
+        />
       )}
       {confirmModal && (
         <ConfirmModal
