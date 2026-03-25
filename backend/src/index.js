@@ -36,6 +36,7 @@ const allowedOrigins = process.env.FRONTEND_URL
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 app.use('/api/public', publicRouter);
+app.use('/api/billing', billingRouter);
 app.use(clerkAuth);
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -49,7 +50,6 @@ app.use('/api/feedback', feedbackRouter);
 app.use('/api/plays', playsRouter);
 app.use('/api/opponent-stats', opponentStatsRouter);
 app.use('/api/score-adjustments', scoreAdjustmentsRouter);
-app.use('/api/billing', billingRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
