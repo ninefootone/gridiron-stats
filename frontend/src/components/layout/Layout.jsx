@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useUser, useClerk } from '@clerk/react';
 import { useHelp } from '../../context/HelpContext';
+import { useApi } from '../../hooks/useApi';
 import styles from './Layout.module.css';
 
 export default function Layout() {
@@ -9,6 +10,7 @@ export default function Layout() {
   const { signOut } = useClerk();
   const navigate = useNavigate();
   const { openHelp } = useHelp();
+  const api = useApi();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -54,6 +56,20 @@ export default function Layout() {
                 <div className={styles.dropdownEmail}>{user?.primaryEmailAddress?.emailAddress}</div>
               </div>
               <div className={styles.dropdownDivider} />
+              <button
+                className={styles.dropdownItem}
+                onClick={async () => {
+                  setMenuOpen(false);
+                  try {
+                    const { url } = await api.post('/billing/portal', {});
+                    window.location.href = url;
+                  } catch {
+                    navigate('/teams');
+                  }
+                }}
+              >
+                Manage Subscription
+              </button>
               <button
                 className={styles.dropdownItem}
                 onClick={() => { setMenuOpen(false); openHelp(); }}
