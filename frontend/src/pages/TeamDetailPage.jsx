@@ -243,11 +243,12 @@ async function loadMembers() {
   async function startCheckout(price_key) {
     try {
       const sub = await api.get('/billing/subscription');
-      if (sub.stripe_customer_id) {
-        // Already a customer — use portal to upgrade
+      if (sub.stripe_customer_id && sub.status === 'active') {
+        // Active subscriber — use portal to upgrade
         const { url } = await api.post('/billing/portal', {});
         window.location.href = url;
       } else {
+        // No subscription or cancelled — fresh checkout
         const { url } = await api.post('/billing/checkout', { price_key });
         window.location.href = url;
       }
