@@ -13,6 +13,11 @@ export default function Layout() {
   const api = useApi();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const [plan, setPlan] = useState(null);
+
+  useEffect(() => {
+    api.get('/billing/subscription').then(sub => setPlan(sub.plan)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -53,7 +58,14 @@ export default function Layout() {
             <div className={styles.dropdown}>
               <div className={styles.dropdownUser}>
                 <div className={styles.dropdownName}>{user?.fullName || 'Account'}</div>
-                <div className={styles.dropdownEmail}>{user?.primaryEmailAddress?.emailAddress}</div>
+              <div className={styles.dropdownEmail}>{user?.primaryEmailAddress?.emailAddress}</div>
+              {plan && (
+                <div style={{ marginTop: 4 }}>
+                  <span className={`tag ${plan === 'club' ? 'tag-gold' : plan === 'individual' ? 'tag-green' : 'tag-gray'}`} style={{ fontSize: '0.7rem' }}>
+                    {plan === 'club' ? 'Club' : plan === 'individual' ? 'Individual' : 'Free'} plan
+                  </span>
+                </div>
+              )}
               </div>
               <div className={styles.dropdownDivider} />
               <button
