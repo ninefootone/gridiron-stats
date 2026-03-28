@@ -8,6 +8,7 @@ import { useHelp } from '../context/HelpContext';
 import InstallBanner from '../components/shared/InstallBanner';
 import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
 import UpgradeModal from '../components/shared/UpgradeModal';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function TeamsPage() {
   const api = useApi();
@@ -33,13 +34,14 @@ export default function TeamsPage() {
   const { openHelp } = useHelp();
   const [shareTeam, setShareTeam] = useState(null);
   const [upgradeModal, setUpgradeModal] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     if (params.get('upgraded') === 'true') {
       window.history.replaceState({}, '', '/teams');
       setShowCreateModal(true);
@@ -48,7 +50,7 @@ export default function TeamsPage() {
       window.history.replaceState({}, '', '/teams');
       setUpgradeModal({ limit: 'teams' });
     }
-  }, []);
+  }, [location.search]);
 
   async function handleCreate(e) {
     e.preventDefault();
