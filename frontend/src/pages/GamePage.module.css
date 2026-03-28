@@ -196,7 +196,7 @@
   .whistleFooterMobile {
     display: block;
     position: fixed;
-    bottom: 64px;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     left: 0;
     right: 0;
     z-index: 99;
