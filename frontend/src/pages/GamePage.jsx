@@ -12,6 +12,7 @@ import BottomNav from '../components/shared/BottomNav';
 import jsQR from 'jsqr';
 import { STAT_CATEGORIES, getStatInfo, ALL_STATS, getStatsForTeamType } from '../utils/stats';
 import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
+import LiveViewModal from '../components/shared/LiveViewModal';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -67,6 +68,7 @@ export default function GamePage() {
 
   const [teamType, setTeamType] = useState(null);
   const [showMoreStats, setShowMoreStats] = useState(false);
+  const [liveViewModal, setLiveViewModal] = useState(false);
   
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
@@ -367,10 +369,7 @@ export default function GamePage() {
           </button>
         )}
         {isAdmin && (
-          <button className="btn btn-ghost btn-sm" onClick={() => {
-            navigator.clipboard.writeText(`https://app.gridiron-stats.co/live/${gameId}`);
-            setAlertModal('Live view link copied!');
-          }}>Live View</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => setLiveViewModal(true)}>Live View</button>
         )}
       </div>
 
@@ -1148,6 +1147,9 @@ export default function GamePage() {
           message={alertModal}
           onClose={() => setAlertModal(null)}
         />
+      )}
+      {liveViewModal && (
+        <LiveViewModal gameId={gameId} onClose={() => setLiveViewModal(false)} />
       )}
     <BottomNav
       activeKey="games"
