@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
 import styles from './TeamsPage.module.css';
@@ -8,7 +8,6 @@ import { useHelp } from '../context/HelpContext';
 import InstallBanner from '../components/shared/InstallBanner';
 import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
 import UpgradeModal from '../components/shared/UpgradeModal';
-import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function TeamsPage() {
   const api = useApi();
