@@ -37,7 +37,7 @@ export function HelpProvider({ children }) {
               <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 8 }}>Roles</div>
               {[
                 { role: 'Admin', desc: 'Full control. Manage the roster, set up plays, log stats, connect Whistle, export data, edit team settings and manage billing.' },
-                { role: 'Coach', desc: "Can manage the roster, log stats, add games, set up plays and control game status (Start/End Game). Can't create new teams or manage billing." },
+                { role: 'Coach', desc: "Can manage the roster, log stats, add and edit games, set up plays, connect Whistle and export data. Can't manage team members, create or delete teams, or manage billing." },
                 { role: 'Viewer', desc: 'Follow the action. Read-only access — great for parents, supporters and anyone who just wants to watch the numbers come in. Share the view code to invite them.' },
               ].map(({ role, desc }) => (
                 <div key={role} style={{ marginBottom: 10 }}>
