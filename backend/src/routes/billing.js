@@ -136,6 +136,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           id: subscription.id,
           status: subscription.status,
           cancel_at_period_end: subscription.cancel_at_period_end,
+          cancel_at: subscription.cancel_at,
           current_period_end: subscription.items?.data?.[0]?.current_period_end,
         }));
         await pool.query(`
@@ -149,7 +150,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           plan,
           subscription.status,
           subscription.items?.data?.[0]?.current_period_end ? new Date(subscription.items.data[0].current_period_end * 1000) : null,
-          subscription.cancel_at_period_end,
+          subscription.cancel_at_period_end || !!subscription.cancel_at,
           subscription.id,
         ]);
         break;
