@@ -132,13 +132,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         const plan = getPlanFromPrice(subscription.items.data[0].price.id);
-        console.log('Subscription updated:', JSON.stringify({
-          id: subscription.id,
-          status: subscription.status,
-          cancel_at_period_end: subscription.cancel_at_period_end,
-          cancel_at: subscription.cancel_at,
-          current_period_end: subscription.items?.data?.[0]?.current_period_end,
-        }));
         await pool.query(`
           UPDATE subscriptions SET
             plan = $1, status = $2,
