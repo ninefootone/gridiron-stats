@@ -73,14 +73,19 @@ export default function Layout() {
                 onClick={async () => {
                   setMenuOpen(false);
                   try {
-                    const { url } = await api.post('/billing/portal', {});
-                    window.location.href = url;
+                    const sub = await api.get('/billing/subscription');
+                    if (sub.stripe_customer_id && sub.status === 'active') {
+                      const { url } = await api.post('/billing/portal', {});
+                      window.location.href = url;
+                    } else {
+                      navigate('/teams?upgrade=true');
+                    }
                   } catch {
-                    navigate('/teams');
+                    navigate('/teams?upgrade=true');
                   }
                 }}
               >
-                Manage Subscription
+                {plan === 'free' ? 'Upgrade Plan' : 'Manage Subscription'}
               </button>
               <button
                 className={styles.dropdownItem}
