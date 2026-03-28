@@ -411,14 +411,14 @@ export default function GamePage() {
         <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'stretch' }}>
           <div className={styles.actionButtons}>
             <button className={`btn btn-primary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={openStatFirst}>⚡ Log Stat</button>
-            {isAdmin && (
+            {!isViewer && (
               <button className={`btn btn-secondary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
             )}
           </div>
           {isAdmin && (
             <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
           )}
-          {isAdmin && (
+          {!isViewer && (
             <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.whistleBtn}`} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
               <img src="/whistle-icon.svg" alt="" style={{ width: 18, height: 18, opacity: whistleGameId ? 1 : 0.5 }} />
               {whistleGameId ? 'Whistle' : 'Connect Whistle'}
@@ -954,7 +954,7 @@ export default function GamePage() {
           </form>
         </Modal>
       )}
-    {isAdmin && (
+    {!isViewer && (
         <div className="section-divider" style={{ paddingBottom: 80, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-sm btn-ghost" style={{ color: 'var(--gray-400)' }} onClick={refreshGame}>↻ Refresh</button>
           <button className="btn btn-sm btn-secondary" onClick={() => {
@@ -1120,16 +1120,18 @@ export default function GamePage() {
           }}>
             ⬇ Export PDF
           </button>
-          <button className="btn btn-sm btn-danger" onClick={async () => {
-            setConfirmModal({
-              message: 'Delete this game and all its stats? This cannot be undone.',
-              confirmLabel: 'Delete Game',
-              onConfirm: async () => {
-                await api.del(`/games/${gameId}`);
-                navigate(`/teams/${teamId}`);
-              }
-            });
-          }}>Delete Game</button>
+          {isAdmin && (
+            <button className="btn btn-sm btn-danger" onClick={() => {
+              setConfirmModal({
+                message: 'Delete this game and all its stats? This cannot be undone.',
+                confirmLabel: 'Delete Game',
+                onConfirm: async () => {
+                  await api.del(`/games/${gameId}`);
+                  navigate(`/teams/${teamId}`);
+                }
+              });
+            }}>Delete Game</button>
+          )}
         </div>
       )}
       {confirmModal && (
