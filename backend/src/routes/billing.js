@@ -106,14 +106,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const subscription = await stripe.subscriptions.retrieve(session.subscription);
-console.log('Subscription data:', JSON.stringify({
-  id: subscription.id,
-  current_period_end: subscription.current_period_end,
-  status: subscription.status,
-  billing_cycle_anchor: subscription.billing_cycle_anchor,
-  items: subscription.items?.data?.[0]?.current_period_end,
-}));        
+        const subscription = await stripe.subscriptions.retrieve(session.subscription);    
         const plan = getPlanFromPrice(subscription.items.data[0].price.id);
         
         await pool.query(`
@@ -131,7 +124,7 @@ console.log('Subscription data:', JSON.stringify({
           subscription.id,
           plan,
           subscription.status,
-          subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+          subscription.items?.data?.[0]?.current_period_end ? new Date(subscription.items.data[0].current_period_end * 1000) : null,
         ]);
         break;
       }
@@ -149,7 +142,7 @@ console.log('Subscription data:', JSON.stringify({
         `, [
           plan,
           subscription.status,
-          subscription.current_period_end ? new Date(subscription.current_period_end * 1000) : null,
+          subscription.items?.data?.[0]?.current_period_end ? new Date(subscription.items.data[0].current_period_end * 1000) : null,
           subscription.cancel_at_period_end,
           subscription.id,
         ]);
