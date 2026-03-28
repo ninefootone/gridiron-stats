@@ -10,6 +10,7 @@ import PlayerPage from './pages/PlayerPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import LivePage from './pages/LivePage';
 import CookieBanner from './components/shared/CookieBanner';
+import OfflineBanner from './components/shared/OfflineBanner';
 
 function PrivateRoute({ children }) {
   const { isLoaded, isSignedIn } = useAuth();
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/live/:gameId" element={<LivePage />} />
       </Routes>
       <CookieBanner />
+      <OfflineBanner />
     </>
   );
 }
