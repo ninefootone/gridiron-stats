@@ -7,7 +7,7 @@ import { useUser } from '@clerk/react';
 import { useHelp } from '../context/HelpContext';
 import InstallBanner from '../components/shared/InstallBanner';
 import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
-import UpgradeModal from '../components/shared/UpgradeModal';
+import { useUpgrade } from '../context/UpgradeContext';
 
 export default function TeamsPage() {
   const api = useApi();
@@ -32,8 +32,8 @@ export default function TeamsPage() {
   const { user } = useUser();
   const { openHelp } = useHelp();
   const [shareTeam, setShareTeam] = useState(null);
-  const [upgradeModal, setUpgradeModal] = useState(null);
   const location = useLocation();
+  const { openUpgrade } = useUpgrade();
 
   useEffect(() => {
     api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
@@ -47,7 +47,7 @@ export default function TeamsPage() {
     }
     if (params.get('upgrade') === 'true') {
       window.history.replaceState({}, '', '/teams');
-      setUpgradeModal({ limit: 'teams' });
+      openUpgrade('teams');
     }
   }, [location.search]);
 
@@ -68,7 +68,7 @@ export default function TeamsPage() {
     } catch (err) {
       if (err.upgrade_required) {
         setShowCreateModal(false);
-        setUpgradeModal({ limit: err.limit });
+        openUpgrade(err.limit);
       } else {
         setError(err.message);
       }
@@ -107,23 +107,6 @@ export default function TeamsPage() {
     });
   }
 
-  async function startCheckout(price_key) {
-    try {
-      const sub = await api.get('/billing/subscription');
-      if (sub.stripe_customer_id && sub.status === 'active') {
-        // Active subscriber — use portal to upgrade
-        const { url } = await api.post('/billing/portal', {});
-        window.location.href = url;
-      } else {
-        // No subscription or cancelled — fresh checkout
-        const { url } = await api.post('/billing/checkout', { price_key });
-        window.location.href = url;
-      }
-    } catch (err) {
-      setAlertModal(err.message);
-    }
-  }
-
   function copyCode(code, id) {
     navigator.clipboard.writeText(code);
     setCopiedCode(id);
@@ -148,11 +131,11 @@ export default function TeamsPage() {
               const sub = await api.get('/billing/subscription');
               const adminTeams = teams.filter(t => t.my_role === 'admin').length;
               if (sub.plan === 'free' && adminTeams >= 1) {
-                setUpgradeModal({ limit: 'teams' });
-                return;
-              }
+                openUpgrade('teams');
+                  return;
+                }
               if (sub.plan === 'individual' && adminTeams >= 1) {
-                setUpgradeModal({ limit: 'club' });
+                openUpgrade('club');
                 return;
               }
               setShowCreateModal(true); setError(''); 
@@ -447,13 +430,6 @@ export default function TeamsPage() {
             <button className="btn btn-primary" onClick={() => { setShareTeam(null); setCopiedCode(null); }}>Done</button>
           </div>
         </Modal>
-      )}
-      {upgradeModal && (
-        <UpgradeModal
-          limit={upgradeModal.limit}
-          onCheckout={startCheckout}
-          onClose={() => setUpgradeModal(null)}
-        />
       )}
       {confirmModal && (
         <ConfirmModal

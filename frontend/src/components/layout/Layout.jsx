@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useUser, useClerk } from '@clerk/react';
 import { useHelp } from '../../context/HelpContext';
+import { useUpgrade } from '../../context/UpgradeContext';
 import { useApi } from '../../hooks/useApi';
 import styles from './Layout.module.css';
 
@@ -14,6 +15,7 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const [plan, setPlan] = useState(null);
+  const { openUpgrade } = useUpgrade();
 
   useEffect(() => {
     api.get('/billing/subscription').then(sub => setPlan(sub.plan)).catch(() => {});
@@ -78,10 +80,10 @@ export default function Layout() {
                       const { url } = await api.post('/billing/portal', {});
                       window.location.href = url;
                     } else {
-                      navigate('/teams?upgrade=true');
+                      openUpgrade('teams');
                     }
                   } catch {
-                    navigate('/teams?upgrade=true');
+                    openUpgrade('teams');
                   }
                 }}
               >

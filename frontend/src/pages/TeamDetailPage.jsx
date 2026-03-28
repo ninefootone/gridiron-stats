@@ -8,7 +8,7 @@ import styles from './TeamDetailPage.module.css';
 import lbStyles from './LeaderboardPage.module.css';
 import BottomNav from '../components/shared/BottomNav';
 import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType, normalisePosition } from '../utils/stats';
-import UpgradeModal from '../components/shared/UpgradeModal';
+import { useUpgrade } from '../context/UpgradeContext';
 
 function LeaderboardTab({ teamId, onPlayerClick }) {
   const api = useApi();
@@ -86,6 +86,7 @@ export default function TeamDetailPage() {
   const { teamId } = useParams();
   const navigate = useNavigate();
   const api = useApi();
+  const { openUpgrade } = useUpgrade();
   const [team, setTeam] = useState(null);
   const isViewer = team?.my_role === 'viewer';
   const isAdmin = team?.my_role === 'admin';
@@ -113,7 +114,6 @@ export default function TeamDetailPage() {
   const [error, setError] = useState('');
   const [confirmModal, setConfirmModal] = useState(null);
   const [alertModal, setAlertModal] = useState(null);
-  const [upgradeModal, setUpgradeModal] = useState(null);
   const [members, setMembers] = useState([]);
   const [membersLoading, setMembersLoading] = useState(false);
   const [plays, setPlays] = useState([]);
@@ -172,7 +172,7 @@ export default function TeamDetailPage() {
     } catch (err) {
       if (err.upgrade_required) {
         setGameModal(false);
-        setUpgradeModal({ limit: err.limit });
+        openUpgrade(err.limit);
       } else {
         setError(err.message);
       }
@@ -238,23 +238,6 @@ async function loadMembers() {
       setMembers(m);
     } catch (err) { console.error(err); }
     finally { setMembersLoading(false); }
-  }
-
-  async function startCheckout(price_key) {
-    try {
-      const sub = await api.get('/billing/subscription');
-      if (sub.stripe_customer_id && sub.status === 'active') {
-        // Active subscriber — use portal to upgrade
-        const { url } = await api.post('/billing/portal', {});
-        window.location.href = url;
-      } else {
-        // No subscription or cancelled — fresh checkout
-        const { url } = await api.post('/billing/checkout', { price_key });
-        window.location.href = url;
-      }
-    } catch (err) {
-      setAlertModal(err.message);
-    }
   }
 
   async function updateMemberRole(userId, role) {
@@ -1017,13 +1000,6 @@ async function loadMembers() {
             </button>
           </div>
         </Modal>
-      )}
-      {upgradeModal && (
-        <UpgradeModal
-          limit={upgradeModal.limit}
-          onCheckout={startCheckout}
-          onClose={() => setUpgradeModal(null)}
-        />
       )}
       {confirmModal && (
         <ConfirmModal

@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import './styles/global.css';
 import { HelpProvider } from './context/HelpContext.jsx';
+import { UpgradeProvider } from './context/UpgradeContext.jsx';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} fallbackRedirectUrl="/teams">
       <BrowserRouter>
         <HelpProvider>
-          <App />
+          <UpgradeProvider>
+            <App />
+          </UpgradeProvider>
         </HelpProvider>
       </BrowserRouter>
     </ClerkProvider>
