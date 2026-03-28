@@ -15,10 +15,14 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const [plan, setPlan] = useState(null);
+  const [subInfo, setSubInfo] = useState(null);
   const { openUpgrade } = useUpgrade();
 
   useEffect(() => {
-    api.get('/billing/subscription').then(sub => setPlan(sub.plan)).catch(() => {});
+    api.get('/billing/subscription').then(sub => {
+      setPlan(sub.plan);
+      setSubInfo(sub);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -66,6 +70,11 @@ export default function Layout() {
                   <span className={`tag ${plan === 'club' ? 'tag-gold' : plan === 'individual' ? 'tag-green' : 'tag-gray'}`} style={{ fontSize: '0.7rem' }}>
                     {plan === 'club' ? 'Club' : plan === 'individual' ? 'Individual' : 'Free'} plan
                   </span>
+                  {subInfo?.cancel_at_period_end && subInfo?.current_period_end && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--gray-400)', marginTop: 4 }}>
+                      Cancels {new Date(subInfo.current_period_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  )}
                 </div>
               )}
               </div>
