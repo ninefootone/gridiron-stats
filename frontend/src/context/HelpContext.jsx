@@ -36,9 +36,9 @@ export function HelpProvider({ children }) {
             <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 8 }}>Roles</div>
               {[
-                { role: 'Admin', desc: 'Full access including managing players, logging stats, exporting and connecting Whistle' },
-                { role: 'Coach', desc: "Can log stats and control game status (Start/End Game) but can't manage the roster or settings" },
-                { role: 'Viewer', desc: 'Read-only access, great for parents and supporters' },
+                { role: 'Admin', desc: 'Full control. Manage the roster, set up plays, log stats, connect Whistle, export data, edit team settings and manage billing.' },
+                { role: 'Coach', desc: "Can manage the roster, log stats, add games, set up plays and control game status (Start/End Game). Can't create new teams or manage billing." },
+                { role: 'Viewer', desc: 'Follow the action. Read-only access — great for parents, supporters and anyone who just wants to watch the numbers come in. Share the view code to invite them.' },
               ].map(({ role, desc }) => (
                 <div key={role} style={{ marginBottom: 10 }}>
                   <span className="tag tag-gold" style={{ marginBottom: 4, display: 'inline-block' }}>{role}</span>
