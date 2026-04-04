@@ -269,4 +269,45 @@ router.delete('/:id/members/:userId', requireAuth, async (req, res, next) => {
   }
 });
 
+// POST /api/teams/:id/set-active — unrestrict chosen team, restrict others
+router.post('/:id/set-active', requireAuth, async (req, res, next) => {
+  try {
+    // Get user's plan
+    const { rows: subRows } = await pool.query(
+      `SELECT plan FROM subscriptions WHERE user_id = $1`,
+      [req.dbUser.id]
+    );
+    const plan = subRows[0]?.plan || 'free';
+    const allowedTeams = plan === 'club' ? Infinity : 1;
+
+    // Get all teams created by this user
+    const { rows: teams } = await pool.query(
+      `SELECT id FROM teams WHERE created_by = $1 ORDER BY id ASC`,
+      [req.dbUser.id]
+    );
+
+    // Unrestrict chosen team, restrict others beyond limit
+    const chosenId = Number(req.params.id);
+    const activeTeams = [chosenId];
+
+    for (const team of teams) {
+      if (team.id === chosenId) continue;
+      if (activeTeams.length < allowedTeams) {
+        activeTeams.push(team.id);
+      }
+    }
+
+    for (const team of teams) {
+      const restricted = !activeTeams.includes(team.id);
+      await pool.query(
+        `UPDATE teams SET restricted = $1 WHERE id = $2`,
+        [restricted, team.id]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
+
 module.exports = router;
