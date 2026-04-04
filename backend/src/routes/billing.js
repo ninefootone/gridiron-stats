@@ -126,6 +126,9 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           subscription.status,
           subscription.items?.data?.[0]?.current_period_end ? new Date(subscription.items.data[0].current_period_end * 1000) : null,
         ]);
+        await applyPlanRestrictions(session.metadata.user_id, plan);
+        const { rows: checkoutUserRows } = await pool.query(`SELECT email FROM users WHERE id = $1`, [session.metadata.user_id]);
+        if (checkoutUserRows[0]) await syncPlanToBrevo(checkoutUserRows[0].email, plan);
         break;
       }
 
@@ -152,16 +155,29 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           `SELECT user_id FROM subscriptions WHERE stripe_subscription_id = $1`,
           [subscription.id]
         );
-        if (subRows[0]) await applyPlanRestrictions(subRows[0].user_id, plan);
+        if (subRows[0]) {
+          await applyPlanRestrictions(subRows[0].user_id, plan);
+          const { rows: userRows } = await pool.query(`SELECT email FROM users WHERE id = $1`, [subRows[0].user_id]);
+          if (userRows[0]) await syncPlanToBrevo(userRows[0].email, plan);
+        }
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
+        const { rows: delSubRows } = await pool.query(
+          `SELECT user_id FROM subscriptions WHERE stripe_subscription_id = $1`,
+          [subscription.id]
+        );
         await pool.query(`
           UPDATE subscriptions SET plan = 'free', status = 'cancelled', updated_at = NOW()
           WHERE stripe_subscription_id = $1
         `, [subscription.id]);
+        if (delSubRows[0]) {
+          await applyPlanRestrictions(delSubRows[0].user_id, 'free');
+          const { rows: delUserRows } = await pool.query(`SELECT email FROM users WHERE id = $1`, [delSubRows[0].user_id]);
+          if (delUserRows[0]) await syncPlanToBrevo(delUserRows[0].email, 'free');
+        }
         break;
       }
     }
@@ -196,6 +212,27 @@ function getPlanFromPrice(priceId) {
   if (priceId === process.env.STRIPE_PRICE_INDIVIDUAL_MONTHLY || priceId === process.env.STRIPE_PRICE_INDIVIDUAL_ANNUAL) return 'individual';
   if (priceId === process.env.STRIPE_PRICE_CLUB_MONTHLY || priceId === process.env.STRIPE_PRICE_CLUB_ANNUAL) return 'club';
   return 'free';
+}
+
+async function syncPlanToBrevo(email, plan) {
+  if (!process.env.BREVO_API_KEY || !email) return;
+  try {
+    await fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        email,
+        attributes: { PLAN: plan },
+        listIds: [2],
+        updateEnabled: true,
+      }),
+    });
+  } catch (e) {
+    console.error('Brevo plan sync failed:', e);
+  }
 }
 
 module.exports = router;
