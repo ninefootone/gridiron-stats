@@ -41,7 +41,8 @@ export default function TeamsPage() {
       setTeams(data);
       const adminTeams = data.filter(t => t.my_role === 'admin');
       const hasRestricted = adminTeams.some(t => t.restricted);
-      if (hasRestricted && adminTeams.length > 1) setShowChooseTeamModal(true);
+      const hasActive = adminTeams.some(t => !t.restricted);
+      if (hasRestricted && !hasActive && adminTeams.length > 1) setShowChooseTeamModal(true);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -447,7 +448,7 @@ export default function TeamsPage() {
               <button
                 key={t.id}
                 className={`btn ${!t.restricted ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ textAlign: 'left', padding: '12px 16px' }}
+                style={{ textAlign: 'left', padding: '12px 16px', whiteSpace: 'normal', wordBreak: 'break-word', width: '100%' }}
                 onClick={async () => {
                   await api.post(`/teams/${t.id}/set-active`, {});
                   const updated = await api.get('/teams');
