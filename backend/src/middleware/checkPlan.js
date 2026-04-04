@@ -11,16 +11,16 @@ async function getUserPlan(userId) {
 async function checkTeamLimit(req, res, next) {
   try {
     const plan = await getUserPlan(req.dbUser.id);
-    if (plan === 'club' || plan === 'individual') return next();
+    if (plan === 'club') return next();
 
-    // Free plan — max 1 team
+    // Free and Individual plans — max 1 team
     const { rows } = await pool.query(
       `SELECT COUNT(*) FROM teams WHERE created_by = $1`,
       [req.dbUser.id]
     );
     if (Number(rows[0].count) >= 1) {
       return res.status(403).json({ 
-        error: 'Free plan limit reached',
+        error: plan === 'individual' ? 'Individual plan limit reached' : 'Free plan limit reached',
         limit: 'teams',
         upgrade_required: true,
       });
