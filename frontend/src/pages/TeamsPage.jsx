@@ -34,9 +34,14 @@ export default function TeamsPage() {
   const [shareTeam, setShareTeam] = useState(null);
   const location = useLocation();
   const { openUpgrade } = useUpgrade();
+  const [showChooseTeamModal, setShowChooseTeamModal] = useState(false);
 
   useEffect(() => {
-    api.get('/teams').then(setTeams).catch(console.error).finally(() => setLoading(false));
+    api.get('/teams').then(data => {
+      setTeams(data);
+      const hasRestricted = data.some(t => t.restricted && t.my_role === 'admin');
+      if (hasRestricted) setShowChooseTeamModal(true);
+    }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -428,6 +433,39 @@ export default function TeamsPage() {
           )}
           <div className="modal-footer">
             <button className="btn btn-primary" onClick={() => { setShareTeam(null); setCopiedCode(null); }}>Done</button>
+          </div>
+        </Modal>
+      )}
+      {showChooseTeamModal && (
+        <Modal title="Choose Your Active Team" onClose={() => setShowChooseTeamModal(false)}>
+          <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', marginBottom: 20 }}>
+            Your plan has changed. You can only have 1 active team on your current plan. Choose which team to keep active — others will become read-only.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+            {teams.filter(t => t.my_role === 'admin').map(t => (
+              <button
+                key={t.id}
+                className={`btn ${!t.restricted ? 'btn-primary' : 'btn-secondary'}`}
+                style={{ textAlign: 'left', padding: '12px 16px' }}
+                onClick={async () => {
+                  await api.post(`/teams/${t.id}/set-active`, {});
+                  const updated = await api.get('/teams');
+                  setTeams(updated);
+                  setShowChooseTeamModal(false);
+                }}
+              >
+                <div style={{ fontWeight: 700 }}>{t.name}</div>
+                {t.season && <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{t.season}</div>}
+                {!t.restricted && <div style={{ fontSize: '0.72rem', color: 'var(--gold)', marginTop: 2 }}>Currently active</div>}
+              </button>
+            ))}
+          </div>
+          <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)' }}>
+            Upgrade to Club plan for unlimited teams.
+          </p>
+          <div className="modal-footer">
+            <button className="btn btn-ghost" onClick={() => setShowChooseTeamModal(false)}>Decide later</button>
+            <button className="btn btn-secondary" onClick={() => { setShowChooseTeamModal(false); openUpgrade('club'); }}>Upgrade to Club</button>
           </div>
         </Modal>
       )}
