@@ -22,12 +22,14 @@ export default function Layout() {
   const [deleteAccountStep, setDeleteAccountStep] = useState(1);
   const [soleAdminTeams, setSoleAdminTeams] = useState([]);
   const [deleteAccountSaving, setDeleteAccountSaving] = useState(false);
+  const [emailOptOut, setEmailOptOut] = useState(false);
 
   useEffect(() => {
     api.get('/billing/subscription').then(sub => {
       setPlan(sub.plan);
       setSubInfo(sub);
     }).catch(() => {});
+    api.get('/users/me').then(u => setEmailOptOut(u.email_opt_out)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -102,6 +104,28 @@ export default function Layout() {
                 }}
               >
                 {plan === 'free' ? 'Upgrade Plan' : 'Manage Subscription'}
+              </button>
+              <button
+                className={styles.dropdownItem}
+                onClick={async () => {
+                  const newOptOut = !emailOptOut;
+                  setEmailOptOut(newOptOut);
+                  await api.patch('/users/me/email-opt-out', { opt_out: newOptOut });
+                }}
+              >
+                <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <span>Product emails</span>
+                  <span style={{
+                    width: 32, height: 18, borderRadius: 9, background: emailOptOut ? 'var(--gray-600, #444)' : 'var(--gold)',
+                    position: 'relative', display: 'inline-block', transition: 'background 0.2s',
+                  }}>
+                    <span style={{
+                      position: 'absolute', top: 2, left: emailOptOut ? 2 : 14,
+                      width: 14, height: 14, borderRadius: '50%', background: '#fff',
+                      transition: 'left 0.2s',
+                    }} />
+                  </span>
+                </span>
               </button>
               <button
                 className={styles.dropdownItem}
