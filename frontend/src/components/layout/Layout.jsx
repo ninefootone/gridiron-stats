@@ -171,6 +171,7 @@ export default function Layout() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                 <button
                   className="btn btn-danger"
+                  style={{ whiteSpace: 'normal', wordBreak: 'break-word', width: '100%', textAlign: 'left' }}
                   disabled={deleteAccountSaving}
                   onClick={async () => {
                     setDeleteAccountSaving(true);
@@ -189,6 +190,7 @@ export default function Layout() {
                 </button>
                 <button
                   className="btn btn-secondary"
+                  style={{ whiteSpace: 'normal', wordBreak: 'break-word', width: '100%', textAlign: 'left' }}
                   disabled={deleteAccountSaving}
                   onClick={async () => {
                     setDeleteAccountSaving(true);
