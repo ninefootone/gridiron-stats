@@ -122,4 +122,51 @@ router.get('/me/sole-admin-teams', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// PATCH /api/users/me/email-opt-out — toggle email opt out
+router.patch('/me/email-opt-out', requireAuth, async (req, res, next) => {
+  try {
+    const { opt_out } = req.body;
+    
+    await pool.query(
+      `UPDATE users SET email_opt_out = $1 WHERE id = $2`,
+      [opt_out, req.dbUser.id]
+    );
+
+    // Update Brevo
+    if (process.env.BREVO_API_KEY && req.dbUser.email) {
+      try {
+        if (opt_out) {
+          // Remove from list
+          await fetch(`https://api.brevo.com/v3/contacts/lists/2/contacts/remove`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'api-key': process.env.BREVO_API_KEY,
+            },
+            body: JSON.stringify({ emails: [req.dbUser.email] }),
+          });
+        } else {
+          // Add back to list
+          await fetch('https://api.brevo.com/v3/contacts', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'api-key': process.env.BREVO_API_KEY,
+            },
+            body: JSON.stringify({
+              email: req.dbUser.email,
+              listIds: [2],
+              updateEnabled: true,
+            }),
+          });
+        }
+      } catch (e) {
+        console.error('Brevo opt-out update failed:', e);
+      }
+    }
+
+    res.json({ success: true, email_opt_out: opt_out });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
