@@ -47,4 +47,22 @@ router.get('/opponent-stats', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/public/stats-summary — public platform stats for marketing site
+router.get('/stats-summary', async (req, res, next) => {
+  try {
+    const [users, teams, players, games] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM users'),
+      pool.query('SELECT COUNT(*) FROM teams'),
+      pool.query('SELECT COUNT(*) FROM players WHERE active = true'),
+      pool.query('SELECT COUNT(*) FROM games'),
+    ]);
+    res.json({
+      coaches: Number(users.rows[0].count),
+      teams: Number(teams.rows[0].count),
+      players: Number(players.rows[0].count),
+      games: Number(games.rows[0].count),
+    });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
