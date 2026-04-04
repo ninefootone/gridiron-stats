@@ -146,7 +146,11 @@ router.patch('/me/email-opt-out', requireAuth, async (req, res, next) => {
             body: JSON.stringify({ emails: [req.dbUser.email] }),
           });
         } else {
-          // Add back to list
+          // Add back to list with attributes
+          const { rows: subRows } = await pool.query(
+            `SELECT plan FROM subscriptions WHERE user_id = $1`,
+            [req.dbUser.id]
+          );
           await fetch('https://api.brevo.com/v3/contacts', {
             method: 'POST',
             headers: {
@@ -155,6 +159,13 @@ router.patch('/me/email-opt-out', requireAuth, async (req, res, next) => {
             },
             body: JSON.stringify({
               email: req.dbUser.email,
+              attributes: {
+                FIRSTNAME: req.dbUser.name?.split(' ')[0] || '',
+                LASTNAME: req.dbUser.name?.split(' ').slice(1).join(' ') || '',
+                PLAN: subRows[0]?.plan || 'free',
+                ROLE: 'admin',
+                APP: 'Gridiron Stats',
+              },
               listIds: [2],
               updateEnabled: true,
             }),
