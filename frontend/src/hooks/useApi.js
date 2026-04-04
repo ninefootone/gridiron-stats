@@ -21,6 +21,7 @@ export function useApi() {
       const error = new Error(err.error || 'Request failed');
       error.upgrade_required = err.upgrade_required || false;
       error.limit = err.limit || null;
+      error.team_restricted = err.team_restricted || false;
       throw error;
     }
     return res.json();

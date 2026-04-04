@@ -151,7 +151,10 @@ export default function TeamDetailPage() {
       setPlayerModal(false);
       setEditingPlayer(null);
       setPlayerForm({ name: '', number: '', positions: [] });
-    } catch (err) { setError(err.message); }
+    } catch (err) {
+      if (err.team_restricted) openUpgrade('teams');
+      else setError(err.message);
+    }
     finally { setSaving(false); }
   }
 
@@ -173,6 +176,9 @@ export default function TeamDetailPage() {
       if (err.upgrade_required) {
         setGameModal(false);
         openUpgrade(err.limit);
+      } else if (err.team_restricted) {
+        setGameModal(false);
+        openUpgrade('teams');
       } else {
         setError(err.message);
       }
@@ -203,7 +209,10 @@ async function loadPlays() {
       setPlayModal(false);
       setEditingPlay(null);
       setPlayForm({ name: '', type: 'offense', season: team?.season || '', notes: '' });
-    } catch (err) { setAlertModal(err.message); }
+    } catch (err) {
+      if (err.team_restricted) openUpgrade('teams');
+      else setAlertModal(err.message);
+    }
     finally { setSaving(false); }
   }
 
