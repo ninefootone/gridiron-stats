@@ -90,6 +90,8 @@ export default function TeamDetailPage() {
   const [team, setTeam] = useState(null);
   const isViewer = team?.my_role === 'viewer';
   const isAdmin = team?.my_role === 'admin';
+  const isCoach = team?.my_role === 'member';
+  const canEdit = (isAdmin || isCoach) && !team?.restricted;
   const [players, setPlayers] = useState([]);
   const [games, setGames] = useState([]);
   const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'players');
@@ -391,7 +393,7 @@ async function loadMembers() {
               <button className={`btn btn-sm ${playerSort === 'number' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('number')}># Number</button>
               <button className={`btn btn-sm ${playerSort === 'name' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPlayerSort('name')}>A–Z</button>
             </div>
-            {!isViewer && (
+            {canEdit && (
               <div className={styles.playerToolbarAdd}>
                 <button className="btn btn-primary btn-sm" onClick={() => setAddPlayerMenuModal(true)}>+ Add</button>
               </div>
@@ -455,7 +457,7 @@ async function loadMembers() {
 
       {tab === 'games' && (
         <div>
-          {!isViewer && (
+          {canEdit && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
               <button className="btn btn-primary" onClick={() => setGameModal(true)}>+ Add Game</button>
             </div>
@@ -561,8 +563,12 @@ async function loadMembers() {
         <div className={styles.playsLayout}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-primary btn-sm" onClick={() => { setEditingPlay(null); setPlayForm({ name: '', type: 'offense', season: team?.season || '', notes: '' }); setPlayModal(true); }}>+ Add Play</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => setCopyPlaysModal(true)}>Copy from Season</button>
+              {canEdit && (
+                <>
+                  <button className="btn btn-primary btn-sm" onClick={() => { setEditingPlay(null); setPlayForm({ name: '', type: 'offense', season: team?.season || '', notes: '' }); setPlayModal(true); }}>+ Add Play</button>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setCopyPlaysModal(true)}>Copy from Season</button>
+                </>
+              )}
             </div>
           </div>
 
