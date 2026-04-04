@@ -39,8 +39,9 @@ export default function TeamsPage() {
   useEffect(() => {
     api.get('/teams').then(data => {
       setTeams(data);
-      const hasRestricted = data.some(t => t.restricted && t.my_role === 'admin');
-      if (hasRestricted) setShowChooseTeamModal(true);
+      const adminTeams = data.filter(t => t.my_role === 'admin');
+      const hasRestricted = adminTeams.some(t => t.restricted);
+      if (hasRestricted && adminTeams.length > 1) setShowChooseTeamModal(true);
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -455,8 +456,8 @@ export default function TeamsPage() {
                 }}
               >
                 <div style={{ fontWeight: 700 }}>{t.name}</div>
-                {t.season && <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{t.season}</div>}
-                {!t.restricted && <div style={{ fontSize: '0.72rem', color: 'var(--gold)', marginTop: 2 }}>Currently active</div>}
+                {t.season && <div style={{ fontSize: '0.78rem', color: t.restricted ? 'var(--gray-300)' : '#fff' }}>{t.season}</div>}
+                {!t.restricted && <div style={{ fontSize: '0.72rem', color: '#fff', marginTop: 2, opacity: 0.8 }}>Currently active</div>}
               </button>
             ))}
           </div>
