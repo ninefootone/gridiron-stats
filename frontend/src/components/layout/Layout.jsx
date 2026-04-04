@@ -5,6 +5,7 @@ import { useHelp } from '../../context/HelpContext';
 import { useUpgrade } from '../../context/UpgradeContext';
 import { useApi } from '../../hooks/useApi';
 import styles from './Layout.module.css';
+import Modal from '../shared/Modal';
 
 export default function Layout() {
   const { user } = useUser();
@@ -17,6 +18,10 @@ export default function Layout() {
   const [plan, setPlan] = useState(null);
   const [subInfo, setSubInfo] = useState(null);
   const { openUpgrade } = useUpgrade();
+  const [deleteAccountModal, setDeleteAccountModal] = useState(false);
+  const [deleteAccountStep, setDeleteAccountStep] = useState(1);
+  const [soleAdminTeams, setSoleAdminTeams] = useState([]);
+  const [deleteAccountSaving, setDeleteAccountSaving] = useState(false);
 
   useEffect(() => {
     api.get('/billing/subscription').then(sub => {
@@ -110,6 +115,19 @@ export default function Layout() {
               >
                 Sign out
               </button>
+              <button
+                className={styles.dropdownItem}
+                style={{ color: 'var(--danger, #d94f4f)' }}
+                onClick={async () => {
+                  setMenuOpen(false);
+                  const teams = await api.get('/users/me/sole-admin-teams');
+                  setSoleAdminTeams(teams);
+                  setDeleteAccountStep(1);
+                  setDeleteAccountModal(true);
+                }}
+              >
+                Delete Account
+              </button>
             </div>
           )}
         </div>
@@ -117,6 +135,84 @@ export default function Layout() {
       <main className={`${styles.main} yard-lines`}>
         <Outlet />
       </main>
+      {deleteAccountModal && (
+        <Modal title="Delete Account" onClose={() => setDeleteAccountModal(false)}>
+          {deleteAccountStep === 1 && (
+            <>
+              <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', marginBottom: 16 }}>
+                Are you sure you want to delete your account? This action cannot be undone.
+              </p>
+              {soleAdminTeams.length > 0 && (
+                <div style={{ background: 'rgba(217,79,79,0.1)', border: '1px solid rgba(217,79,79,0.3)', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
+                  <p style={{ fontSize: '0.88rem', color: '#ff8080', marginBottom: 8, fontWeight: 700 }}>
+                    ⚠️ You are the sole admin of {soleAdminTeams.length} team{soleAdminTeams.length === 1 ? '' : 's'}:
+                  </p>
+                  {soleAdminTeams.map(t => (
+                    <div key={t.id} style={{ fontSize: '0.85rem', color: 'var(--gray-300)', marginBottom: 4 }}>
+                      • {t.name} — {t.player_count} players, {t.game_count} games
+                    </div>
+                  ))}
+                  <p style={{ fontSize: '0.82rem', color: 'var(--gray-400)', marginTop: 8 }}>
+                    If you delete your account, these teams will be deleted too. To keep them, promote another coach to admin first.
+                  </p>
+                </div>
+              )}
+              <div className="modal-footer">
+                <button className="btn btn-secondary" onClick={() => setDeleteAccountModal(false)}>Cancel</button>
+                <button className="btn btn-danger" onClick={() => setDeleteAccountStep(2)}>Continue</button>
+              </div>
+            </>
+          )}
+          {deleteAccountStep === 2 && (
+            <>
+              <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', marginBottom: 20 }}>
+                What would you like to do with your data?
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                <button
+                  className="btn btn-danger"
+                  disabled={deleteAccountSaving}
+                  onClick={async () => {
+                    setDeleteAccountSaving(true);
+                    try {
+                      await api.del('/users/me', { delete_data: true });
+                      await signOut();
+                      navigate('/login');
+                    } catch (err) {
+                      console.error(err);
+                    } finally {
+                      setDeleteAccountSaving(false);
+                    }
+                  }}
+                >
+                  Delete account and all my data
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  disabled={deleteAccountSaving}
+                  onClick={async () => {
+                    setDeleteAccountSaving(true);
+                    try {
+                      await api.del('/users/me', { delete_data: false });
+                      await signOut();
+                      navigate('/login');
+                    } catch (err) {
+                      console.error(err);
+                    } finally {
+                      setDeleteAccountSaving(false);
+                    }
+                  }}
+                >
+                  Delete account only — keep team data
+                </button>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-ghost" onClick={() => setDeleteAccountStep(1)}>← Back</button>
+              </div>
+            </>
+          )}
+        </Modal>
+      )}
     </div>
   );
 }
