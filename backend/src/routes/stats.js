@@ -4,6 +4,7 @@ const { pool } = require('../db/init');
 const router = express.Router();
 const { recalculateOurScore } = require('../utils/scoring');
 const { broadcast } = require('../ws');
+const { checkTeamRestricted } = require('../middleware/checkRestricted');
 
 // GET /api/stats?game_id=X or ?player_id=X
 router.get('/', requireAuth, async (req, res, next) => {
@@ -82,7 +83,7 @@ router.get('/summary', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/stats — log a stat
-router.post('/', requireAuth, async (req, res, next) => {
+router.post('/', requireAuth, checkTeamRestricted, async (req, res, next) => {
   const { game_id, player_id, stat_type, value, notes, play_id } = req.body;
   if (!game_id || !player_id || !stat_type) {
     return res.status(400).json({ error: 'game_id, player_id and stat_type required' });

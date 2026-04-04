@@ -2,6 +2,7 @@ const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
+const { checkTeamRestricted } = require('../middleware/checkRestricted');
 
 // GET /api/players?team_id=X
 router.get('/', requireAuth, async (req, res, next) => {
@@ -28,7 +29,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/players
-router.post('/', requireAuth, async (req, res, next) => {
+router.post('/', requireAuth, checkTeamRestricted, async (req, res, next) => {
   const { team_id, name, number, positions } = req.body;
   if (!team_id || !name) return res.status(400).json({ error: 'team_id and name required' });
   try {
@@ -43,7 +44,7 @@ router.post('/', requireAuth, async (req, res, next) => {
 });
 
 // PUT /api/players/:id
-router.put('/:id', requireAuth, async (req, res, next) => {
+router.put('/:id', requireAuth, checkTeamRestricted, async (req, res, next) => {
   const { name, number, positions } = req.body;
   try {
     const { rows } = await pool.query(
@@ -82,7 +83,7 @@ router.patch('/:id/active', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/players/import
-router.post('/import', requireAuth, async (req, res, next) => {
+router.post('/import', requireAuth, checkTeamRestricted, async (req, res, next) => {
   const { team_id, players } = req.body;
   if (!team_id || !Array.isArray(players)) return res.status(400).json({ error: 'team_id and players array required' });
   try {
@@ -116,7 +117,7 @@ router.post('/import', requireAuth, async (req, res, next) => {
 });
 
 // DELETE /api/players/:id
-router.delete('/:id', requireAuth, async (req, res, next) => {
+router.delete('/:id', requireAuth, checkTeamRestricted, async (req, res, next) => {
   try {
     await pool.query(`DELETE FROM players WHERE id = $1`, [req.params.id]);
     res.json({ success: true });

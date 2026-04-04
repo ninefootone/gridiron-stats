@@ -2,6 +2,7 @@ const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const { broadcast } = require('../ws');
+const { checkTeamRestricted } = require('../middleware/checkRestricted');
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 
 // POST /api/games
 const { checkGameLimit } = require('../middleware/checkPlan');
-router.post('/', requireAuth, checkGameLimit, async (req, res, next) => {
+router.post('/', requireAuth, checkGameLimit, checkTeamRestricted, async (req, res, next) => {
   const { team_id, opponent_name, location, game_date, game_time, home_away, notes, game_type } = req.body;
   if (!team_id || !opponent_name || !game_date) {
     return res.status(400).json({ error: 'team_id, opponent_name and game_date required' });
@@ -55,7 +56,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 });
 
 // PUT /api/games/:id
-router.put('/:id', requireAuth, async (req, res, next) => {
+router.put('/:id', requireAuth, checkTeamRestricted, async (req, res, next) => {
   const { opponent_name, location, game_date, game_time, home_away, our_score, opponent_score, status, notes, game_type, whistle_game_id } = req.body;
   try {
     const { rows } = await pool.query(
@@ -82,7 +83,7 @@ router.put('/:id', requireAuth, async (req, res, next) => {
 });
 
 // DELETE /api/games/:id
-router.delete('/:id', requireAuth, async (req, res, next) => {
+router.delete('/:id', requireAuth, checkTeamRestricted, async (req, res, next) => {
   try {
     await pool.query(`DELETE FROM games WHERE id = $1`, [req.params.id]);
     res.json({ success: true });
