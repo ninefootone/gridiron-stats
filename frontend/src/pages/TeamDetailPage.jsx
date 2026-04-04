@@ -329,11 +329,33 @@ async function loadMembers() {
 
   return (
     <div>
+      {team.restricted && (
+        <div style={{
+          background: 'rgba(217,79,79,0.15)',
+          border: '1px solid rgba(217,79,79,0.4)',
+          borderRadius: 'var(--radius)',
+          padding: '10px 16px',
+          marginBottom: 16,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: '0.88rem', color: '#ff8080' }}>
+            ⚠️ This team is read-only — your plan has changed.
+          </span>
+          <button className="btn btn-primary btn-sm" onClick={() => openUpgrade('teams')}>
+            Upgrade
+          </button>
+        </div>
+      )}
       <div className={styles.header}>
         <div className={styles.teamInfo}>
           <div className="page-title">{team.name}</div>
           {team.season && <span style={{ color: 'var(--gold)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.06em' }}>{team.season}</span>}
         </div>
+
         <div className={styles.record}>
           <span className={styles.recordNum}>{wins}</span><span className={styles.recordSep}>-</span><span className={styles.recordNum}>{losses}</span>
           <span className={styles.recordLabel}>W-L</span>
