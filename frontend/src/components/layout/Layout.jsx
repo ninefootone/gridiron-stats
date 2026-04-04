@@ -114,7 +114,7 @@ export default function Layout() {
                 }}
               >
                 <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                  <span>Product emails</span>
+                  <span>Email updates</span>
                   <span style={{
                     width: 32, height: 18, borderRadius: 9, background: emailOptOut ? 'var(--gray-600, #444)' : 'var(--gold)',
                     position: 'relative', display: 'inline-block', transition: 'background 0.2s',
