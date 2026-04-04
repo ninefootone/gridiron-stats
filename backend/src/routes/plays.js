@@ -5,14 +5,14 @@ const { checkTeamRestricted } = require('../middleware/checkRestricted');
 
 const router = express.Router();
 
-// Helper — check admin role
-async function requireAdmin(teamId, userId, res) {
+// Helper — check admin or coach role
+async function requireAdminOrCoach(teamId, userId, res) {
   const { rows } = await pool.query(
     `SELECT role FROM team_members WHERE team_id = $1 AND user_id = $2`,
     [teamId, userId]
   );
-  if (!rows.length || rows[0].role !== 'admin') {
-    res.status(403).json({ error: 'Admin only' });
+  if (!rows.length || !['admin', 'member'].includes(rows[0].role)) {
+    res.status(403).json({ error: 'Admin or coach only' });
     return false;
   }
   return true;
@@ -38,7 +38,7 @@ router.post('/', requireAuth, checkTeamRestricted, async (req, res, next) => {
     return res.status(400).json({ error: 'team_id, name, type and season required' });
   }
   try {
-    if (!await requireAdmin(team_id, req.dbUser.id, res)) return;
+    if (!await requireAdminOrCoach(team_id, req.dbUser.id, res)) return;
     const { rows } = await pool.query(
       `INSERT INTO plays (team_id, name, type, season, notes) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [team_id, name, type, season, notes || null]
@@ -53,7 +53,7 @@ router.put('/:id', requireAuth, checkTeamRestricted, async (req, res, next) => {
   try {
     const existing = await pool.query(`SELECT * FROM plays WHERE id = $1`, [req.params.id]);
     if (!existing.rows.length) return res.status(404).json({ error: 'Play not found' });
-    if (!await requireAdmin(existing.rows[0].team_id, req.dbUser.id, res)) return;
+    if (!await requireAdminOrCoach(existing.rows[0].team_id, req.dbUser.id, res)) return;
     const { rows } = await pool.query(
       `UPDATE plays SET name = COALESCE($1, name), type = COALESCE($2, type), season = COALESCE($3, season), notes = COALESCE($4, notes)
        WHERE id = $5 RETURNING *`,
@@ -68,7 +68,7 @@ router.delete('/:id', requireAuth, checkTeamRestricted, async (req, res, next) =
   try {
     const existing = await pool.query(`SELECT * FROM plays WHERE id = $1`, [req.params.id]);
     if (!existing.rows.length) return res.status(404).json({ error: 'Play not found' });
-    if (!await requireAdmin(existing.rows[0].team_id, req.dbUser.id, res)) return;
+    if (!await requireAdminOrCoach(existing.rows[0].team_id, req.dbUser.id, res)) return;
     await pool.query(`DELETE FROM plays WHERE id = $1`, [req.params.id]);
     res.json({ success: true });
   } catch (err) { next(err); }
@@ -81,7 +81,7 @@ router.post('/copy', requireAuth, async (req, res, next) => {
     return res.status(400).json({ error: 'team_id, from_season and to_season required' });
   }
   try {
-    if (!await requireAdmin(team_id, req.dbUser.id, res)) return;
+    if (!await requireAdminOrCoach(team_id, req.dbUser.id, res)) return;
     const { rows } = await pool.query(
       `INSERT INTO plays (team_id, name, type, season, notes)
        SELECT team_id, name, type, $1, notes FROM plays
