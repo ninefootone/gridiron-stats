@@ -47,4 +47,79 @@ router.get('/admin/stats', requireAuth, async (req, res, next) => {
   }
 });
 
+// DELETE /api/users/me — delete account
+router.delete('/me', requireAuth, async (req, res, next) => {
+  const { delete_data } = req.body;
+  try {
+    const userId = req.dbUser.id;
+    const authId = req.dbUser.auth0_id;
+
+    // Find teams where user is sole admin
+    const { rows: soleAdminTeams } = await pool.query(`
+      SELECT t.id, t.name FROM teams t
+      WHERE t.created_by = $1
+      AND (
+        SELECT COUNT(*) FROM team_members tm
+        WHERE tm.team_id = t.id AND tm.role = 'admin'
+      ) = 1
+    `, [userId]);
+
+    if (delete_data) {
+      // Delete all teams and their data where user is sole admin
+      for (const team of soleAdminTeams) {
+        await pool.query(`DELETE FROM player_stats WHERE game_id IN (SELECT id FROM games WHERE team_id = $1)`, [team.id]);
+        await pool.query(`DELETE FROM opponent_stats WHERE game_id IN (SELECT id FROM games WHERE team_id = $1)`, [team.id]);
+        await pool.query(`DELETE FROM score_adjustments WHERE game_id IN (SELECT id FROM games WHERE team_id = $1)`, [team.id]);
+        await pool.query(`DELETE FROM plays WHERE team_id = $1`, [team.id]);
+        await pool.query(`DELETE FROM games WHERE team_id = $1`, [team.id]);
+        await pool.query(`DELETE FROM players WHERE team_id = $1`, [team.id]);
+        await pool.query(`DELETE FROM team_members WHERE team_id = $1`, [team.id]);
+        await pool.query(`DELETE FROM teams WHERE id = $1`, [team.id]);
+      }
+    }
+
+    // Remove from Brevo
+    if (process.env.BREVO_API_KEY && req.dbUser.email) {
+      try {
+        await fetch(`https://api.brevo.com/v3/contacts/${encodeURIComponent(req.dbUser.email)}`, {
+          method: 'DELETE',
+          headers: { 'api-key': process.env.BREVO_API_KEY },
+        });
+      } catch (e) {
+        console.error('Brevo delete failed:', e);
+      }
+    }
+
+    // Delete from our database (cascades to team_members, subscriptions)
+    await pool.query(`DELETE FROM users WHERE id = $1`, [userId]);
+
+    // Delete from Clerk
+    const { createClerkClient } = require('@clerk/express');
+    const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+    await clerk.users.deleteUser(authId);
+
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/users/me/sole-admin-teams — check before deletion
+router.get('/me/sole-admin-teams', requireAuth, async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT t.id, t.name,
+        (SELECT COUNT(*) FROM players WHERE team_id = t.id) as player_count,
+        (SELECT COUNT(*) FROM games WHERE team_id = t.id) as game_count
+      FROM teams t
+      WHERE t.created_by = $1
+      AND (
+        SELECT COUNT(*) FROM team_members tm
+        WHERE tm.team_id = t.id AND tm.role = 'admin'
+      ) = 1
+    `, [req.dbUser.id]);
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
