@@ -132,7 +132,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         const plan = getPlanFromPrice(subscription.items.data[0].price.id);
-        await pool.query(`
+                await pool.query(`
           UPDATE subscriptions SET
             plan = $1, status = $2,
             current_period_end = $3,
@@ -146,6 +146,13 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           subscription.cancel_at_period_end || !!subscription.cancel_at,
           subscription.id,
         ]);
+
+        // Apply restrictions based on new plan
+        const { rows: subRows } = await pool.query(
+          `SELECT user_id FROM subscriptions WHERE stripe_subscription_id = $1`,
+          [subscription.id]
+        );
+        if (subRows[0]) await applyPlanRestrictions(subRows[0].user_id, plan);
         break;
       }
 
@@ -164,6 +171,26 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     res.status(500).json({ error: 'Webhook handler failed' });
   }
 });
+
+async function applyPlanRestrictions(userId, plan) {
+  // Get all teams created by this user, oldest first
+  const { rows: teams } = await pool.query(
+    `SELECT id FROM teams WHERE created_by = $1 ORDER BY id ASC`,
+    [userId]
+  );
+
+  if (!teams.length) return;
+
+  const allowedTeams = plan === 'club' ? Infinity : 1;
+
+  for (let i = 0; i < teams.length; i++) {
+    const restricted = i >= allowedTeams;
+    await pool.query(
+      `UPDATE teams SET restricted = $1 WHERE id = $2`,
+      [restricted, teams[i].id]
+    );
+  }
+}
 
 function getPlanFromPrice(priceId) {
   if (priceId === process.env.STRIPE_PRICE_INDIVIDUAL_MONTHLY || priceId === process.env.STRIPE_PRICE_INDIVIDUAL_ANNUAL) return 'individual';
