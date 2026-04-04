@@ -191,6 +191,9 @@ async function initDB() {
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_customer_id ON subscriptions(stripe_customer_id)`);    
 
+    // Team restriction for downgraded plans
+    await pool.query(`ALTER TABLE teams ADD COLUMN IF NOT EXISTS restricted BOOLEAN DEFAULT false`);
+
     console.log('✅ Database schema ready');
   } finally {
     client.release();
