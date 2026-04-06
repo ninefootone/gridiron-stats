@@ -444,6 +444,18 @@ export default function TeamsPage() {
                   {copiedCode === shareTeam.id + '_view' ? '✓ Copied' : '📋 Copy'}
                 </button>
               </div>
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ marginTop: 8, fontSize: '0.78rem', color: 'var(--gray-400)', alignSelf: 'flex-start' }}
+                onClick={() => {
+                  const message = `Hi! You can follow ${shareTeam.name} on Gridiron Stats to see live player stats and scores.\n\n1. Visit app.gridiron-stats.co\n2. Create a free account\n3. Tap 'Join Team' and enter this code: ${shareTeam.view_code}\n\nYou'll have read-only access — perfect for following the season! 🏈`;
+                  navigator.clipboard.writeText(message);
+                  setCopiedCode(shareTeam.id + '_view_invite');
+                  setTimeout(() => setCopiedCode(null), 2000);
+                }}
+              >
+                {copiedCode === shareTeam.id + '_view_invite' ? '✓ Message copied' : '✉️ Copy invite message'}
+              </button>
             </div>
           )}
           <div className="modal-footer">
