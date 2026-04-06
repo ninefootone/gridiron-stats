@@ -195,4 +195,41 @@ router.post('/:id/link', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/players/:id/linked-stats — get stats across all linked players
+router.get('/:id/linked-stats', requireAuth, async (req, res, next) => {
+  try {
+    // Get this player's club_player_id
+    const { rows: playerRows } = await pool.query(
+      `SELECT id, name, club_player_id FROM players WHERE id = $1`,
+      [req.params.id]
+    );
+    if (!playerRows.length) return res.status(404).json({ error: 'Player not found' });
+    const { club_player_id } = playerRows[0];
+    if (!club_player_id) return res.json({ linked: false, players: [] });
+
+    // Get all players sharing this club_player_id
+    const { rows: linkedPlayers } = await pool.query(
+      `SELECT p.id, p.name, p.number, p.team_id, t.name as team_name
+       FROM players p
+       JOIN teams t ON t.id = p.team_id
+       WHERE p.club_player_id = $1`,
+      [club_player_id]
+    );
+
+    // Get stats for each linked player
+    const playersWithStats = await Promise.all(linkedPlayers.map(async lp => {
+      const { rows: stats } = await pool.query(
+        `SELECT stat_type, SUM(value) as total
+         FROM player_stats
+         WHERE player_id = $1
+         GROUP BY stat_type`,
+        [lp.id]
+      );
+      return { ...lp, stats };
+    }));
+
+    res.json({ linked: true, players: playersWithStats });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
