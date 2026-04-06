@@ -113,6 +113,7 @@ export default function TeamDetailPage() {
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [playerNameMatches, setPlayerNameMatches] = useState([]);
   const [linkToPlayerId, setLinkToPlayerId] = useState(null);
+  const [importMatches, setImportMatches] = useState({});
   const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -308,10 +309,19 @@ async function loadMembers() {
     if (!file) return;
     setImportError('');
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = async ev => {
       const parsed = parseCSV(ev.target.result);
       if (!parsed.length) { setImportError('No valid players found. Check your CSV format.'); return; }
       setImportPreview(parsed);
+      // Check for cross-team matches
+      const matches = {};
+      for (const player of parsed) {
+        if (player.name.trim().length >= 2) {
+          const results = await api.get(`/players/search?name=${encodeURIComponent(player.name.trim())}&team_id=${teamId}`);
+          if (results.length > 0) matches[player.name] = results;
+        }
+      }
+      setImportMatches(matches);
     };
     reader.readAsText(file);
   }
@@ -320,9 +330,17 @@ async function loadMembers() {
     setImporting(true);
     try {
       const { players: newPlayers } = await api.post('/players/import', { team_id: Number(teamId), players: importPreview });
+      // Link any matched players
+      for (const newPlayer of newPlayers) {
+        const match = importMatches[newPlayer.name];
+        if (match && match._selectedLink) {
+          await api.post(`/players/${newPlayer.id}/link`, { link_to_player_id: match._selectedLink });
+        }
+      }
       setPlayers(prev => [...prev, ...newPlayers]);
       setImportModal(false);
       setImportPreview([]);
+      setImportMatches({});
     } catch (err) {
       setImportError(err.message);
     } finally {
@@ -1091,12 +1109,46 @@ async function loadMembers() {
               <div className="label-xs" style={{ marginBottom: 8 }}>
                 Preview — {importPreview.length} players found
               </div>
-              <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {importPreview.map((p, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 12px' }}>
-                    <span style={{ fontFamily: 'var(--font-display)', color: 'var(--gold)', fontWeight: 900, width: 32 }}>#{p.number || '—'}</span>
-                    <span style={{ flex: 1, fontWeight: 600 }}>{p.name}</span>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{p.positions.join(', ') || '—'}</span>
+                  <div key={i}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 12px' }}>
+                      <span style={{ fontFamily: 'var(--font-display)', color: 'var(--gold)', fontWeight: 900, width: 32 }}>#{p.number || '—'}</span>
+                      <span style={{ flex: 1, fontWeight: 600 }}>{p.name}</span>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{p.positions.join(', ') || '—'}</span>
+                    </div>
+                    {importMatches[p.name] && (
+                      <div style={{ background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.3)', borderRadius: 8, padding: '8px 12px', marginTop: 4, fontSize: '0.82rem' }}>
+                        {importMatches[p.name]._selectedLink ? (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ color: '#51cf66' }}>✓ Will be linked to existing player</span>
+                            <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-400)', fontSize: '0.75rem' }}
+                              onClick={() => setImportMatches(prev => ({ ...prev, [p.name]: { ...prev[p.name], _selectedLink: null } }))}>
+                              Undo
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            {importMatches[p.name].map(match => (
+                              <div key={match.id} style={{ marginBottom: 6 }}>
+                                <span style={{ color: 'var(--gold)' }}>⚠️ {match.name}</span>
+                                <span style={{ color: 'var(--gray-300)' }}> already on <strong>{match.team_name}</strong></span>
+                                <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                                  <button type="button" className="btn btn-sm btn-secondary"
+                                    onClick={() => setImportMatches(prev => ({ ...prev, [p.name]: { ...prev[p.name], _selectedLink: match.id } }))}>
+                                    Link to this player
+                                  </button>
+                                  <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-400)' }}
+                                    onClick={() => setImportMatches(prev => { const n = { ...prev }; delete n[p.name]; return n; })}>
+                                    Different player
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
