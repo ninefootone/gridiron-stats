@@ -155,4 +155,37 @@ router.get('/search', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/players/:id/link — link two players via club_player_id
+router.post('/:id/link', requireAuth, async (req, res, next) => {
+  const { link_to_player_id } = req.body;
+  if (!link_to_player_id) return res.status(400).json({ error: 'link_to_player_id required' });
+  try {
+    // Get the target player's club_player_id (or use their id as the club_player_id)
+    const { rows: targetRows } = await pool.query(
+      `SELECT id, club_player_id FROM players WHERE id = $1`,
+      [link_to_player_id]
+    );
+    if (!targetRows.length) return res.status(404).json({ error: 'Player not found' });
+
+    // Use existing club_player_id if set, otherwise use the target player's id
+    const clubPlayerId = targetRows[0].club_player_id || targetRows[0].id;
+
+    // Update both players to share the same club_player_id
+    await pool.query(
+      `UPDATE players SET club_player_id = $1 WHERE id = $2`,
+      [clubPlayerId, link_to_player_id]
+    );
+    await pool.query(
+      `UPDATE players SET club_player_id = $1 WHERE id = $2`,
+      [clubPlayerId, req.params.id]
+    );
+
+    const { rows } = await pool.query(
+      `SELECT * FROM players WHERE id = $1`,
+      [req.params.id]
+    );
+    res.json(rows[0]);
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
