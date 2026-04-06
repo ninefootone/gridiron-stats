@@ -11,7 +11,7 @@ export function HelpProvider({ children }) {
   const [helpModal, setHelpModal] = useState(false);
 
   return (
-    <HelpContext.Provider value={{ openHelp: () => setHelpModal(true) }}>
+    <HelpContext.Provider value={{ openHelp: () => window.open('https://gridiron-stats.co/how-does-it-work/', '_blank', 'noopener noreferrer') }}>
       {children}
       {helpModal && (
         <Modal title="Help & Info" onClose={() => setHelpModal(false)} wide>
