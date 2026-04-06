@@ -145,11 +145,11 @@ router.get('/search', requireAuth, async (req, res, next) => {
               t.name as team_name, t.id as team_id
        FROM players p
        JOIN teams t ON t.id = p.team_id
-       WHERE LOWER(p.name) = LOWER($1)
+       WHERE LOWER(p.name) LIKE LOWER($1)
        AND p.team_id != $2
        AND t.created_by = $3
        AND p.active = true`,
-      [name.trim(), team_id, adminId]
+      [name.trim() + '%', team_id, adminId]
     );
     res.json(rows);
   } catch (err) { next(err); }

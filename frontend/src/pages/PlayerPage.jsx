@@ -211,15 +211,14 @@ export default function PlayerPage() {
       )}
 
       {/* Link to another player */}
-      {teamRole !== 'viewer' && (
+      {teamRole !== 'viewer' && !linkedStats?.linked && (
         <div style={{ marginBottom: 16, textAlign: 'right' }}>
           <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.78rem', color: 'var(--gray-400)' }}
             onClick={() => { setLinkModal(true); setLinkSearch(''); setLinkResults([]); }}>
-            🔗 {linkedStats?.linked ? 'Manage club links' : 'Link to player on another team'}
+            🔗 Link to player on another team
           </button>
         </div>
       )}
-
 
       {teamRole !== 'viewer' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0', padding: '14px 18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
