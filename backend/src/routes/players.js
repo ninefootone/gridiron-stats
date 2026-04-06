@@ -126,4 +126,33 @@ router.delete('/:id', requireAuth, checkTeamRestricted, async (req, res, next) =
   }
 });
 
+// GET /api/players/search — find players with same name across same-admin teams
+router.get('/search', requireAuth, async (req, res, next) => {
+  const { name, team_id } = req.query;
+  if (!name || !team_id) return res.json([]);
+  try {
+    // Find the admin who created the target team
+    const { rows: teamRows } = await pool.query(
+      `SELECT created_by FROM teams WHERE id = $1`,
+      [team_id]
+    );
+    if (!teamRows.length) return res.json([]);
+    const adminId = teamRows[0].created_by;
+
+    // Find players with matching name on other teams created by same admin
+    const { rows } = await pool.query(
+      `SELECT p.id, p.name, p.number, p.positions, p.club_player_id,
+              t.name as team_name, t.id as team_id
+       FROM players p
+       JOIN teams t ON t.id = p.team_id
+       WHERE LOWER(p.name) = LOWER($1)
+       AND p.team_id != $2
+       AND t.created_by = $3
+       AND p.active = true`,
+      [name.trim(), team_id, adminId]
+    );
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
