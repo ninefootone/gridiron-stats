@@ -907,7 +907,6 @@ async function loadMembers() {
                   setLinkToPlayerId(null);
                   if (name.trim().length >= 2 && !editingPlayer) {
                     const matches = await api.get(`/players/search?name=${encodeURIComponent(name.trim())}&team_id=${teamId}`);
-                    console.log('Player search results:', matches);
                     setPlayerNameMatches(matches);
                   } else {
                     setPlayerNameMatches([]);
