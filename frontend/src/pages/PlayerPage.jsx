@@ -25,19 +25,26 @@ export default function PlayerPage() {
   const [team, setTeam] = useState(null);
   const [showAllPositions, setShowAllPositions] = useState(false);
   const isAdmin = teamRole === 'admin';
+  const [linkedStats, setLinkedStats] = useState(null);
+  const [linkModal, setLinkModal] = useState(false);
+  const [linkSearch, setLinkSearch] = useState('');
+  const [linkResults, setLinkResults] = useState([]);
+  const [linkSaving, setLinkSaving] = useState(false);
 
   useEffect(() => {
     Promise.all([
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?player_id=${playerId}`),
       api.get(`/teams/${teamId}`),
-    ]).then(([players, s, t]) => {
+      api.get(`/players/${playerId}/linked-stats`),
+    ]).then(([players, s, t, linked]) => {
       setTeamRole(t.my_role);
       setTeam(t);
       const p = players.find(p => String(p.id) === String(playerId));
       setPlayer(p);
       if (p) setEditForm({ name: p.name, number: p.number || '', positions: p.positions || [] });
       setStats(s);
+      setLinkedStats(linked);
     }).catch(console.error).finally(() => setLoading(false));
   }, [playerId, teamId]);
 
@@ -164,6 +171,55 @@ export default function PlayerPage() {
           </div>
         </div>
       )}
+
+      {/* Cross-team stats */}
+      {linkedStats?.linked && linkedStats.players.length > 1 && (
+        <div style={{ margin: '20px 0', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '16px 18px' }}>
+          <div className="section-label" style={{ marginBottom: 12 }}>Club Stats — All Teams</div>
+          {linkedStats.players.map(lp => (
+            <div key={lp.id} style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: '0.82rem', color: 'var(--gold)', fontWeight: 700, marginBottom: 6 }}>
+                {lp.team_name} {lp.id === Number(playerId) ? '(this team)' : ''}
+              </div>
+              {lp.stats.length === 0 ? (
+                <div style={{ fontSize: '0.82rem', color: 'var(--gray-500)' }}>No stats recorded</div>
+              ) : (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {lp.stats.map(s => {
+                    const info = getStatInfo(s.stat_type);
+                    return <span key={s.stat_type} className="stat-badge">{info.icon} {info.label}: {s.total}{info.unit ? ` ${info.unit}` : ''}</span>;
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 12, marginTop: 4 }}>
+            <div style={{ fontSize: '0.82rem', color: 'var(--gray-300)', fontWeight: 700, marginBottom: 6 }}>Combined Totals</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {Object.entries(
+                linkedStats.players.flatMap(lp => lp.stats).reduce((acc, s) => {
+                  acc[s.stat_type] = (acc[s.stat_type] || 0) + Number(s.total);
+                  return acc;
+                }, {})
+              ).map(([type, total]) => {
+                const info = getStatInfo(type);
+                return <span key={type} className="stat-badge" style={{ background: 'rgba(245,166,35,0.15)', borderColor: 'rgba(245,166,35,0.3)' }}>{info.icon} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}</span>;
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Link to another player */}
+      {teamRole !== 'viewer' && (
+        <div style={{ marginBottom: 16, textAlign: 'right' }}>
+          <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.78rem', color: 'var(--gray-400)' }}
+            onClick={() => { setLinkModal(true); setLinkSearch(''); setLinkResults([]); }}>
+            🔗 {linkedStats?.linked ? 'Manage club links' : 'Link to player on another team'}
+          </button>
+        </div>
+      )}
+
 
       {teamRole !== 'viewer' && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0', padding: '14px 18px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
@@ -345,6 +401,72 @@ export default function PlayerPage() {
           ))}
         </div>
       )}
+
+      {linkModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setLinkModal(false)}>
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">Link to Another Player</div>
+              <button className="modal-close btn" onClick={() => setLinkModal(false)}>✕</button>
+            </div>
+            <p style={{ color: 'var(--gray-300)', fontSize: '0.88rem', marginBottom: 16 }}>
+              Search for a player on another team to link their stats together.
+            </p>
+            <div className="form-group" style={{ marginBottom: 14 }}>
+              <label>Search by name</label>
+              <input
+                className="form-control"
+                value={linkSearch}
+                onChange={async e => {
+                  setLinkSearch(e.target.value);
+                  if (e.target.value.trim().length >= 2) {
+                    const results = await api.get(`/players/search?name=${encodeURIComponent(e.target.value.trim())}&team_id=${teamId}`);
+                    setLinkResults(results.filter(r => r.id !== Number(playerId)));
+                  } else {
+                    setLinkResults([]);
+                  }
+                }}
+                placeholder="Type player name..."
+              />
+            </div>
+            {linkResults.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                {linkResults.map(r => (
+                  <div key={r.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '10px 14px' }}>
+                    <div>
+                      <div style={{ fontWeight: 700 }}>{r.name} {r.number ? `#${r.number}` : ''}</div>
+                      <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{r.team_name}</div>
+                    </div>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={linkSaving}
+                      onClick={async () => {
+                        setLinkSaving(true);
+                        try {
+                          await api.post(`/players/${playerId}/link`, { link_to_player_id: r.id });
+                          const linked = await api.get(`/players/${playerId}/linked-stats`);
+                          setLinkedStats(linked);
+                          setLinkModal(false);
+                        } catch (err) { setAlertModal(err.message); }
+                        finally { setLinkSaving(false); }
+                      }}
+                    >
+                      Link
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {linkSearch.length >= 2 && linkResults.length === 0 && (
+              <p style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }}>No matching players found on other teams.</p>
+            )}
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setLinkModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {confirmModal && (
         <ConfirmModal
