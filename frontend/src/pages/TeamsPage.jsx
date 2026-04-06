@@ -420,6 +420,19 @@ export default function TeamsPage() {
                   {copiedCode === shareTeam.id + '_join' ? '✓ Copied' : '📋 Copy'}
                 </button>
               </div>
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ marginTop: 8, fontSize: '0.78rem', color: 'var(--gray-400)', alignSelf: 'flex-start' }}
+                onClick={() => {
+                  const message = `Hi! I'd like to add you as a coach on ${shareTeam.name} in Gridiron Stats.\n\n1. Access the app at app.gridiron-stats.co\n2. Create a free account\n3. Tap 'Join Team' and enter this code: ${shareTeam.join_code}\n\nSee you on the sideline! 🏈`;
+                  navigator.clipboard.writeText(message);
+                  setCopiedCode(shareTeam.id + '_invite');
+                  setTimeout(() => setCopiedCode(null), 2000);
+                }}
+              >
+                {copiedCode === shareTeam.id + '_invite' ? '✓ Message copied' : '✉️ Copy invite message'}
+              </button>
+
             </div>
           )}
           {shareTeam.view_code && (
