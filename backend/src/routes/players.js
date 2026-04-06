@@ -160,15 +160,22 @@ router.post('/:id/link', requireAuth, async (req, res, next) => {
   const { link_to_player_id } = req.body;
   if (!link_to_player_id) return res.status(400).json({ error: 'link_to_player_id required' });
   try {
-    // Get the target player's club_player_id (or use their id as the club_player_id)
+    // Get the target player's club_player_id
     const { rows: targetRows } = await pool.query(
       `SELECT id, club_player_id FROM players WHERE id = $1`,
       [link_to_player_id]
     );
     if (!targetRows.length) return res.status(404).json({ error: 'Player not found' });
 
-    // Use existing club_player_id if set, otherwise use the target player's id
-    const clubPlayerId = targetRows[0].club_player_id || targetRows[0].id;
+    let clubPlayerId = targetRows[0].club_player_id;
+
+    // If no existing club_player record, create one
+    if (!clubPlayerId) {
+      const { rows: clubRows } = await pool.query(
+        `INSERT INTO club_players DEFAULT VALUES RETURNING id`
+      );
+      clubPlayerId = clubRows[0].id;
+    }
 
     // Update both players to share the same club_player_id
     await pool.query(
