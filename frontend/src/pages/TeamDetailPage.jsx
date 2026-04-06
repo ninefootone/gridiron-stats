@@ -111,6 +111,8 @@ export default function TeamDetailPage() {
   const [playerForm, setPlayerForm] = useState({ name: '', number: '', positions: [] });
   const [showAllPositions, setShowAllPositions] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
+  const [playerNameMatches, setPlayerNameMatches] = useState([]);
+  const [linkToPlayerId, setLinkToPlayerId] = useState(null);
   const [gameForm, setGameForm] = useState({ opponent_name: '', location: '', game_date: '', game_time: '', home_away: 'home', notes: '', game_type: 'regular' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -147,12 +149,17 @@ export default function TeamDetailPage() {
         const p = await api.put(`/players/${editingPlayer.id}`, { ...playerForm, number: playerForm.number ? Number(playerForm.number) : null, positions: playerForm.positions });
         setPlayers(prev => prev.map(pl => pl.id === p.id ? p : pl));
       } else {
-        const p = await api.post('/players', { team_id: Number(teamId), ...playerForm, number: playerForm.number ? Number(playerForm.number) : null, positions: playerForm.positions });
+        let p = await api.post('/players', { team_id: Number(teamId), ...playerForm, number: playerForm.number ? Number(playerForm.number) : null, positions: playerForm.positions });
+        if (linkToPlayerId) {
+          p = await api.post(`/players/${p.id}/link`, { link_to_player_id: linkToPlayerId });
+        }
         setPlayers(prev => [...prev, p]);
       }
       setPlayerModal(false);
       setEditingPlayer(null);
       setPlayerForm({ name: '', number: '', positions: [] });
+      setPlayerNameMatches([]);
+      setLinkToPlayerId(null);
     } catch (err) {
       if (err.team_restricted) openUpgrade('teams');
       else setError(err.message);
@@ -891,7 +898,77 @@ async function loadMembers() {
             {error && <div className="alert alert-error">{error}</div>}
             <div className="form-group" style={{ marginBottom: 14 }}>
               <label>Name *</label>
-              <input className="form-control" value={playerForm.name} onChange={e => setPlayerForm(p => ({ ...p, name: e.target.value }))} placeholder="Player name" required />
+              <input
+                className="form-control"
+                value={playerForm.name}
+                onChange={async e => {
+                  const name = e.target.value;
+                  setPlayerForm(p => ({ ...p, name }));
+                  setLinkToPlayerId(null);
+                  if (name.trim().length >= 2 && !editingPlayer) {
+                    const matches = await api.get(`/players/search?name=${encodeURIComponent(name.trim())}&team_id=${teamId}`);
+                    setPlayerNameMatches(matches);
+                  } else {
+                    setPlayerNameMatches([]);
+                  }
+                }}
+                placeholder="Player name"
+                required
+              />
+              {playerNameMatches.length > 0 && !linkToPlayerId && (
+                <div style={{ marginTop: 8 }}>
+                  {playerNameMatches.map(match => (
+                    <div key={match.id} style={{
+                      background: 'rgba(245,166,35,0.1)',
+                      border: '1px solid rgba(245,166,35,0.3)',
+                      borderRadius: 8,
+                      padding: '10px 12px',
+                      marginBottom: 6,
+                      fontSize: '0.85rem',
+                    }}>
+                      <div style={{ marginBottom: 6 }}>
+                        <span style={{ color: 'var(--gold)' }}>⚠️ {match.name}</span>
+                        <span style={{ color: 'var(--gray-300)' }}> is already on <strong>{match.team_name}</strong></span>
+                        {match.number && <span style={{ color: 'var(--gray-400)' }}> (#{match.number})</span>}
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => {
+                          setLinkToPlayerId(match.id);
+                          setPlayerNameMatches([]);
+                        }}
+                      >
+                        Link to this player
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-ghost"
+                        style={{ marginLeft: 8, color: 'var(--gray-400)' }}
+                        onClick={() => setPlayerNameMatches([])}
+                      >
+                        Different player
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {linkToPlayerId && (
+                <div style={{
+                  background: 'rgba(81,207,102,0.1)',
+                  border: '1px solid rgba(81,207,102,0.3)',
+                  borderRadius: 8,
+                  padding: '8px 12px',
+                  marginTop: 8,
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                  <span style={{ color: '#51cf66' }}>✓ Will be linked to existing player</span>
+                  <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-400)' }} onClick={() => setLinkToPlayerId(null)}>Undo</button>
+                </div>
+              )}
             </div>
             <div className="form-group" style={{ marginBottom: 14 }}>
               <label>Jersey #</label>
