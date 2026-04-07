@@ -130,7 +130,7 @@ export default function TeamDetailPage() {
   const [copyFromSeason, setCopyFromSeason] = useState('');
   const [copyToSeason, setCopyToSeason] = useState('');
   const [editTeamModal, setEditTeamModal] = useState(false);
-  const [editTeamForm, setEditTeamForm] = useState({ name: '', season: '', description: '', team_type: null });
+  const [editTeamForm, setEditTeamForm] = useState({ name: '', season: '', description: '', team_type: null, notify_on_join: true });
 
   useEffect(() => {
     Promise.all([
@@ -801,7 +801,7 @@ async function loadMembers() {
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => {
-                setEditTeamForm({ name: team.name, season: team.season || '', description: team.description || '', team_type: team.team_type || null });
+                setEditTeamForm({ name: team.name, season: team.season || '', description: team.description || '', team_type: team.team_type || null, notify_on_join: team.notify_on_join ?? true });
                 setEditTeamModal(true);
               }}
             >
@@ -868,9 +868,21 @@ async function loadMembers() {
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', marginTop: 6 }}>Filters positions and stats for your game type</p>
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            <div className="form-group" style={{ marginBottom: 14 }}>
               <label>Description</label>
               <textarea className="form-control" rows={2} value={editTeamForm.description} onChange={e => setEditTeamForm(p => ({ ...p, description: e.target.value }))} placeholder="Optional notes" />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Notify me when someone joins</span>
+                <input
+                  type="checkbox"
+                  checked={editTeamForm.notify_on_join ?? true}
+                  onChange={e => setEditTeamForm(p => ({ ...p, notify_on_join: e.target.checked }))}
+                  style={{ width: 18, height: 18 }}
+                />
+              </label>
+              <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', marginTop: 4 }}>Email all admins when a coach or viewer joins using a code.</p>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setEditTeamModal(false)}>Cancel</button>
