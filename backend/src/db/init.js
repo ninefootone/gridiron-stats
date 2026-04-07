@@ -194,6 +194,7 @@ async function initDB() {
     // Team restriction for downgraded plans
     await pool.query(`ALTER TABLE teams ADD COLUMN IF NOT EXISTS restricted BOOLEAN DEFAULT false`);
     await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_opt_out BOOLEAN DEFAULT false`);
+    await pool.query(`ALTER TABLE teams ADD COLUMN IF NOT EXISTS notify_on_join BOOLEAN DEFAULT true`);
 
     console.log('✅ Database schema ready');
   } finally {
