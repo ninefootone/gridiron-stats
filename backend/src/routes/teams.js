@@ -98,6 +98,7 @@ router.post('/join', requireAuth, async (req, res, next) => {
       `INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, 'member')`,
       [team.id, req.dbUser.id]
     );
+    notifyAdminsOfJoin(team.id, req.dbUser.name, req.dbUser.email, 'join').catch(console.error);
     res.json({ success: true, team });
   } catch (err) {
     next(err);
@@ -126,6 +127,7 @@ router.post('/view', requireAuth, async (req, res, next) => {
       `INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, 'viewer')`,
       [team.id, req.dbUser.id]
     );
+    notifyAdminsOfJoin(team.id, req.dbUser.name, req.dbUser.email, 'view').catch(console.error);
     res.json({ success: true, team });
   } catch (err) {
     next(err);
@@ -309,5 +311,51 @@ router.post('/:id/set-active', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+async function notifyAdminsOfJoin(teamId, joinerName, joinerEmail, joinType) {
+  if (!process.env.BREVO_API_KEY) return;
+  try {
+    // Check if notifications are enabled for this team
+    const { rows: teamRows } = await pool.query(
+      `SELECT t.name, t.notify_on_join FROM teams t WHERE t.id = $1`,
+      [teamId]
+    );
+    if (!teamRows.length || !teamRows[0].notify_on_join) return;
+    const teamName = teamRows[0].name;
+
+    // Get all admins for this team
+    const { rows: admins } = await pool.query(
+      `SELECT u.email, u.name FROM users u
+       JOIN team_members tm ON tm.user_id = u.id
+       WHERE tm.team_id = $1 AND tm.role = 'admin'`,
+      [teamId]
+    );
+    if (!admins.length) return;
+
+    // Send email to each admin
+    for (const admin of admins) {
+      await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          sender: { name: 'Gridiron Stats', email: 'hello@gridiron-stats.app' },
+          to: [{ email: admin.email, name: admin.name }],
+          subject: `${joinerName} joined ${teamName}`,
+          htmlContent: `
+            <h2>New team member</h2>
+            <p><strong>${joinerName}</strong> (${joinerEmail}) has joined <strong>${teamName}</strong> as a ${joinType === 'view' ? 'viewer' : 'coach'}.</p>
+            <p>You can manage your team members at <a href="https://app.gridiron-stats.co">app.gridiron-stats.co</a>.</p>
+            <hr>
+            <p style="font-size:12px;color:#999;">You're receiving this because you're an admin of ${teamName}. You can turn off these notifications in your team settings.</p>
+          `,
+        }),
+      });
+    }
+  } catch (err) {
+    console.error('Join notification error:', err);
+  }
+}
 
 module.exports = router;
