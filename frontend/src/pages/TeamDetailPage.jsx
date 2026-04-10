@@ -404,9 +404,9 @@ async function loadMembers() {
             Plays
           </button>
         )}
-        {isAdmin && (
-          <button className={`${styles.tab} ${tab === 'members' ? styles.activeTab : ''}`} onClick={() => { setTab('members'); loadMembers(); }}>
-            Members
+        {!isViewer && (
+          <button className={`${styles.tab} ${tab === 'settings' ? styles.activeTab : ''}`} onClick={() => { setTab('settings'); loadMembers(); }}>
+            Settings
           </button>
         )}
       </div>
@@ -683,88 +683,46 @@ async function loadMembers() {
         </Modal>
       )}
 
-      {tab === 'members' && isAdmin && (
+      {tab === 'settings' && !isViewer && (
         <div>
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
-              <div className="label-xs" style={{ marginBottom: 8 }}>Join Code (coaches)</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)' }}>{team.join_code}</div>
+          <div style={{ marginBottom: 24 }}>
+            <div className="label-xs" style={{ marginBottom: 12 }}>Share Codes</div>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 10 }}>
+              <div className="label-xs" style={{ marginBottom: 6 }}>Join Code (coaches)</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)', flex: 1 }}>{team.join_code}</div>
+                <button className="btn btn-secondary btn-sm" onClick={() => { navigator.clipboard.writeText(team.join_code); }}>📋 Copy</button>
+              </div>
             </div>
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 16 }}>
-              <div className="label-xs" style={{ marginBottom: 8 }}>View Code (read-only)</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)' }}>{team.view_code}</div>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 10 }}>
+              <div className="label-xs" style={{ marginBottom: 6 }}>View Code (read-only)</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)', flex: 1 }}>{team.view_code}</div>
+                <button className="btn btn-secondary btn-sm" onClick={() => { navigator.clipboard.writeText(team.view_code); }}>📋 Copy</button>
+              </div>
             </div>
           </div>
-          {membersLoading ? <div className="spinner" /> : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {members.map(m => (
-                <div key={m.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 }}>
-                  {m.picture && <img src={m.picture} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />}
-                  <div style={{ flex: 1, minWidth: 120 }}>
-                    <div style={{ fontWeight: 700 }}>{m.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{m.email}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexBasis: '100%', justifyContent: 'flex-start' }} className={styles.memberControls}>
-                    <select
-                      className="form-control"
-                      style={{ width: 'auto', opacity: members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 0.5 : 1 }}
-                      value={m.role}
-                      disabled={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin'}
-                      title={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 'Promote another coach to admin first before changing this role' : undefined}
-                      onChange={e => updateMemberRole(m.id, e.target.value)}
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="member">Coach</option>
-                      <option value="viewer">Viewer</option>
-                    </select>
-                    {members.filter(x => x.role === 'admin').length === 1 && m.role === 'admin' ? (
-                      <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>Promote another coach to admin first</span>
-                    ) : (
-                      <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab === 'leaderboard' && (
-        <LeaderboardTab teamId={teamId} onPlayerClick={playerId => navigate(`/teams/${teamId}/players/${playerId}`)} />
-      )}
-
-      {isAdmin && tab !== 'members' && tab !== 'plays' && (
-        <div className="section-divider" style={{ marginTop: 48 }}>
-          <div className="label-xs" style={{ marginBottom: 12 }}>Export</div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
-            {(tab === 'players') && (
+          {/* Export */}
+          <div style={{ marginBottom: 24 }}>
+            <div className="label-xs" style={{ marginBottom: 12 }}>Export</div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={() => {
                   const rows = [
                     ['Name', 'Number', 'Positions', 'Status'],
                     ...[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => [
-                      p.name,
-                      p.number ?? '',
-                      (p.positions || []).join('|'),
-                      p.active ? 'Active' : 'Inactive',
+                      p.name, p.number ?? '', (p.positions || []).join('|'), p.active ? 'Active' : 'Inactive',
                     ])
                   ];
                   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
                   const blob = new Blob([csv], { type: 'text/csv' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `${team.name} — Roster.csv`;
-                  a.click();
+                  a.href = url; a.download = `${team.name} — Roster.csv`; a.click();
                   URL.revokeObjectURL(url);
                 }}
-              >
-                ⬇ Roster CSV
-              </button>
-            )}
-            {(tab === 'games' || tab === 'leaderboard') && (
+              >⬇ Roster CSV</button>
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={async () => {
@@ -778,53 +736,96 @@ async function loadMembers() {
                   const rows = [
                     ['Name', 'Number', ...statTypes],
                     ...Object.values(allStats).sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => [
-                      p.name,
-                      p.number ?? '',
-                      ...statTypes.map(s => p[s] ?? 0),
+                      p.name, p.number ?? '', ...statTypes.map(s => p[s] ?? 0),
                     ])
                   ];
                   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
                   const blob = new Blob([csv], { type: 'text/csv' });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `${team.name} — Season Stats.csv`;
-                  a.click();
+                  a.href = url; a.download = `${team.name} — Season Stats.csv`; a.click();
                   URL.revokeObjectURL(url);
                 }}
-              >
-                ⬇ Season Stats CSV
-              </button>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                setEditTeamForm({ name: team.name, season: team.season || '', description: team.description || '', team_type: team.team_type || null, notify_on_join: team.notify_on_join ?? true });
-                setEditTeamModal(true);
-              }}
-            >
-              Edit Team
-            </button>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => {
-                setConfirmModal({
-                  message: `Delete ${team.name}? This cannot be undone.`,
-                  confirmLabel: 'Delete',
-                  onConfirm: async () => {
-                    await api.del(`/teams/${team.id}`);
-                    navigate('/teams');
-                  },
-                });
-              }}
-            >
-              Delete Team
-            </button>
+              >⬇ Season Stats CSV</button>
+            </div>
           </div>
 
+          {/* Team Actions — admin only */}
+          {isAdmin && (
+            <div style={{ marginBottom: 24 }}>
+              <div className="label-xs" style={{ marginBottom: 12 }}>Team</div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => {
+                    setEditTeamForm({ name: team.name, season: team.season || '', description: team.description || '', team_type: team.team_type || null, notify_on_join: team.notify_on_join ?? true });
+                    setEditTeamModal(true);
+                  }}
+                >Edit Team</button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => {
+                    setConfirmModal({
+                      message: `Delete ${team.name}? This cannot be undone.`,
+                      confirmLabel: 'Delete',
+                      onConfirm: async () => {
+                        await api.del(`/teams/${team.id}`);
+                        navigate('/teams');
+                      },
+                    });
+                  }}
+                >Delete Team</button>
+              </div>
+            </div>
+          )}
+
+          <div className="label-xs" style={{ marginBottom: 12 }}>Members</div>
+
+          {membersLoading ? <div className="spinner" /> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {members.map(m => (
+                <div key={m.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 }}>
+                  {m.picture && <img src={m.picture} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />}
+                  <div style={{ flex: 1, minWidth: 120 }}>
+                    <div style={{ fontWeight: 700 }}>{m.name}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--gray-300)' }}>{m.email}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexBasis: '100%', justifyContent: 'flex-start' }} className={styles.memberControls}>
+                    {isAdmin ? (
+                      <>
+                        <select
+                          className="form-control"
+                          style={{ width: 'auto', opacity: members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 0.5 : 1 }}
+                          value={m.role}
+                          disabled={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin'}
+                          title={members.filter(m => m.role === 'admin').length === 1 && m.role === 'admin' ? 'Promote another coach to admin first before changing this role' : undefined}
+                          onChange={e => updateMemberRole(m.id, e.target.value)}
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="member">Coach</option>
+                          <option value="viewer">Viewer</option>
+                        </select>
+                        {members.filter(x => x.role === 'admin').length === 1 && m.role === 'admin' ? (
+                          <span style={{ fontSize: '0.78rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>Promote another coach to admin first</span>
+                        ) : (
+                          <button className="btn btn-danger btn-sm" onClick={() => removeMember(m.id, m.name)}>Remove</button>
+                        )}
+                      </>
+                    ) : (
+                      <span className={`tag ${m.role === 'admin' ? 'tag-gold' : 'tag-gray'}`} style={{ fontSize: '0.75rem' }}>
+                        {m.role === 'admin' ? 'Admin' : m.role === 'member' ? 'Coach' : 'Viewer'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+      )}
+
+      {tab === 'leaderboard' && (
+        <LeaderboardTab teamId={teamId} onPlayerClick={playerId => navigate(`/teams/${teamId}/players/${playerId}`)} />
       )}
 
             {editTeamModal && (
@@ -1202,7 +1203,7 @@ async function loadMembers() {
           { key: 'games', label: 'Games', onClick: () => setTab('games'), icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
           ...(!isViewer ? [{ key: 'plays', label: 'Plays', onClick: () => { setTab('plays'); loadPlays(); }, icon: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></> }] : []),
           { key: 'leaderboard', label: 'Leaders', onClick: () => setTab('leaderboard'), icon: <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></> },
-          ...(isAdmin ? [{ key: 'members', label: 'Members', onClick: () => { setTab('members'); loadMembers(); }, icon: <><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></> }] : []),
+          ...(!isViewer ? [{ key: 'settings', label: 'Settings', onClick: () => { setTab('settings'); loadMembers(); }, icon: <><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></> }] : []),
         ]}
       />
       <div className="bottom-nav-padding" />
