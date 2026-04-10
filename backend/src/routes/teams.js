@@ -38,7 +38,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 // POST /api/teams
 const { checkTeamLimit } = require('../middleware/checkPlan');
 router.post('/', requireAuth, checkTeamLimit, async (req, res, next) => {
-  const { name, season, description } = req.body;
+  const { name, season, description, team_type } = req.body;
   if (!name) return res.status(400).json({ error: 'Team name required' });
   try {
     const client = await pool.connect();
@@ -55,8 +55,8 @@ router.post('/', requireAuth, checkTeamLimit, async (req, res, next) => {
         attempts++;
       }
       const { rows } = await client.query(
-        `INSERT INTO teams (name, season, description, created_by, join_code, view_code) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-        [name, season, description, req.dbUser.id, join_code, view_code]
+        `INSERT INTO teams (name, season, description, team_type, created_by, join_code, view_code) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [name, season, description, team_type ?? null, req.dbUser.id, join_code, view_code]
       );
       const team = rows[0];
       await client.query(
