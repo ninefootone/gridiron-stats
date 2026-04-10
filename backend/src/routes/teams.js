@@ -347,7 +347,7 @@ async function notifyAdminsOfJoin(teamId, joinerName, joinerEmail, joinType) {
           'api-key': process.env.BREVO_API_KEY,
         },
         body: JSON.stringify({
-          sender: { name: 'Gridiron Stats', email: 'hello@gridiron-stats.app' },
+          sender: { name: 'Gridiron Stats', email: 'noreply@gridiron-stats.co' },
           to: [{ email: admin.email, name: admin.name }],
           subject: `${joinerName} joined ${teamName}`,
           htmlContent: `
