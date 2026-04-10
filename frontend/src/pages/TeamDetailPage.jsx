@@ -832,7 +832,7 @@ async function loadMembers() {
           <form onSubmit={async e => {
             e.preventDefault();
             const updated = await api.put(`/teams/${teamId}`, editTeamForm);
-            setTeam(updated);
+            setTeam(prev => ({ ...prev, ...updated }));
             setEditTeamModal(false);
           }}>
             <div className="form-group" style={{ marginBottom: 14 }}>

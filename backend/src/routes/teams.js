@@ -64,7 +64,13 @@ router.post('/', requireAuth, checkTeamLimit, async (req, res, next) => {
         [team.id, req.dbUser.id]
       );
       await client.query('COMMIT');
-      res.status(201).json(team);
+      res.status(201).json({
+        ...team,
+        player_count: 0,
+        game_count: 0,
+        my_role: 'admin',
+        team_type: team.team_type || null,
+      });
     } catch (e) {
       await client.query('ROLLBACK');
       throw e;
