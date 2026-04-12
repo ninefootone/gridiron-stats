@@ -220,11 +220,11 @@ export default function GamePage() {
   }
 
   const OPPONENT_SCORE_TYPES = [
-    { key: 'touchdown', label: 'Touchdown', value: 6, icon: '🏈' },
-    { key: 'one_xp', label: '1XP', value: 1, icon: '🎯' },
-    { key: 'two_xp', label: '2XP', value: 2, icon: '💪' },
-    { key: 'safety', label: 'Safety', value: 2, icon: '🛡️' },
-    { key: 'field_goal', label: 'Field Goal', value: 3, icon: '🏹' },
+    { key: 'touchdown', label: 'Touchdown', value: 6, icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg> },
+    { key: 'one_xp', label: '1XP', value: 1, icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg> },
+    { key: 'two_xp', label: '2XP', value: 2, icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+    { key: 'safety', label: 'Safety', value: 2, icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> },
+    { key: 'field_goal', label: 'Field Goal', value: 3, icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="22" x2="12" y2="8"/><path d="M12 8 L7 3 M12 8 L17 3 M7 3 L17 3"/></svg> },
   ];
 
   async function logOpponentScore(stat_type) {
@@ -419,7 +419,10 @@ export default function GamePage() {
             )}
           </div>
           {isAdmin && (
-            <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>⚙️ Adjust Score</button>
+            <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+  Adjust Score
+</button>
           )}
           {!isViewer && (
             <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.whistleBtn}`} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
@@ -502,7 +505,7 @@ export default function GamePage() {
             <div style={{ marginTop: 8 }}>
               {scoreAdjustments.map(sa => (
                 <div key={sa.id} className={styles.statRow} style={{ background: 'rgba(255,255,255,0.03)', borderLeft: '3px solid rgba(255,255,255,0.15)' }}>
-                  <span className={styles.statIcon}>⚙️</span>
+                  <span className={styles.statIcon}><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>
                   <div className={styles.statContent}>
                     <div className={styles.statMainRow}>
                       <span className={styles.statPlayer} style={{ color: 'var(--gray-400)' }}>{sa.team === 'ours' ? 'Our' : 'Opponent'} score adjusted</span>
