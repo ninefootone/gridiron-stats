@@ -215,7 +215,8 @@ export default function PlayerPage() {
         <div style={{ marginBottom: 16, textAlign: 'right' }}>
           <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.78rem', color: 'var(--gray-400)' }}
             onClick={() => { setLinkModal(true); setLinkSearch(''); setLinkResults([]); }}>
-            🔗 Link to player on another team
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Link to player on another team
           </button>
         </div>
       )}
@@ -371,7 +372,8 @@ export default function PlayerPage() {
 
             doc.save(`${player.name} — Player Report.pdf`);
           }}>
-            ⬇ Export Player PDF
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Player PDF
           </button>
         </div>
       )}
