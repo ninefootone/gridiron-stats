@@ -410,7 +410,10 @@ export default function GamePage() {
       {!isViewer && (
         <div style={{ margin: '12px 0', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'stretch' }}>
           <div className={styles.actionButtons}>
-            <button className={`btn btn-primary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={openStatFirst}>⚡ Log Stat</button>
+            <button className={`btn btn-primary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={openStatFirst}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+  Log Stat
+</button>
             {!isViewer && (
               <button className={`btn btn-secondary ${styles.logStatBtn}`} style={{ flex: 1, minHeight: 64, fontSize: '1rem' }} onClick={() => setOpponentModal(true)}>🏈 Opponent Score</button>
             )}
@@ -664,7 +667,8 @@ export default function GamePage() {
             </div>
           ) : (
             <button className="btn btn-ghost btn-sm" style={{ marginBottom: 14 }} onClick={startQrScan}>
-              📷 Scan QR Code
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Scan QR Code
             </button>
           )}
           {whistleGameId && (
@@ -956,7 +960,10 @@ export default function GamePage() {
       )}
     {!isViewer && (
         <div className="section-divider" style={{ paddingBottom: 80, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-sm btn-ghost" style={{ color: 'var(--gray-400)' }} onClick={refreshGame}>↻ Refresh</button>
+          <button className="btn btn-sm btn-ghost" style={{ color: 'var(--gray-400)' }} onClick={refreshGame}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
           <button className="btn btn-sm btn-secondary" onClick={() => {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
@@ -1118,7 +1125,8 @@ export default function GamePage() {
 
             doc.save(`${game.opponent_name} — ${format(new Date(game.game_date), 'd MMM yyyy')}.pdf`);
           }}>
-            ⬇ Export PDF
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export PDF
           </button>
           {isAdmin && (
             <button className="btn btn-sm btn-danger" onClick={() => {
