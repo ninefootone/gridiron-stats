@@ -66,7 +66,7 @@ function LeaderboardTab({ teamId, onPlayerClick }) {
               className={`${lbStyles.leaderRow} ${i === 0 ? lbStyles.first : ''}`}
               onClick={() => onPlayerClick(row.id)}
             >
-              <div className={lbStyles.rank}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
+              <div className={lbStyles.rank}>{i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : `#${i + 1}`}</div>
               <div className={lbStyles.playerNum}>#{row.number}</div>
               <div className={lbStyles.leaderInfo}>
                 <div className={lbStyles.leaderName}>{row.name}</div>

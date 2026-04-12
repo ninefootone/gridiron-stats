@@ -337,7 +337,9 @@ export default function TeamsPage() {
         <Modal title="Give Feedback" onClose={() => { setFeedbackModal(false); setFeedbackSent(false); setFeedbackError(''); }}>
           {feedbackSent ? (
             <div style={{ textAlign: 'center', padding: '24px 0' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>🙌</div>
+              <div style={{ marginBottom: 12 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              </div>
               <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: 8 }}>Thanks for the feedback!</div>
               <p style={{ color: 'var(--gray-300)', fontSize: '0.9rem' }}>We'll take a look and get back to you if needed.</p>
             </div>
@@ -419,7 +421,11 @@ export default function TeamsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius)', padding: '12px 16px' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '0.15em', flex: 1 }}>{shareTeam.join_code}</span>
                 <button className="btn btn-secondary btn-sm" onClick={() => copyCode(shareTeam.join_code, shareTeam.id + '_join')}>
-                  {copiedCode === shareTeam.id + '_join' ? '✓ Copied' : '📋 Copy'}
+                  {copiedCode === shareTeam.id + '_join' ? (
+                    <><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><polyline points="20 6 9 17 4 12"/></svg>Copied</>
+                  ) : (
+                    <><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</>
+                  )}
                 </button>
               </div>
               <button
@@ -443,7 +449,11 @@ export default function TeamsPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius)', padding: '12px 16px' }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, letterSpacing: '0.15em', flex: 1 }}>{shareTeam.view_code}</span>
                 <button className="btn btn-secondary btn-sm" onClick={() => copyCode(shareTeam.view_code, shareTeam.id + '_view')}>
-                  {copiedCode === shareTeam.id + '_view' ? '✓ Copied' : '📋 Copy'}
+                  {copiedCode === shareTeam.id + '_view' ? (
+                    <><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><polyline points="20 6 9 17 4 12"/></svg>Copied</>
+                  ) : (
+                    <><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy</>
+                  )}
                 </button>
               </div>
               <button

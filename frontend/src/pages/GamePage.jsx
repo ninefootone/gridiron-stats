@@ -470,7 +470,7 @@ export default function GamePage() {
                   const type = OPPONENT_SCORE_TYPES.find(t => t.key === item.stat_type);
                   return (
                     <div key={`opp-${item.id}`} className={styles.statRow} style={{ background: 'rgba(255,0,0,0.06)', borderLeft: '3px solid rgba(255,80,80,0.4)' }}>
-                      <span className={styles.statIcon}>{type?.icon || '🏈'}</span>
+                      <span className={styles.statIcon}>{type?.icon || <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>}</span>
                       <div className={styles.statContent}>
                         <div className={styles.statMainRow}>
                           <span className={styles.statPlayer} style={{ color: 'var(--gray-300)' }}>Opponent</span>

@@ -76,7 +76,7 @@ export default function LeaderboardPage() {
                   className={`${styles.leaderRow} ${i === 0 ? styles.first : ''}`}
                   onClick={() => navigate(`/teams/${teamId}/players/${row.id}`)}
                 >
-                  <div className={styles.rank}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
+                  <div className={styles.rank}>{i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : `#${i + 1}`}</div>
                   <div className={styles.playerNum}>#{row.number}</div>
                   <div className={styles.leaderInfo}>
                     <div className={styles.leaderName}>{row.name}</div>

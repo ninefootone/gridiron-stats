@@ -86,7 +86,9 @@ export default function LivePage() {
   if (!isToday && !isPast && game.game_status === 'scheduled') {
     return (
       <div style={{ minHeight: '100vh', background: '#1a3a2a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'sans-serif', padding: 24 }}>
-        <div style={{ fontSize: '3rem', marginBottom: 16 }}>🏈</div>
+        <div style={{ marginBottom: 16 }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        </div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>No Live Game Today</div>
         <p style={{ color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>
           Next game: vs {game.opponent_name} on {format(new Date(game.game_date), 'EEEE d MMMM yyyy')}
@@ -114,7 +116,7 @@ export default function LivePage() {
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>
-          🔴 Live · Gridiron Stats
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{marginRight:6,verticalAlign:'middle',color:'#d94f4f'}}><circle cx="12" cy="12" r="12"/></svg>Live · Gridiron Stats
         </div>
         <div style={{ fontFamily: 'var(--font-display, sans-serif)', fontSize: '1.6rem', fontWeight: 900, textTransform: 'uppercase' }}>
           vs {game.opponent_name}
