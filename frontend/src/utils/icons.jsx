@@ -60,8 +60,8 @@ export function getStatIcon(key, size = 16) {
     // Special Teams
     case 'kick_return_yds': return <svg {...p}><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>;
     case 'punt_return_yds': return <svg {...p}><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>;
-    case 'pat_kick':        return <svg {...p}><line x1="12" y1="22" x2="12" y2="8"/><path d="M12 8 L7 3 M12 8 L17 3 M7 3 L17 3"/></svg>;
-    case 'field_goal':      return <svg {...p}><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>;
+    case 'pat_kick':        return <svg {...p} strokeWidth="1.5"><path d="m4.75 2.5 0 12 13.5 0 0 -12"/><path d="m11.5 14.5 0 7.5"/><path d="M9.7871280824 8.9964371123a3.001 1.875 -52.882 1 0 3.6219580752 -4.7859611053 3.001 1.875 -52.882 1 0 -3.6219580752 4.7859611053Z"/></svg>;
+    case 'field_goal':      return <svg {...p} strokeWidth="1.5"><path d="m4.75 2.5 0 12 13.5 0 0 -12"/><path d="m11.5 14.5 0 7.5"/><path d="M9.7871280824 8.9964371123a3.001 1.875 -52.882 1 0 3.6219580752 -4.7859611053 3.001 1.875 -52.882 1 0 -3.6219580752 4.7859611053Z"/></svg>;
 
     // Default
     default: return <svg {...p}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>;
