@@ -13,6 +13,7 @@ import jsQR from 'jsqr';
 import { STAT_CATEGORIES, getStatInfo, ALL_STATS, getStatsForTeamType } from '../utils/stats';
 import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
 import LiveViewModal from '../components/shared/LiveViewModal';
+import { getStatIcon } from '../utils/icons';
 
 export default function GamePage() {
   const { teamId, gameId } = useParams();
@@ -484,7 +485,7 @@ export default function GamePage() {
                 const info = getStatInfo(item.stat_type);
                 return (
                   <div key={item.id} className={styles.statRow}>
-                    <span className={styles.statIcon}>{info.icon}</span>
+                    <span className={styles.statIcon}>{getStatIcon(info.icon)}</span>
                     <div className={styles.statContent}>
                       <div className={styles.statMainRow}>
                         <span className={styles.statPlayer}>#{item.player_number} {item.player_name}</span>
@@ -543,7 +544,7 @@ export default function GamePage() {
                       const info = getStatInfo(type);
                       return (
                         <span key={type} className="stat-badge">
-                          {info.icon} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}
+                          {getStatIcon(info.icon)} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}
                         </span>
                       );
                     })}
@@ -731,7 +732,7 @@ export default function GamePage() {
                         style={selectedStat === s.key ? { borderColor: cat.color, background: `${cat.color}22` } : {}}
                         onClick={() => setSelectedStat(s.key)}
                       >
-                        <span className={styles.statBtnIcon}>{s.icon}</span>
+                        <span className={styles.statBtnIcon}>{getStatIcon(s.icon)}</span>
                         <span className={styles.statBtnLabel}>{s.label}</span>
                       </button>
                     ))}
@@ -805,7 +806,7 @@ export default function GamePage() {
                             style={sfStat === s.key ? { borderColor: cat.color, background: `${cat.color}22` } : {}}
                             onClick={() => { setSfStat(s.key); setSfStep(2); setSfPlayer(null); setSfPasser(null); setSfReceiver(null); setSfPickSix(false); setSfReturnPlayer(null); }}
                           >
-                            <span className={styles.statBtnIcon}>{s.icon}</span>
+                            <span className={styles.statBtnIcon}>{getStatIcon(s.icon)}</span>
                             <span className={styles.statBtnLabel}>{s.label}</span>
                           </button>
                         ))}

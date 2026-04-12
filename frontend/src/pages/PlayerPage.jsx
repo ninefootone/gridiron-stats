@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import styles from './PlayerPage.module.css';
 import BottomNav from '../components/shared/BottomNav';
 import ConfirmModal, { AlertModal } from '../components/shared/ConfirmModal';
+import { getStatIcon } from '../utils/icons';
 
 export default function PlayerPage() {
   const { teamId, playerId } = useParams();
@@ -187,7 +188,7 @@ export default function PlayerPage() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {lp.stats.map(s => {
                     const info = getStatInfo(s.stat_type);
-                    return <span key={s.stat_type} className="stat-badge">{info.icon} {info.label}: {s.total}{info.unit ? ` ${info.unit}` : ''}</span>;
+                    return <span key={s.stat_type} className="stat-badge">{getStatIcon(info.icon)} {info.label}: {s.total}{info.unit ? ` ${info.unit}` : ''}</span>;
                   })}
                 </div>
               )}
@@ -203,7 +204,7 @@ export default function PlayerPage() {
                 }, {})
               ).map(([type, total]) => {
                 const info = getStatInfo(type);
-                return <span key={type} className="stat-badge" style={{ background: 'rgba(245,166,35,0.15)', borderColor: 'rgba(245,166,35,0.3)' }}>{info.icon} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}</span>;
+                return <span key={type} className="stat-badge" style={{ background: 'rgba(245,166,35,0.15)', borderColor: 'rgba(245,166,35,0.3)' }}>{getStatIcon(info.icon)} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}</span>;
               })}
             </div>
           </div>
@@ -259,7 +260,7 @@ export default function PlayerPage() {
               const info = getStatInfo(type);
               return (
                 <div key={type} className={styles.totalCard}>
-                  <div className={styles.totalIcon}>{info.icon}</div>
+                  <div className={styles.totalIcon}>{getStatIcon(info.icon)}</div>
                   <div className={styles.totalValue}>{total}{info.unit ? ` ${info.unit}` : ''}</div>
                   <div className={styles.totalLabel}>{info.label}</div>
                 </div>
@@ -394,7 +395,7 @@ export default function PlayerPage() {
                 ).map(([type, total]) => {
                   const info = getStatInfo(type);
                   return (
-                    <span key={type} className="stat-badge">{info.icon} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}</span>
+                    <span key={type} className="stat-badge">{getStatIcon(info.icon)} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}</span>
                   );
                 })}
               </div>

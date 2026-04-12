@@ -9,6 +9,7 @@ import lbStyles from './LeaderboardPage.module.css';
 import BottomNav from '../components/shared/BottomNav';
 import { getStatInfo, STAT_CATEGORIES, getPositionsForTeamType, normalisePosition } from '../utils/stats';
 import { useUpgrade } from '../context/UpgradeContext';
+import { getStatIcon } from '../utils/icons';
 
 function LeaderboardTab({ teamId, onPlayerClick }) {
   const api = useApi();
@@ -48,7 +49,7 @@ function LeaderboardTab({ teamId, onPlayerClick }) {
                 className={`${lbStyles.statPill} ${selectedStat === s.key ? lbStyles.activeStatPill : ''}`}
                 onClick={() => setSelectedStat(s.key)}
               >
-                {s.icon} {s.label}
+                {getStatIcon(s.icon)} {s.label}
               </button>
             ))}
           </div>

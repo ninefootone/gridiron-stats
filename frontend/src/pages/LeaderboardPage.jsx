@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApi } from '../hooks/useApi';
 import { getStatInfo, STAT_CATEGORIES, ALL_STATS } from '../utils/stats';
 import styles from './LeaderboardPage.module.css';
+import { getStatIcon } from '../utils/icons';
 
 export default function LeaderboardPage() {
   const { teamId } = useParams();
@@ -56,7 +57,7 @@ export default function LeaderboardPage() {
                     className={`${styles.statPill} ${selectedStat === s.key ? styles.activeStatPill : ''}`}
                     onClick={() => setSelectedStat(s.key)}
                   >
-                    {s.icon} {s.label}
+                    {getStatIcon(s.icon)} {s.label}
                   </button>
                 ))}
               </div>
