@@ -34,7 +34,7 @@ function LeaderboardTab({ teamId, onPlayerClick }) {
   if (loading) return <div className="spinner" />;
 
   if (summary.length === 0) return (
-    <div className="empty-state"><div className="icon">📊</div><p>No stats recorded yet this season.</p></div>
+    <div className="empty-state"><p>No stats recorded yet this season.</p></div>
   );
 
   return (
@@ -426,7 +426,7 @@ async function loadMembers() {
             )}
           </div>
           {players.length === 0 ? (
-            <div className="empty-state"><div className="icon">👥</div><p>No players yet. Add your roster.</p></div>
+            <div className="empty-state"><p>No players yet. Add your roster.</p></div>
           ) : (
             <div className={styles.playerGrid}>
               {[...players.filter(p => p.active)].sort((a, b) => playerSort === 'name' ? a.name.localeCompare(b.name) : (a.number ?? 999) - (b.number ?? 999)).map(p => (
@@ -489,7 +489,7 @@ async function loadMembers() {
             </div>
           )}
           {games.length === 0 ? (
-            <div className="empty-state"><div className="icon">🏈</div><p>No games yet. Add your schedule.</p></div>
+            <div className="empty-state"><p>No games yet. Add your schedule.</p></div>
           ) : (
             <div className={styles.gameList}>
               {(() => {
