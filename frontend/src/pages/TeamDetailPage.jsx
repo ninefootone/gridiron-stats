@@ -614,7 +614,8 @@ async function loadMembers() {
                     {typePlays.length === 0 ? (
                       <p style={{ color: 'var(--gray-500)', fontSize: '0.9rem' }}>No {type} plays yet.</p>
                     ) : (
-                      typePlays.map(p => (
+                      <div className={styles.playsGrid}>
+                      {typePlays.map(p => (
                         <div key={p.id} className={styles.playCard}>
                           <div className={styles.playInfo}>
                             <div className={styles.playName}>{p.name}</div>
@@ -626,7 +627,8 @@ async function loadMembers() {
                             <button className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }} onClick={() => deletePlay(p.id)}>✕</button>
                           </div>
                         </div>
-                      ))
+                      ))}
+                      </div>
                     )}
                   </div>
                 );
