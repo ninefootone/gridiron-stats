@@ -604,7 +604,11 @@ async function loadMembers() {
                 return (
                   <div key={type} className={styles.playsBlock}>
                     <div className={styles.playsBlockTitle} style={{ color: type === 'offense' ? '#f5a623' : '#4a90d9' }}>
-                      {type === 'offense' ? '⚔️ Offense' : '🛡️ Defense'}
+                      {type === 'offense' ? (
+                        <><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>Offense</>
+                      ) : (
+                        <><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Defense</>
+                      )}
                     </div>
                     {typePlays.length === 0 ? (
                       <p style={{ color: 'var(--gray-500)', fontSize: '0.9rem' }}>No {type} plays yet.</p>
@@ -691,14 +695,20 @@ async function loadMembers() {
               <div className="label-xs" style={{ marginBottom: 6 }}>Join Code (coaches)</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)', flex: 1 }}>{team.join_code}</div>
-                <button className="btn btn-secondary btn-sm" onClick={() => { navigator.clipboard.writeText(team.join_code); }}>📋 Copy</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => { navigator.clipboard.writeText(team.join_code); }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
               </div>
             </div>
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 18px', marginBottom: 10 }}>
               <div className="label-xs" style={{ marginBottom: 6 }}>View Code (read-only)</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.1em', color: 'var(--gold)', flex: 1 }}>{team.view_code}</div>
-                <button className="btn btn-secondary btn-sm" onClick={() => { navigator.clipboard.writeText(team.view_code); }}>📋 Copy</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => { navigator.clipboard.writeText(team.view_code); }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
               </div>
             </div>
           </div>
@@ -722,7 +732,10 @@ async function loadMembers() {
                   a.href = url; a.download = `${team.name} — Roster.csv`; a.click();
                   URL.revokeObjectURL(url);
                 }}
-              >⬇ Roster CSV</button>
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Roster CSV
+              </button>
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={async () => {
@@ -746,7 +759,10 @@ async function loadMembers() {
                   a.href = url; a.download = `${team.name} — Season Stats.csv`; a.click();
                   URL.revokeObjectURL(url);
                 }}
-              >⬇ Season Stats CSV</button>
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:5,verticalAlign:'middle'}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Season Stats CSV
+              </button>
             </div>
           </div>
 
@@ -852,14 +868,14 @@ async function loadMembers() {
                   className={`btn btn-sm ${editTeamForm.team_type === 'flag' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setEditTeamForm(p => ({ ...p, team_type: p.team_type === 'flag' ? null : 'flag' }))}
                 >
-                  🚩 Flag
+                  Flag
                 </button>
                 <button
                   type="button"
                   className={`btn btn-sm ${editTeamForm.team_type === 'contact' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setEditTeamForm(p => ({ ...p, team_type: p.team_type === 'contact' ? null : 'contact' }))}
                 >
-                  🏈 Contact
+                  Contact
                 </button>
                 {editTeamForm.team_type && (
                   <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)' }} onClick={() => setEditTeamForm(p => ({ ...p, team_type: null }))}>
