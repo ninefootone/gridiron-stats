@@ -13,14 +13,26 @@ const iconProps = {
   className: "stat-icon-svg",
 };
 
+const footballPaths = (
+  <>
+    <path d="M23.248 3.85a2.991 2.991 0 0 0 -3.1 -3.1c-3.67 0.14 -9.889 1.05 -14.117 5.281S0.891 16.474 0.752 20.15a2.991 2.991 0 0 0 3.1 3.1c3.675 -0.138 9.894 -1.05 14.122 -5.279S23.109 7.526 23.248 3.85Z" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
+    <path d="m15.75 8.25 -7.5 7.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
+    <path d="m10.875 10.875 2.25 2.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
+    <path d="m8.25 13.5 2.25 2.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
+    <path d="m13.5 8.25 2.25 2.25" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
+    <path d="m1.426 14.926 7.648 7.648" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
+    <path d="m22.574 9.074 -7.648 -7.648" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/>
+  </>
+);
+
 export function getStatIcon(key, size = 16) {
   const p = { ...iconProps, width: size, height: size };
   
   switch (key) {
     // Offense
-    case 'td_passing':    return <svg {...p}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>;
-    case 'td_receiving':  return <svg {...p}><circle cx="12" cy="12" r="10"/><polyline points="8 12 12 16 16 12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>;
-    case 'td_rushing':    return <svg {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>;
+    case 'td_passing':    return <svg {...p}>{footballPaths}</svg>;
+    case 'td_receiving':  return <svg {...p}>{footballPaths}</svg>;
+    case 'td_rushing':    return <svg {...p}>{footballPaths}</svg>;
     case 'receiving_yds': return <svg {...p}><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>;
     case 'rushing_yds':   return <svg {...p}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>;
     case 'passing_yds':   return <svg {...p}><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>;
