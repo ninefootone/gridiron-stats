@@ -10,6 +10,7 @@ const iconProps = {
   strokeWidth: "2",
   strokeLinecap: "round",
   strokeLinejoin: "round",
+  className: "stat-icon-svg",
 };
 
 export function getStatIcon(key, size = 16) {
