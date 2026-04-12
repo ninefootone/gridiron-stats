@@ -516,7 +516,7 @@ async function loadMembers() {
                       <div className={styles.gameVs}>
                         <div className={styles.gameOpponent}>vs {g.opponent_name}</div>
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2, alignItems: 'center' }}>
-                          {g.location && <span className={styles.gameLocation}>📍 {g.location}</span>}
+                          {g.location && <span className={styles.gameLocation}><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:3,verticalAlign:'middle'}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{g.location}</span>}
                           {g.game_type === 'friendly' && <span className="tag tag-gray" style={{ fontSize: '0.7rem' }}>Friendly</span>}
                           {g.game_type === 'playoff' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Playoff</span>}
                           {g.game_type === 'finals' && <span className="tag tag-gold" style={{ fontSize: '0.7rem' }}>Finals</span>}
@@ -526,7 +526,7 @@ async function loadMembers() {
                         {isPast && (g.our_score > 0 || g.opponent_score > 0)
                           ? <div className={`${styles.score} ${won ? styles.win : lost ? styles.loss : ''}`}>{g.our_score}–{g.opponent_score}</div>
                           : isToday
-                            ? <span className="tag tag-gold">🔴 Live</span>
+                            ? <span className="tag tag-gold"><svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="currentColor" stroke="none" style={{marginRight:4,verticalAlign:'middle',color:'#d94f4f'}}><circle cx="12" cy="12" r="12"/></svg>Live</span>
                             : isPast
                               ? <span className="tag tag-gray">Completed</span>
                               : <span className="tag tag-gray">Scheduled</span>
