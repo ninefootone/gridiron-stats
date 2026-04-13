@@ -789,7 +789,7 @@ export default function GamePage() {
               className="form-control"
               value={whistleInput}
               onChange={e => setWhistleInput(e.target.value.toLowerCase())}
-              placeholder="https://www.whistle-app.co.uk/game/abc123 or abc123"
+              placeholder="https://www.whistle-app.co/game/abc123 or abc123"
               autoCapitalize="none"
               autoCorrect="off"
             />
