@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const WHISTLE_HOST = 'www.whistle-app.co';
+const WHISTLE_HOST = 'whistle-app.co';
 
 export function useWhistleSocket(whistleGameId) {
   const [whistleState, setWhistleState] = useState(null);
