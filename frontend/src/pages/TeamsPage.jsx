@@ -238,14 +238,14 @@ export default function TeamsPage() {
                   className={`btn btn-sm ${form.team_type === 'flag' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setForm(p => ({ ...p, team_type: p.team_type === 'flag' ? null : 'flag' }))}
                 >
-                  🚩 Flag
+                  Flag
                 </button>
                 <button
                   type="button"
                   className={`btn btn-sm ${form.team_type === 'contact' ? 'btn-primary' : 'btn-secondary'}`}
                   onClick={() => setForm(p => ({ ...p, team_type: p.team_type === 'contact' ? null : 'contact' }))}
                 >
-                  🏈 Contact
+                  Contact
                 </button>
                 {form.team_type && (
                   <button type="button" className="btn btn-ghost btn-sm" style={{ color: 'var(--gray-500)' }} onClick={() => setForm(p => ({ ...p, team_type: null }))}>
