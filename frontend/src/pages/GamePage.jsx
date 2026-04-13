@@ -107,20 +107,6 @@ export default function GamePage() {
     finally { setSaving(false); }
   }
 
-  async function refreshGame() {
-    const [g, s, os, sa] = await Promise.all([
-      api.get(`/games/${gameId}`),
-      api.get(`/stats?game_id=${gameId}`),
-      api.get(`/opponent-stats?game_id=${gameId}`),
-      api.get(`/score-adjustments?game_id=${gameId}`),
-    ]);
-    setGame(g);
-    setStats(s);
-    setOpponentStats(os);
-    setScoreAdjustments(sa);
-    setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' });
-  }
-
   useGameSocket(gameId, {
     stat_added: ({ stat }) => {
       setStats(prev => {
@@ -967,10 +953,6 @@ export default function GamePage() {
       )}
     {!isViewer && (
         <div className="section-divider" style={{ paddingBottom: 80, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-sm btn-ghost" style={{ color: 'var(--gray-400)' }} onClick={refreshGame}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            Refresh
-          </button>
           <button className="btn btn-sm btn-secondary" onClick={() => {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
