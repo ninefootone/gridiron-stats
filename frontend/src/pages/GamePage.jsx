@@ -37,6 +37,7 @@ export default function GamePage() {
   const [adjustForm, setAdjustForm] = useState({ team: 'ours', adjustment: '', reason: '' });
   const [adjustSaving, setAdjustSaving] = useState(false);
   const [whistleGameId, setWhistleGameId] = useState(null);
+  const [gameMoreModal, setGameMoreModal] = useState(false);
   const [whistleModal, setWhistleModal] = useState(false);
   const [whistleInput, setWhistleInput] = useState('');
   const [whistleSaving, setWhistleSaving] = useState(false);
@@ -153,6 +154,140 @@ export default function GamePage() {
   });
 
   const { whistleState, connected: whistleConnected } = useWhistleSocket(whistleGameId);
+
+  function exportPDF() {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let y = 20;
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`vs ${game.opponent_name}`, 14, y);
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text(`${format(new Date(game.game_date), 'EEEE d MMMM yyyy')}${game.game_time ? ' · ' + game.game_time : ''}${game.location ? ' · ' + game.location : ''}`, 14, y);
+    y += 6;
+    doc.text(`Score: ${game.our_score} – ${game.opponent_score}  |  ${game.home_away === 'home' ? 'Home' : game.home_away === 'away' ? 'Away' : 'Neutral'}${gameTypeLabel ? '  |  ' + gameTypeLabel : ''}`, 14, y);
+    y += 10;
+    doc.setDrawColor(200);
+    doc.line(14, y, pageWidth - 14, y);
+    y += 8;
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text('Game Summary', 14, y);
+    y += 8;
+    Object.values(statsByPlayer).forEach(({ player_name, player_number, stats: ps }) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text(`#${player_number} ${player_name}`, 14, y);
+      y += 6;
+      const totals = ps.reduce((acc, s) => {
+        acc[s.stat_type] = (acc[s.stat_type] || 0) + Number(s.value);
+        return acc;
+      }, {});
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60);
+      const statLine = Object.entries(totals).map(([type, total]) => {
+        const info = getStatInfo(type);
+        return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
+      }).join('  ·  ');
+      const lines = doc.splitTextToSize(statLine, pageWidth - 28);
+      doc.text(lines, 20, y);
+      y += lines.length * 5 + 4;
+    });
+    y += 4;
+    doc.setDrawColor(200);
+    doc.line(14, y, pageWidth - 14, y);
+    y += 8;
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0);
+    doc.text('Full Stat Log', 14, y);
+    y += 8;
+    stats.forEach(s => {
+      if (y > 275) { doc.addPage(); y = 20; }
+      const info = getStatInfo(s.stat_type);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0);
+      doc.text(`#${s.player_number} ${s.player_name}`, 14, y);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${info.label}${info.unit ? ': ' + s.value + ' ' + info.unit : ''}`, 70, y);
+      const meta = [s.play_name, s.notes].filter(Boolean).join(' · ');
+      if (meta) {
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(100);
+        doc.text(meta, 130, y);
+      }
+      y += 6;
+    });
+    if (opponentStats.length > 0) {
+      if (y > 260) { doc.addPage(); y = 20; }
+      y += 4;
+      doc.setDrawColor(200);
+      doc.line(14, y, pageWidth - 14, y);
+      y += 8;
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text('Opponent Scoring', 14, y);
+      y += 8;
+      const OPPONENT_LABELS = { touchdown: 'Touchdown', one_xp: '1XP', two_xp: '2XP', safety: 'Safety', field_goal: 'Field Goal' };
+      opponentStats.slice().reverse().forEach(os => {
+        if (y > 275) { doc.addPage(); y = 20; }
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60);
+        doc.text(OPPONENT_LABELS[os.stat_type] || os.stat_type, 14, y);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0);
+        doc.text(`+${os.value} pts`, 70, y);
+        y += 6;
+      });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      const oppTotal = opponentStats.reduce((acc, os) => acc + os.value, 0);
+      doc.text(`Total: ${oppTotal} pts`, 14, y);
+      y += 8;
+    }
+    if (scoreAdjustments.length > 0) {
+      if (y > 260) { doc.addPage(); y = 20; }
+      y += 4;
+      doc.setDrawColor(200);
+      doc.line(14, y, pageWidth - 14, y);
+      y += 8;
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0);
+      doc.text('Score Adjustments', 14, y);
+      y += 8;
+      scoreAdjustments.forEach(sa => {
+        if (y > 275) { doc.addPage(); y = 20; }
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60);
+        doc.text(`${sa.team === 'ours' ? 'Our score' : 'Opponent score'}`, 14, y);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0);
+        doc.text(`${sa.adjustment >= 0 ? '+' : ''}${sa.adjustment} pts`, 70, y);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(100);
+        const reasonLines = doc.splitTextToSize(sa.reason, pageWidth - 130);
+        doc.text(reasonLines, 100, y);
+        y += Math.max(6, reasonLines.length * 5);
+      });
+    }
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text('Generated by Gridiron Stats · gridiron-stats.co', 14, doc.internal.pageSize.getHeight() - 10);
+    doc.save(`${game.opponent_name} — ${format(new Date(game.game_date), 'd MMM yyyy')}.pdf`);
+  }
 
   function parseWhistleId(input) {
     try {
@@ -357,6 +492,11 @@ export default function GamePage() {
         )}
         {isAdmin && (
           <button className="btn btn-ghost btn-sm" onClick={() => setLiveViewModal(true)}>Live View</button>
+        )}
+        {!isViewer && (
+          <button className="btn btn-ghost btn-sm" onClick={() => setGameMoreModal(true)} title="More options">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+          </button>
         )}
       </div>
 
@@ -951,186 +1091,6 @@ export default function GamePage() {
           </form>
         </Modal>
       )}
-    {!isViewer && (
-        <div className="section-divider" style={{ paddingBottom: 80, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-sm btn-secondary" onClick={() => {
-            const doc = new jsPDF();
-            const pageWidth = doc.internal.pageSize.getWidth();
-            let y = 20;
-
-            // Header
-            doc.setFontSize(20);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`vs ${game.opponent_name}`, 14, y);
-            y += 8;
-
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(100);
-            doc.text(`${format(new Date(game.game_date), 'EEEE d MMMM yyyy')}${game.game_time ? ' · ' + game.game_time : ''}${game.location ? ' · ' + game.location : ''}`, 14, y);
-            y += 6;
-            doc.text(`Score: ${game.our_score} – ${game.opponent_score}  |  ${game.home_away === 'home' ? 'Home' : game.home_away === 'away' ? 'Away' : 'Neutral'}${gameTypeLabel ? '  |  ' + gameTypeLabel : ''}`, 14, y);
-            y += 10;
-
-            // Divider
-            doc.setDrawColor(200);
-            doc.line(14, y, pageWidth - 14, y);
-            y += 8;
-
-            // Game Summary by player
-            doc.setFontSize(13);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(0);
-            doc.text('Game Summary', 14, y);
-            y += 8;
-
-            Object.values(statsByPlayer).forEach(({ player_name, player_number, stats: ps }) => {
-              if (y > 270) { doc.addPage(); y = 20; }
-              doc.setFontSize(11);
-              doc.setFont('helvetica', 'bold');
-              doc.setTextColor(0);
-              doc.text(`#${player_number} ${player_name}`, 14, y);
-              y += 6;
-
-              const totals = ps.reduce((acc, s) => {
-                acc[s.stat_type] = (acc[s.stat_type] || 0) + Number(s.value);
-                return acc;
-              }, {});
-
-              doc.setFontSize(10);
-              doc.setFont('helvetica', 'normal');
-              doc.setTextColor(60);
-              const statLine = Object.entries(totals).map(([type, total]) => {
-                const info = getStatInfo(type);
-                return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
-              }).join('  ·  ');
-              const lines = doc.splitTextToSize(statLine, pageWidth - 28);
-              doc.text(lines, 20, y);
-              y += lines.length * 5 + 4;
-            });
-
-            y += 4;
-            doc.setDrawColor(200);
-            doc.line(14, y, pageWidth - 14, y);
-            y += 8;
-
-            // Full stat log
-            doc.setFontSize(13);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(0);
-            doc.text('Full Stat Log', 14, y);
-            y += 8;
-
-            stats.forEach(s => {
-              if (y > 275) { doc.addPage(); y = 20; }
-              const info = getStatInfo(s.stat_type);
-              doc.setFontSize(10);
-              doc.setFont('helvetica', 'normal');
-              doc.setTextColor(0);
-              doc.text(`#${s.player_number} ${s.player_name}`, 14, y);
-              doc.setFont('helvetica', 'bold');
-              doc.text(`${info.label}${info.unit ? ': ' + s.value + ' ' + info.unit : ''}`, 70, y);
-              const meta = [s.play_name, s.notes].filter(Boolean).join(' · ');
-              if (meta) {
-                doc.setFont('helvetica', 'italic');
-                doc.setTextColor(100);
-                doc.text(meta, 130, y);
-              }
-              y += 6;
-            });
-
-	    
-
-            // Opponent scoring log
-            if (opponentStats.length > 0) {
-              if (y > 260) { doc.addPage(); y = 20; }
-              y += 4;
-              doc.setDrawColor(200);
-              doc.line(14, y, pageWidth - 14, y);
-              y += 8;
-
-              doc.setFontSize(13);
-              doc.setFont('helvetica', 'bold');
-              doc.setTextColor(0);
-              doc.text('Opponent Scoring', 14, y);
-              y += 8;
-
-              const OPPONENT_LABELS = { touchdown: 'Touchdown', one_xp: '1XP', two_xp: '2XP', safety: 'Safety', field_goal: 'Field Goal' };
-              opponentStats.slice().reverse().forEach(os => {
-                if (y > 275) { doc.addPage(); y = 20; }
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(60);
-                doc.text(OPPONENT_LABELS[os.stat_type] || os.stat_type, 14, y);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0);
-                doc.text(`+${os.value} pts`, 70, y);
-                y += 6;
-              });
-
-              doc.setFontSize(10);
-              doc.setFont('helvetica', 'bold');
-              doc.setTextColor(0);
-              const oppTotal = opponentStats.reduce((acc, os) => acc + os.value, 0);
-              doc.text(`Total: ${oppTotal} pts`, 14, y);
-              y += 8;
-            }
-
-            // Score adjustments log
-            if (scoreAdjustments.length > 0) {
-              if (y > 260) { doc.addPage(); y = 20; }
-              y += 4;
-              doc.setDrawColor(200);
-              doc.line(14, y, pageWidth - 14, y);
-              y += 8;
-
-              doc.setFontSize(13);
-              doc.setFont('helvetica', 'bold');
-              doc.setTextColor(0);
-              doc.text('Score Adjustments', 14, y);
-              y += 8;
-
-              scoreAdjustments.forEach(sa => {
-                if (y > 275) { doc.addPage(); y = 20; }
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                doc.setTextColor(60);
-                doc.text(`${sa.team === 'ours' ? 'Our score' : 'Opponent score'}`, 14, y);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(0);
-                doc.text(`${sa.adjustment >= 0 ? '+' : ''}${sa.adjustment} pts`, 70, y);
-                doc.setFont('helvetica', 'italic');
-                doc.setTextColor(100);
-                const reasonLines = doc.splitTextToSize(sa.reason, pageWidth - 130);
-                doc.text(reasonLines, 100, y);
-                y += Math.max(6, reasonLines.length * 5);
-              });
-            }
-
-            // Footer
-            doc.setFontSize(8);
-            doc.setTextColor(150);
-            doc.text('Generated by Gridiron Stats · gridiron-stats.co', 14, doc.internal.pageSize.getHeight() - 10);
-
-            doc.save(`${game.opponent_name} — ${format(new Date(game.game_date), 'd MMM yyyy')}.pdf`);
-          }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export PDF
-          </button>
-          {isAdmin && (
-            <button className="btn btn-sm btn-danger" onClick={() => {
-              setConfirmModal({
-                message: 'Delete this game and all its stats? This cannot be undone.',
-                confirmLabel: 'Delete Game',
-                onConfirm: async () => {
-                  await api.del(`/games/${gameId}`);
-                  navigate(`/teams/${teamId}`);
-                }
-              });
-            }}>Delete Game</button>
-          )}
-        </div>
-      )}
       {confirmModal && (
         <ConfirmModal
           title={confirmModal.title || 'Are you sure?'}
@@ -1150,12 +1110,37 @@ export default function GamePage() {
       {liveViewModal && (
         <LiveViewModal gameId={gameId} onClose={() => setLiveViewModal(false)} />
       )}
+
+      {gameMoreModal && (
+        <Modal title="Game Options" onClose={() => setGameMoreModal(false)}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button className="btn btn-secondary" onClick={() => { setGameMoreModal(false); exportPDF(); }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export PDF
+            </button>
+            {isAdmin && (
+              <button className="btn btn-danger" onClick={() => {
+                setGameMoreModal(false);
+                setConfirmModal({
+                  message: 'Delete this game and all its stats? This cannot be undone.',
+                  confirmLabel: 'Delete Game',
+                  onConfirm: async () => {
+                    await api.del(`/games/${gameId}`);
+                    navigate(`/teams/${teamId}`);
+                  }
+                });
+              }}>Delete Game</button>
+            )}
+          </div>
+        </Modal>
+      )}
     <BottomNav
       activeKey="games"
       items={[
         { key: 'games', label: 'Games', onClick: () => navigate(`/teams/${teamId}?tab=games`), icon: <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></> },
         ...(!isViewer ? [{ key: 'log', label: 'Log Stat', onClick: openStatFirst, icon: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></> }] : []),
         ...(isAdmin ? [{ key: 'score', label: 'Score', onClick: () => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }, icon: <><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></> }] : []),
+        ...(!isViewer ? [{ key: 'more', label: 'More', onClick: () => setGameMoreModal(true), icon: <><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></> }] : []),
       ]}
     />
     <div className="bottom-nav-padding" />
