@@ -172,6 +172,16 @@
   width: auto;
 }
 
+.desktopOnly {
+  display: inline-flex;
+}
+
+@media (max-width: 768px) {
+  .desktopOnly {
+    display: none !important;
+  }
+}
+
 @media (max-width: 640px) {
   .logStatBtn {
     width: 100%;
