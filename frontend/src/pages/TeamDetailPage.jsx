@@ -542,7 +542,7 @@ async function loadMembers() {
                               setGameForm({
                                 opponent_name: g.opponent_name,
                                 location: g.location || '',
-                                game_date: g.game_date,
+                                game_date: g.game_date ? g.game_date.slice(0, 10) : '',
                                 game_time: g.game_time || '',
                                 home_away: g.home_away || 'home',
                                 notes: g.notes || '',
