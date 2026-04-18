@@ -70,6 +70,7 @@ export default function GamePage() {
 
   const [teamType, setTeamType] = useState(null);
   const [showMoreStats, setShowMoreStats] = useState(false);
+  const [statViewMode, setStatViewMode] = useState(() => localStorage.getItem('statViewMode') || 'grid');
   const [liveViewModal, setLiveViewModal] = useState(false);
   
   function openStatFirst() {
@@ -391,7 +392,15 @@ export default function GamePage() {
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
 
-  function openStatModal(player) {
+  const toggleStatViewMode = () => {
+  setStatViewMode(prev => {
+    const next = prev === 'grid' ? 'list' : 'grid';
+    localStorage.setItem('statViewMode', next);
+    return next;
+  });
+};
+
+function openStatModal(player) {
     setSelectedPlayer(player);
     setSelectedStat(null);
     setStatValue('');
@@ -849,6 +858,11 @@ export default function GamePage() {
       {statModal && selectedPlayer && (
         <Modal title={`Log Stat — #${selectedPlayer.number} ${selectedPlayer.name}`} onClose={() => setStatModal(false)} wide>
           <form onSubmit={logStat}>
+<div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+              <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: '0.8rem', color: 'var(--gray-400)' }} onClick={toggleStatViewMode}>
+                {statViewMode === 'grid' ? '☰ List view' : '⊞ Grid view'}
+              </button>
+            </div>
             <div className={styles.statCategories}>
               {(() => {
                 const allowed = getStatsForTeamType(teamType, showMoreStats);
@@ -858,13 +872,12 @@ export default function GamePage() {
                 return (
                 <div key={catKey}>
                   <div className={styles.catLabel} style={{ color: cat.color }}>{cat.label}</div>
-                  <div className={styles.statGrid}>
+                  <div className={statViewMode === 'list' ? styles.statGridList : styles.statGrid}>
                     {filteredStats.map(s => (
-
                       <button
                         key={s.key}
                         type="button"
-                        className={`${styles.statBtn} ${selectedStat === s.key ? styles.statBtnActive : ''}`}
+                        className={`${statViewMode === 'list' ? styles.statBtnList : styles.statBtn} ${selectedStat === s.key ? styles.statBtnActive : ''}`}
                         style={selectedStat === s.key ? { borderColor: cat.color, background: `${cat.color}22` } : {}}
                         onClick={() => setSelectedStat(s.key)}
                       >
@@ -923,7 +936,12 @@ export default function GamePage() {
         <Modal title="Log Stat" onClose={() => setStatFirstModal(false)} wide>
           {sfStep === 1 && (
             <div>
-              <div style={{ marginBottom: 12, color: 'var(--gray-300)', fontSize: '0.9rem' }}>Choose a stat type:</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ color: 'var(--gray-300)', fontSize: '0.9rem' }}>Choose a stat type:</span>
+                <button type="button" className="btn btn-ghost btn-sm" style={{ fontSize: '0.8rem', color: 'var(--gray-400)' }} onClick={toggleStatViewMode}>
+                  {statViewMode === 'grid' ? '☰ List view' : '⊞ Grid view'}
+                </button>
+              </div>
               <div className={styles.statCategories}>
                 {(() => {
                   const allowed = getStatsForTeamType(teamType, showMoreStats);
@@ -933,12 +951,12 @@ export default function GamePage() {
                   return (
                     <div key={catKey}>
                       <div className={styles.catLabel} style={{ color: cat.color }}>{cat.label}</div>
-                      <div className={styles.statGrid}>
+                      <div className={statViewMode === 'list' ? styles.statGridList : styles.statGrid}>
                         {countingInCat.map(s => (
                           <button
                             key={s.key}
                             type="button"
-                            className={`${styles.statBtn} ${sfStat === s.key ? styles.statBtnActive : ''}`}
+                            className={`${statViewMode === 'list' ? styles.statBtnList : styles.statBtn} ${sfStat === s.key ? styles.statBtnActive : ''}`}
                             style={sfStat === s.key ? { borderColor: cat.color, background: `${cat.color}22` } : {}}
                             onClick={() => { setSfStat(s.key); setSfStep(2); setSfPlayer(null); setSfPasser(null); setSfReceiver(null); setSfPickSix(false); setSfReturnPlayer(null); }}
                           >

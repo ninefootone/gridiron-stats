@@ -152,6 +152,34 @@
 .statBtnIcon { font-size: 1.4rem; }
 .statBtnLabel { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; color: var(--gold); }
 
+/* List layout variant */
+.statGridList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.statBtnList {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--white);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.82rem;
+  text-align: left;
+  width: 100%;
+}
+.statBtnList:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+.statBtnList .statBtnIcon { font-size: 1.2rem; flex-shrink: 0; }
+.statBtnList .statBtnLabel { font-size: 0.85rem; text-align: left; }
+
 .rosterHeader {
   display: flex;
   align-items: center;
