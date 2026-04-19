@@ -172,6 +172,8 @@ export default function DrillsPage() {
   const [editDrill, setEditDrill] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [activeTag, setActiveTag] = useState(null);
 
   useEffect(() => { loadDrills(); }, []);
 
@@ -219,7 +221,26 @@ export default function DrillsPage() {
   const myDrills = drills.filter(d => d.is_owner);
   const communityDrills = drills.filter(d => d.visibility === 'community');
 
-  const displayDrills = tab === 'my' ? myDrills : communityDrills;
+  function applyFilters(list) {
+    let filtered = list;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(d =>
+        d.title.toLowerCase().includes(q) ||
+        (d.description || '').toLowerCase().includes(q)
+      );
+    }
+    if (activeTag) {
+      filtered = filtered.filter(d => (d.tags || []).includes(activeTag));
+    }
+    return filtered;
+  }
+
+  const displayDrills = applyFilters(tab === 'my' ? myDrills : communityDrills);
+
+  const availableTags = [...new Set(
+    (tab === 'my' ? myDrills : communityDrills).flatMap(d => d.tags || [])
+  )].sort();
 
   const tabStyle = (key) => ({
     padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
@@ -256,9 +277,9 @@ export default function DrillsPage() {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button style={tabStyle('my')} onClick={() => setTab('my')}>My Drills</button>
-          <button style={tabStyle('community')} onClick={() => setTab('community')}>Community</button>
-          <button style={tabStyle('sessions')} onClick={() => setTab('sessions')}>Sessions</button>
+          <button style={tabStyle('my')} onClick={() => { setTab('my'); setSearch(''); setActiveTag(null); }}>My Drills</button>
+          <button style={tabStyle('community')} onClick={() => { setTab('community'); setSearch(''); setActiveTag(null); }}>Community</button>
+          <button style={tabStyle('sessions')} onClick={() => { setTab('sessions'); setSearch(''); setActiveTag(null); }}>Sessions</button>
         </div>
         <div style={{ display: 'flex', background: 'rgba(255,255,255,0.06)', borderRadius: 8, padding: 3 }}>
           <button style={viewBtn('list')} onClick={() => setViewMode('list')}>List</button>
@@ -266,13 +287,46 @@ export default function DrillsPage() {
         </div>
       </div>
 
+      {tab !== 'sessions' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+          <input
+            className="form-control"
+            placeholder="Search drills…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ width: '100%', boxSizing: 'border-box' }}
+          />
+          {availableTags.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {availableTags.map(tag => (
+                <button key={tag} type="button"
+                  onClick={() => setActiveTag(t => t === tag ? null : tag)}
+                  style={{
+                    padding: '4px 12px', borderRadius: 20, fontSize: '0.75rem', cursor: 'pointer',
+                    fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
+                    background: activeTag === tag ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)',
+                    border: activeTag === tag ? '1px solid rgba(212,175,55,0.5)' : '1px solid rgba(255,255,255,0.12)',
+                    color: activeTag === tag ? 'var(--gold)' : 'var(--gray-300)',
+                    transition: 'all 0.15s',
+                  }}
+                >{tag}</button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       {tab === 'sessions' ? (
         <p className="text-muted">Session planner coming in the next step.</p>
       ) : loading ? (
         <div className="spinner" />
       ) : displayDrills.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--gray-300)' }}>
-          {tab === 'my' ? (
+          {search || activeTag ? (
+            <>
+              <p style={{ fontSize: '1.1rem', marginBottom: 8 }}>No drills match your search</p>
+              <button className="btn btn-ghost" style={{ fontSize: '0.85rem' }} onClick={() => { setSearch(''); setActiveTag(null); }}>Clear filters</button>
+            </>
+          ) : tab === 'my' ? (
             <>
               <p style={{ fontSize: '1.1rem', marginBottom: 8 }}>No drills yet</p>
               <p style={{ fontSize: '0.85rem' }}>Add your first drill to get started</p>
