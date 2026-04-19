@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { pool } = require('../db/init');
+const { requireAuth } = require('../middleware/auth');
+
+router.use(requireAuth);
 
 // Beta gate middleware
 function betaCheck(req, res, next) {
