@@ -9,6 +9,7 @@ const { clerkAuth } = require('./middleware/auth');
 const { initDB } = require('./db/init');
 const { setupWebSocket } = require('./ws');
 const teamsRouter = require('./routes/teams');
+const drillsRouter = require('./routes/drills');
 const playersRouter = require('./routes/players');
 const gamesRouter = require('./routes/games');
 const statsRouter = require('./routes/stats');
@@ -43,6 +44,7 @@ app.get('/health', (req, res) => {
 });
 app.use('/api/users', usersRouter);
 app.use('/api/teams', teamsRouter);
+app.use('/api/drills', drillsRouter);
 app.use('/api/players', playersRouter);
 app.use('/api/games', gamesRouter);
 app.use('/api/stats', statsRouter);
