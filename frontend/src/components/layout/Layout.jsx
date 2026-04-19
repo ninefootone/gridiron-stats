@@ -9,8 +9,8 @@ import Modal from '../shared/Modal';
 
 export default function Layout() {
   const { user } = useUser();
-  const betaUsers = (import.meta.env.VITE_DRILLS_BETA_USERS || '').split(',').map(s => s.trim()).filter(Boolean);
-  const isDrillsBeta = true;
+  const drillsBetaUsers = ['user_3AgGD3kALzcbzzPc0PHGo2lwwr8'];
+  const isDrillsBeta = drillsBetaUsers.includes(user?.id);
   const { signOut } = useClerk();
   const navigate = useNavigate();
   const { openHelp } = useHelp();
