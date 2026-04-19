@@ -51,7 +51,7 @@ router.put('/:id', betaCheck, async (req, res, next) => {
     const { rows } = await pool.query(
       `UPDATE drills SET title=$1, description=$2, tags=$3, youtube_url=$4,
        diagram_data=$5, diagram_image_url=$6, visibility=$7, updated_at=NOW()
-       WHERE id=$8 AND created_by=$9 RETURNING *`,
+       WHERE id=$8 AND created_by=$9 RETURNING *, true AS is_owner`,
       [title, description || null, tags || [], youtube_url || null, diagram_data || {}, diagram_image_url || null, visibility || 'private', req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
