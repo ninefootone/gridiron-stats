@@ -46,30 +46,50 @@ function DrillCard({ drill, onEdit, onDelete, isOwner }) {
 }
 
 function DrillRow({ drill, onEdit, onDelete, isOwner }) {
+  const [expanded, setExpanded] = useState(false);
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-      background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.07)'
+      background: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.07)',
+      overflow: 'hidden'
     }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ fontWeight: 700, color: 'var(--white)', fontSize: '0.92rem' }}>{drill.title}</span>
-        {drill.description && (
-          <span className="text-muted" style={{ fontSize: '0.82rem', marginLeft: 10 }}>{drill.description.slice(0, 60)}{drill.description.length > 60 ? '…' : ''}</span>
-        )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', cursor: 'pointer' }}
+        onClick={() => setExpanded(e => !e)}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ fontWeight: 700, color: 'var(--white)', fontSize: '0.92rem' }}>{drill.title}</span>
+          {!expanded && drill.description && (
+            <span className="text-muted" style={{ fontSize: '0.82rem', marginLeft: 10 }}>{drill.description.slice(0, 60)}{drill.description.length > 60 ? '…' : ''}</span>
+          )}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {(drill.tags || []).slice(0, 3).map(tag => (
+            <span key={tag} style={{
+              background: 'rgba(212,175,55,0.12)', color: 'var(--gold)', borderRadius: 20,
+              padding: '1px 8px', fontSize: '0.68rem', fontFamily: 'var(--font-display)',
+              fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em'
+            }}>{tag}</span>
+          ))}
+        </div>
+        <span style={{ color: 'var(--gray-300)', fontSize: '0.8rem', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-        {(drill.tags || []).slice(0, 3).map(tag => (
-          <span key={tag} style={{
-            background: 'rgba(212,175,55,0.12)', color: 'var(--gold)', borderRadius: 20,
-            padding: '1px 8px', fontSize: '0.68rem', fontFamily: 'var(--font-display)',
-            fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em'
-          }}>{tag}</span>
-        ))}
-      </div>
-      {isOwner && (
-        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-          <button className="btn btn-ghost" style={{ padding: '3px 8px', fontSize: '0.75rem' }} onClick={() => onEdit(drill)}>Edit</button>
-          <button className="btn btn-danger" style={{ padding: '3px 8px', fontSize: '0.75rem' }} onClick={() => onDelete(drill)}>Delete</button>
+      {expanded && (
+        <div style={{ padding: '0 16px 16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          {drill.description && (
+            <p className="text-muted" style={{ fontSize: '0.88rem', lineHeight: 1.6, marginTop: 12 }}>{drill.description}</p>
+          )}
+          {drill.youtube_url && (
+            <a href={drill.youtube_url} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-block', marginTop: 10, fontSize: '0.82rem', color: 'var(--gold)', textDecoration: 'none' }}>
+              ▶ Watch on YouTube
+            </a>
+          )}
+          <div style={{ display: 'flex', gap: 6, marginTop: 12, justifyContent: 'flex-end' }}>
+            {isOwner && (
+              <>
+                <button className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={e => { e.stopPropagation(); onEdit(drill); }}>Edit</button>
+                <button className="btn btn-danger" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={e => { e.stopPropagation(); onDelete(drill); }}>Delete</button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -37,7 +37,7 @@ router.post('/', betaCheck, async (req, res, next) => {
     const { title, description, tags, youtube_url, diagram_data, diagram_image_url, visibility } = req.body;
     const { rows } = await pool.query(
       `INSERT INTO drills (created_by, title, description, tags, youtube_url, diagram_data, diagram_image_url, visibility)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *, true AS is_owner`,
       [req.dbUser.id, title, description || null, tags || [], youtube_url || null, diagram_data || {}, diagram_image_url || null, visibility || 'private']
     );
     res.json(rows[0]);
