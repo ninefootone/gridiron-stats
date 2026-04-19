@@ -16,7 +16,8 @@ function betaCheck(req, res, next) {
 router.get('/', betaCheck, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
-      `SELECT d.*, u.name AS creator_name
+      `SELECT d.*, u.name AS creator_name,
+        (d.created_by = $1) AS is_owner
        FROM drills d
        JOIN users u ON u.id = d.created_by
        WHERE d.created_by = $1 OR d.visibility = 'community'
