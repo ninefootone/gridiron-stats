@@ -96,11 +96,11 @@ function DrillForm({ initial, onSave, onClose, saving }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">Title *</label>
-        <input className="input" style={{ width: '100%', boxSizing: 'border-box' }} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Oklahoma Drill" />
+        <input className="form-control" style={{ width: '100%', boxSizing: 'border-box' }} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Oklahoma Drill" />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">Description</label>
-        <textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the drill…" style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }} />
+        <textarea className="form-control" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the drill…" style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <label className="section-label">Tags</label>
@@ -122,11 +122,11 @@ function DrillForm({ initial, onSave, onClose, saving }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">YouTube URL</label>
-        <input className="input" style={{ width: '100%', boxSizing: 'border-box' }} value={form.youtube_url} onChange={e => setForm(f => ({ ...f, youtube_url: e.target.value }))} placeholder="https://youtube.com/watch?v=…" />
+        <input className="form-control" style={{ width: '100%', boxSizing: 'border-box' }} value={form.youtube_url} onChange={e => setForm(f => ({ ...f, youtube_url: e.target.value }))} placeholder="https://youtube.com/watch?v=…" />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">Visibility</label>
-        <select className="input" style={{ width: '100%', boxSizing: 'border-box', background: 'var(--turf)', color: 'var(--white)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '10px 12px' }} value={form.visibility} onChange={e => setForm(f => ({ ...f, visibility: e.target.value }))}>
+        <select className="form-control" style={{ width: '100%', boxSizing: 'border-box', background: 'var(--turf)', color: 'var(--white)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '10px 12px' }} value={form.visibility} onChange={e => setForm(f => ({ ...f, visibility: e.target.value }))}>
           <option value="private">Private — only me</option>
           <option value="club">Club — coming soon</option>
           <option value="community">Community — visible to all coaches</option>
