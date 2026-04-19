@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
 
-const TAGS = ['Flag', 'Contact', 'Offense', 'Defense', 'Special Teams', 'U10', 'U12', 'U14', 'U16', 'U18', 'Senior', 'Warm Up', 'Conditioning'];
+const TAGS = ['Flag', 'Contact', 'Offense', 'Defense', 'Special Teams', 'U11', 'U14', 'U16', 'U17', 'U19', 'Adults'];
 
 function DrillCard({ drill, onEdit, onDelete, isOwner }) {
   return (
@@ -93,45 +93,46 @@ function DrillForm({ initial, onSave, onClose, saving }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">Title *</label>
-        <input className="input" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Oklahoma Drill" />
+        <input className="input" style={{ width: '100%', boxSizing: 'border-box' }} value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Oklahoma Drill" />
       </div>
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">Description</label>
-        <textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the drill…" style={{ resize: 'vertical' }} />
+        <textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the drill…" style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical' }} />
       </div>
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <label className="section-label">Tags</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {TAGS.map(tag => (
             <button key={tag} type="button"
               onClick={() => toggleTag(tag)}
               style={{
-                padding: '4px 12px', borderRadius: 20, fontSize: '0.78rem', cursor: 'pointer',
+                padding: '5px 14px', borderRadius: 20, fontSize: '0.78rem', cursor: 'pointer',
                 fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
                 background: form.tags.includes(tag) ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)',
                 border: form.tags.includes(tag) ? '1px solid rgba(212,175,55,0.5)' : '1px solid rgba(255,255,255,0.12)',
                 color: form.tags.includes(tag) ? 'var(--gold)' : 'var(--gray-300)',
+                transition: 'all 0.15s',
               }}
             >{tag}</button>
           ))}
         </div>
       </div>
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">YouTube URL</label>
-        <input className="input" value={form.youtube_url} onChange={e => setForm(f => ({ ...f, youtube_url: e.target.value }))} placeholder="https://youtube.com/watch?v=…" />
+        <input className="input" style={{ width: '100%', boxSizing: 'border-box' }} value={form.youtube_url} onChange={e => setForm(f => ({ ...f, youtube_url: e.target.value }))} placeholder="https://youtube.com/watch?v=…" />
       </div>
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">Visibility</label>
-        <select className="input" value={form.visibility} onChange={e => setForm(f => ({ ...f, visibility: e.target.value }))}>
+        <select className="input" style={{ width: '100%', boxSizing: 'border-box', background: 'var(--turf)', color: 'var(--white)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '10px 12px' }} value={form.visibility} onChange={e => setForm(f => ({ ...f, visibility: e.target.value }))}>
           <option value="private">Private — only me</option>
           <option value="club">Club — coming soon</option>
           <option value="community">Community — visible to all coaches</option>
         </select>
       </div>
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
         <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
         <button className="btn btn-primary" onClick={() => onSave(form)} disabled={saving || !form.title.trim()}>
           {saving ? 'Saving…' : 'Save Drill'}
