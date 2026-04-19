@@ -120,7 +120,7 @@ function DrillForm({ initial, onSave, onClose, saving }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label className="section-label">Description</label>
-        <textarea className="form-control" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the drill…" style={{ width: '100%', boxSizing: 'border-box', resize: 'none' }} />
+        <textarea className="form-control" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the drill…" style={{ width: '100%', boxSizing: 'border-box', resize: 'none', overflowY: 'auto', paddingRight: 12 }} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <label className="section-label">Tags</label>
