@@ -10,7 +10,7 @@ import Modal from '../shared/Modal';
 export default function Layout() {
   const { user } = useUser();
   const betaUsers = (import.meta.env.VITE_DRILLS_BETA_USERS || '').split(',').map(s => s.trim()).filter(Boolean);
-  const isDrillsBeta = betaUsers.length === 0 || betaUsers.includes(user?.id);
+  const isDrillsBeta = betaUsers.includes(user?.id);
   const { signOut } = useClerk();
   const navigate = useNavigate();
   const { openHelp } = useHelp();
