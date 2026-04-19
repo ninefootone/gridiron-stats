@@ -9,6 +9,7 @@ import Modal from '../shared/Modal';
 
 export default function Layout() {
   const { user } = useUser();
+  const isDrillsBeta = true;
   const { signOut } = useClerk();
   const navigate = useNavigate();
   const { openHelp } = useHelp();
@@ -57,8 +58,13 @@ export default function Layout() {
             </div>
           </div>
           <NavLink to="/teams" className={styles.allTeamsBtn}>
-            All Teams
+            Teams
           </NavLink>
+          {isDrillsBeta && (
+            <NavLink to="/drills" className={styles.allTeamsBtn}>
+              Drills
+            </NavLink>
+          )}
         </div>
         <div className={styles.userArea} ref={menuRef}>
           <button className={styles.avatarBtn} onClick={() => setMenuOpen(p => !p)}>
