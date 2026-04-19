@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApi } from '../hooks/useApi';
 import Modal from '../components/shared/Modal';
+import ConfirmModal from '../components/shared/ConfirmModal';
 
 const TAGS = ['Flag', 'Contact', 'Offense', 'Defense', 'Special Teams', 'U11', 'U14', 'U16', 'U17', 'U19', 'Adults'];
 
@@ -174,6 +175,7 @@ export default function DrillsPage() {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
   const [activeTag, setActiveTag] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => { loadDrills(); }, []);
 
@@ -209,12 +211,17 @@ export default function DrillsPage() {
   }
 
   async function deleteDrill(drill) {
-    if (!window.confirm(`Delete "${drill.title}"?`)) return;
+    setConfirmDelete(drill);
+  }
+
+  async function confirmDeleteDrill() {
     try {
-      await api.delete(`/drills/${drill.id}`);
-      setDrills(ds => ds.filter(d => d.id !== drill.id));
+      await api.delete(`/drills/${confirmDelete.id}`);
+      setDrills(ds => ds.filter(d => d.id !== confirmDelete.id));
+      setConfirmDelete(null);
     } catch (e) {
       setError('Failed to delete drill');
+      setConfirmDelete(null);
     }
   }
 
@@ -353,6 +360,16 @@ export default function DrillsPage() {
         <Modal title={editDrill ? 'Edit Drill' : 'New Drill'} onClose={() => { setModalOpen(false); setEditDrill(null); }}>
           <DrillForm initial={editDrill} onSave={saveDrill} onClose={() => { setModalOpen(false); setEditDrill(null); }} saving={saving} />
         </Modal>
+      )}
+      {confirmDelete && (
+        <ConfirmModal
+          title="Delete Drill"
+          message={`Are you sure you want to delete "${confirmDelete.title}"? This cannot be undone.`}
+          confirmLabel="Delete"
+          confirmClass="btn-danger"
+          onConfirm={confirmDeleteDrill}
+          onClose={() => setConfirmDelete(null)}
+        />
       )}
     </div>
   );
