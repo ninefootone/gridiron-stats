@@ -5,23 +5,21 @@ import ConfirmModal from '../components/shared/ConfirmModal';
 
 const TAGS = ['Flag', 'Contact', 'Offense', 'Defense', 'Special Teams', 'U11', 'U14', 'U16', 'U17', 'U19', 'Adults'];
 
-function DrillCard({ drill, onEdit, onDelete, isOwner }) {
+function DrillCard({ drill, onEdit, onDelete, isOwner, onView }) {
   return (
-    <div className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--white)' }}>{drill.title}</div>
-          {drill.description && (
-            <div className="text-muted" style={{ fontSize: '0.85rem', marginTop: 4, lineHeight: 1.5 }}>{drill.description}</div>
-          )}
+    <div className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--white)' }}>{drill.title}</div>
+      {drill.description && (
+        <div className="text-muted" style={{ fontSize: '0.85rem', lineHeight: 1.5 }}>
+          {drill.description.slice(0, 100)}{drill.description.length > 100 ? '…' : ''}
         </div>
-        {isOwner && (
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            <button className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => onEdit(drill)}>Edit</button>
-            <button className="btn btn-danger" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => onDelete(drill)}>Delete</button>
-          </div>
-        )}
-      </div>
+      )}
+      {drill.youtube_url && (
+        <a href={drill.youtube_url} target="_blank" rel="noopener noreferrer"
+          style={{ display: 'inline-flex', alignItems: 'center', fontSize: '0.82rem', color: 'var(--gold)', textDecoration: 'none' }}>
+          <YoutubeIcon />Watch on YouTube
+        </a>
+      )}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {(drill.tags || []).map(tag => (
           <span key={tag} style={{
@@ -36,12 +34,15 @@ function DrillCard({ drill, onEdit, onDelete, isOwner }) {
           fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em'
         }}>{drill.visibility}</span>
       </div>
-      {drill.youtube_url && (
-        <a href={drill.youtube_url} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize: '0.82rem', color: 'var(--gold)', textDecoration: 'none' }}>
-          ▶ Watch on YouTube
-        </a>
-      )}
+      <div style={{ display: 'flex', gap: 8, marginTop: 4, justifyContent: 'flex-end' }}>
+        <button className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => onView(drill)}>View</button>
+        {isOwner && (
+          <>
+            <button className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => onEdit(drill)}>Edit</button>
+            <button className="btn btn-danger" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={() => onDelete(drill)}>Delete</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -70,7 +71,7 @@ function YoutubeIcon() {
   );
 }
 
-function DrillRow({ drill, onEdit, onDelete, isOwner }) {
+function DrillRow({ drill, onEdit, onDelete, isOwner, onView }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div style={{
@@ -114,6 +115,7 @@ function DrillRow({ drill, onEdit, onDelete, isOwner }) {
             </a>
           )}
           <div style={{ display: 'flex', gap: 6, marginTop: 12, justifyContent: 'flex-end' }}>
+            <button className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={e => { e.stopPropagation(); onView(drill); }}>View</button>
             {isOwner && (
               <>
                 <button className="btn btn-ghost" style={{ padding: '4px 10px', fontSize: '0.78rem' }} onClick={e => { e.stopPropagation(); onEdit(drill); }}>Edit</button>
@@ -126,6 +128,7 @@ function DrillRow({ drill, onEdit, onDelete, isOwner }) {
     </div>
   );
 }
+
 
 function DrillForm({ initial, onSave, onClose, saving }) {
   const [form, setForm] = useState({
@@ -193,6 +196,41 @@ function DrillForm({ initial, onSave, onClose, saving }) {
   );
 }
 
+function DrillDetailModal({ drill, onEdit, onDelete, isOwner, onClose }) {
+  return (
+    <Modal title={drill.title} onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {drill.description && (
+          <p className="text-muted" style={{ fontSize: '0.92rem', lineHeight: 1.7 }}>{drill.description}</p>
+        )}
+        {drill.youtube_url && (
+          <a href={drill.youtube_url} target="_blank" rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', fontSize: '0.88rem', color: 'var(--gold)', textDecoration: 'none' }}>
+            <YoutubeIcon />Watch on YouTube
+          </a>
+        )}
+        {(drill.tags || []).length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {drill.tags.map(tag => (
+              <span key={tag} style={{
+                background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)',
+                color: 'var(--gold)', borderRadius: 20, padding: '2px 10px', fontSize: '0.72rem',
+                fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em'
+              }}>{tag}</span>
+            ))}
+          </div>
+        )}
+        {isOwner && (
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16 }}>
+            <button className="btn btn-ghost" onClick={() => { onClose(); onEdit(drill); }}>Edit</button>
+            <button className="btn btn-danger" onClick={() => { onClose(); onDelete(drill); }}>Delete</button>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
 export default function DrillsPage() {
   const api = useApi();
   const [tab, setTab] = useState('my');
@@ -206,6 +244,7 @@ export default function DrillsPage() {
   const [search, setSearch] = useState('');
   const [activeTags, setActiveTags] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [viewDrill, setViewDrill] = useState(null);
 
   useEffect(() => { loadDrills(); }, []);
 
@@ -377,13 +416,13 @@ export default function DrillsPage() {
       ) : viewMode === 'card' ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
           {displayDrills.map(d => (
-            <DrillCard key={d.id} drill={d} isOwner={d.is_owner} onEdit={drill => { setEditDrill(drill); setModalOpen(true); }} onDelete={deleteDrill} />
+            <DrillCard key={d.id} drill={d} isOwner={d.is_owner} onEdit={drill => { setEditDrill(drill); setModalOpen(true); }} onDelete={deleteDrill} onView={setViewDrill} />
           ))}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {displayDrills.map(d => (
-            <DrillRow key={d.id} drill={d} isOwner={d.is_owner} onEdit={drill => { setEditDrill(drill); setModalOpen(true); }} onDelete={deleteDrill} />
+            <DrillRow key={d.id} drill={d} isOwner={d.is_owner} onEdit={drill => { setEditDrill(drill); setModalOpen(true); }} onDelete={deleteDrill} onView={setViewDrill} />
           ))}
         </div>
       )}
@@ -392,6 +431,15 @@ export default function DrillsPage() {
         <Modal title={editDrill ? 'Edit Drill' : 'New Drill'} onClose={() => { setModalOpen(false); setEditDrill(null); }}>
           <DrillForm initial={editDrill} onSave={saveDrill} onClose={() => { setModalOpen(false); setEditDrill(null); }} saving={saving} />
         </Modal>
+      )}
+      {viewDrill && (
+        <DrillDetailModal
+          drill={viewDrill}
+          isOwner={viewDrill.is_owner}
+          onClose={() => setViewDrill(null)}
+          onEdit={drill => { setEditDrill(drill); setModalOpen(true); }}
+          onDelete={drill => { setViewDrill(null); deleteDrill(drill); }}
+        />
       )}
       {confirmDelete && (
         <ConfirmModal
