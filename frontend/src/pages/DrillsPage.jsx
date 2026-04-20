@@ -46,6 +46,30 @@ function DrillCard({ drill, onEdit, onDelete, isOwner }) {
   );
 }
 
+function ChevronDown() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+function ChevronUp() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="18 15 12 9 6 15" />
+    </svg>
+  );
+}
+
+function YoutubeIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle', position: 'relative', top: -1 }}>
+      <polygon points="5 3 19 12 5 21 5 3" />
+    </svg>
+  );
+}
+
 function DrillRow({ drill, onEdit, onDelete, isOwner }) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -56,21 +80,27 @@ function DrillRow({ drill, onEdit, onDelete, isOwner }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', cursor: 'pointer' }}
         onClick={() => setExpanded(e => !e)}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ fontWeight: 700, color: 'var(--white)', fontSize: '0.92rem' }}>{drill.title}</span>
+          <div style={{ fontWeight: 700, color: 'var(--white)', fontSize: '0.92rem' }}>{drill.title}</div>
           {!expanded && drill.description && (
-            <span className="text-muted" style={{ fontSize: '0.82rem', marginLeft: 10 }}>{drill.description.slice(0, 60)}{drill.description.length > 60 ? '…' : ''}</span>
+            <div className="text-muted" style={{ fontSize: '0.82rem', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {drill.description.slice(0, 80)}{drill.description.length > 80 ? '…' : ''}
+            </div>
+          )}
+          {(drill.tags || []).length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+              {(drill.tags || []).map(tag => (
+                <span key={tag} style={{
+                  background: 'rgba(212,175,55,0.12)', color: 'var(--gold)', borderRadius: 20,
+                  padding: '1px 8px', fontSize: '0.68rem', fontFamily: 'var(--font-display)',
+                  fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em'
+                }}>{tag}</span>
+              ))}
+            </div>
           )}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {(drill.tags || []).slice(0, 3).map(tag => (
-            <span key={tag} style={{
-              background: 'rgba(212,175,55,0.12)', color: 'var(--gold)', borderRadius: 20,
-              padding: '1px 8px', fontSize: '0.68rem', fontFamily: 'var(--font-display)',
-              fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em'
-            }}>{tag}</span>
-          ))}
-        </div>
-        <span style={{ color: 'var(--gray-300)', fontSize: '0.8rem', flexShrink: 0 }}>{expanded ? '▲' : '▼'}</span>
+        <span style={{ color: 'var(--gray-300)', flexShrink: 0 }}>
+          {expanded ? <ChevronUp /> : <ChevronDown />}
+        </span>
       </div>
       {expanded && (
         <div style={{ padding: '0 16px 16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
@@ -79,8 +109,8 @@ function DrillRow({ drill, onEdit, onDelete, isOwner }) {
           )}
           {drill.youtube_url && (
             <a href={drill.youtube_url} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'inline-block', marginTop: 10, fontSize: '0.82rem', color: 'var(--gold)', textDecoration: 'none' }}>
-              ▶ Watch on YouTube
+              style={{ display: 'inline-flex', alignItems: 'center', marginTop: 10, fontSize: '0.82rem', color: 'var(--gold)', textDecoration: 'none' }}>
+              <YoutubeIcon />Watch on YouTube
             </a>
           )}
           <div style={{ display: 'flex', gap: 6, marginTop: 12, justifyContent: 'flex-end' }}>
@@ -174,7 +204,7 @@ export default function DrillsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState('');
-  const [activeTag, setActiveTag] = useState(null);
+  const [activeTags, setActiveTags] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => { loadDrills(); }, []);
@@ -237,17 +267,19 @@ export default function DrillsPage() {
         (d.description || '').toLowerCase().includes(q)
       );
     }
-    if (activeTag) {
-      filtered = filtered.filter(d => (d.tags || []).includes(activeTag));
+    if (activeTags.length > 0) {
+      filtered = filtered.filter(d => activeTags.every(t => (d.tags || []).includes(t)));
     }
     return filtered;
   }
 
   const displayDrills = applyFilters(tab === 'my' ? myDrills : communityDrills);
 
-  const availableTags = [...new Set(
+  const TAG_ORDER = ['Flag', 'Contact', 'Offense', 'Defense', 'Special Teams', 'U11', 'U14', 'U16', 'U17', 'U19', 'Adults'];
+  const allTagsInUse = new Set(
     (tab === 'my' ? myDrills : communityDrills).flatMap(d => d.tags || [])
-  )].sort();
+  );
+  const availableTags = TAG_ORDER.filter(t => allTagsInUse.has(t));
 
   const tabStyle = (key) => ({
     padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
@@ -284,9 +316,9 @@ export default function DrillsPage() {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button style={tabStyle('my')} onClick={() => { setTab('my'); setSearch(''); setActiveTag(null); }}>My Drills</button>
-          <button style={tabStyle('community')} onClick={() => { setTab('community'); setSearch(''); setActiveTag(null); }}>Community</button>
-          <button style={tabStyle('sessions')} onClick={() => { setTab('sessions'); setSearch(''); setActiveTag(null); }}>Sessions</button>
+          <button style={tabStyle('my')} onClick={() => { setTab('my'); setSearch(''); setActiveTags([]); }}>My Drills</button>
+          <button style={tabStyle('community')} onClick={() => { setTab('community'); setSearch(''); setActiveTags([]); }}>Community</button>
+          <button style={tabStyle('sessions')} onClick={() => { setTab('sessions'); setSearch(''); setActiveTags([]); }}>Sessions</button>
         </div>
         <div style={{ display: 'flex', background: 'rgba(255,255,255,0.06)', borderRadius: 8, padding: 3 }}>
           <button style={viewBtn('list')} onClick={() => setViewMode('list')}>List</button>
@@ -307,13 +339,13 @@ export default function DrillsPage() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {availableTags.map(tag => (
                 <button key={tag} type="button"
-                  onClick={() => setActiveTag(t => t === tag ? null : tag)}
+                  onClick={() => setActiveTags(ts => ts.includes(tag) ? ts.filter(t => t !== tag) : [...ts, tag])}
                   style={{
                     padding: '4px 12px', borderRadius: 20, fontSize: '0.75rem', cursor: 'pointer',
                     fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
-                    background: activeTag === tag ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)',
-                    border: activeTag === tag ? '1px solid rgba(212,175,55,0.5)' : '1px solid rgba(255,255,255,0.12)',
-                    color: activeTag === tag ? 'var(--gold)' : 'var(--gray-300)',
+                    background: activeTags.includes(tag) ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)',
+                    border: activeTags.includes(tag) ? '1px solid rgba(212,175,55,0.5)' : '1px solid rgba(255,255,255,0.12)',
+                    color: activeTags.includes(tag) ? 'var(--gold)' : 'var(--gray-300)',
                     transition: 'all 0.15s',
                   }}
                 >{tag}</button>
@@ -328,10 +360,10 @@ export default function DrillsPage() {
         <div className="spinner" />
       ) : displayDrills.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--gray-300)' }}>
-          {search || activeTag ? (
+          {search || activeTags.length > 0 ? (
             <>
               <p style={{ fontSize: '1.1rem', marginBottom: 8 }}>No drills match your search</p>
-              <button className="btn btn-ghost" style={{ fontSize: '0.85rem' }} onClick={() => { setSearch(''); setActiveTag(null); }}>Clear filters</button>
+              <button className="btn btn-ghost" style={{ fontSize: '0.85rem' }} onClick={() => { setSearch(''); setActiveTags([]); }}>Clear filters</button>
             </>
           ) : tab === 'my' ? (
             <>
