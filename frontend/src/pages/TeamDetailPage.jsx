@@ -56,7 +56,7 @@ function LeaderboardTab({ teamId, onPlayerClick }) {
         ))}
       </div>
       <div className={lbStyles.board}>
-        <div className={lbStyles.boardTitle}>{statInfo.icon} {statInfo.label} Leaders</div>
+        <div className={lbStyles.boardTitle}>{getStatIcon(statInfo.icon)} {statInfo.label} Leaders</div>
         {leaderboard.length === 0 ? (
           <p style={{ color: 'var(--gray-500)' }}>No data for this stat yet.</p>
         ) : (

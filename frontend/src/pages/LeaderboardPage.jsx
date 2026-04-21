@@ -66,7 +66,7 @@ export default function LeaderboardPage() {
 
           {/* Leaderboard */}
           <div className={styles.board}>
-            <div className={styles.boardTitle}>{statInfo.icon} {statInfo.label} Leaders</div>
+            <div className={styles.boardTitle}>{getStatIcon(statInfo.icon)} {statInfo.label} Leaders</div>
             {leaderboard.length === 0 ? (
               <p style={{ color: 'var(--gray-500)' }}>No data for this stat yet.</p>
             ) : (
