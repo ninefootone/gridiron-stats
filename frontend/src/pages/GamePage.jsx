@@ -64,6 +64,7 @@ export default function GamePage() {
   const [sfPasser, setSfPasser] = useState(null);
   const [sfReceiver, setSfReceiver] = useState(null);
   const [sfPickSix, setSfPickSix] = useState(false);
+  const [sfQb, setSfQb] = useState(null);
   const [sfReturnPlayer, setSfReturnPlayer] = useState(null);
   const [sfNotes, setSfNotes] = useState('');
   const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
@@ -75,7 +76,7 @@ export default function GamePage() {
   
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
-    setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1); setSfPlay(null);
+    setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1); setSfPlay(null); setSfQb(null);
     setStatFirstModal(true);
   }
 
@@ -95,6 +96,11 @@ export default function GamePage() {
       } else if (sfStat === 'interception') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'interception' });
         if (sfPickSix && sfReturnPlayer) toLog.push({ player: sfReturnPlayer, stat_type: 'td_return' });
+      } else if (sfStat === 'reception') {
+        if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
+        if (sfQb) toLog.push({ player: sfQb, stat_type: 'completion' });
+      } else if (sfStat === 'incomplete') {
+        if (sfQb) toLog.push({ player: sfQb, stat_type: 'incomplete' });
       } else {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
       }
@@ -958,7 +964,7 @@ function openStatModal(player) {
                             type="button"
                             className={`${statViewMode === 'list' ? styles.statBtnList : styles.statBtn} ${sfStat === s.key ? styles.statBtnActive : ''}`}
                             style={sfStat === s.key ? { borderColor: cat.color, background: `${cat.color}22` } : {}}
-                            onClick={() => { setSfStat(s.key); setSfStep(2); setSfPlayer(null); setSfPasser(null); setSfReceiver(null); setSfPickSix(false); setSfReturnPlayer(null); }}
+                            onClick={() => { setSfStat(s.key); setSfStep(2); setSfPlayer(null); setSfPasser(null); setSfReceiver(null); setSfPickSix(false); setSfReturnPlayer(null); setSfQb(null); }}
                           >
                             <span className={styles.statBtnIcon}>{getStatIcon(s.icon)}</span>
                             <span className={styles.statBtnLabel}>{s.label}</span>
@@ -988,7 +994,38 @@ function openStatModal(player) {
                 {getStatInfo(sfStat).icon} {getStatInfo(sfStat).label}
               </div>
 
-              {['td_passing', 'two_pt_pass', 'one_pt_pass'].includes(sfStat) ? (
+              {sfStat === 'reception' ? (
+                <>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>QB (optional)</label>
+                    <select className="form-control" value={sfQb?.id || ''} onChange={e => setSfQb(players.find(p => String(p.id) === e.target.value) || null)}>
+                      <option value="">— Select QB —</option>
+                      {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Receiver (optional)</label>
+                    <select className="form-control" value={sfReceiver?.id || ''} onChange={e => setSfReceiver(players.find(p => String(p.id) === e.target.value) || null)}>
+                      <option value="">— Select receiver —</option>
+                      {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              ) : sfStat === 'incomplete' ? (
+                <div className="form-group" style={{ marginBottom: 14 }}>
+                  <label>QB (optional)</label>
+                  <select className="form-control" value={sfQb?.id || ''} onChange={e => setSfQb(players.find(p => String(p.id) === e.target.value) || null)}>
+                    <option value="">— Select QB —</option>
+                    {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                      <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : ['td_passing', 'two_pt_pass', 'one_pt_pass'].includes(sfStat) ? (
                 <>
                   <div className="form-group" style={{ marginBottom: 14 }}>
                     <label>Passer (optional)</label>
@@ -1075,7 +1112,13 @@ function openStatModal(player) {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={saving || (['td_passing', 'two_pt_pass', 'one_pt_pass'].includes(sfStat) ? (!sfPasser && !sfReceiver) : sfStat === 'interception' ? !sfPlayer : !sfPlayer)}
+                  disabled={saving || (
+                    sfStat === 'reception' ? (!sfQb && !sfReceiver) :
+                    sfStat === 'incomplete' ? !sfQb :
+                    ['td_passing', 'two_pt_pass', 'one_pt_pass'].includes(sfStat) ? (!sfPasser && !sfReceiver) :
+                    sfStat === 'interception' ? !sfPlayer :
+                    !sfPlayer
+                  )}
                   onClick={logStatFirst}
                 >
                   {saving ? 'Logging...' : 'Log Stat'}

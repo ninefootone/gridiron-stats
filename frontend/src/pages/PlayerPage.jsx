@@ -85,6 +85,12 @@ export default function PlayerPage() {
     return acc;
   }, {});
 
+  // Completion percentage
+  const completions = totals['completion'] || 0;
+  const incompletes = totals['incomplete'] || 0;
+  const totalAttempts = completions + incompletes;
+  const compPct = totalAttempts > 0 ? Math.round((completions / totalAttempts) * 100) : null;
+
   // Group by game
   const byGame = {};
   stats.forEach(s => {
@@ -256,7 +262,14 @@ export default function PlayerPage() {
           <p style={{ color: 'var(--gray-500)' }}>No stats recorded yet.</p>
         ) : (
           <div className={styles.totalsGrid}>
-            {Object.entries(totals).map(([type, total]) => {
+            {compPct !== null && (
+              <div key="comp_pct" className={styles.totalCard}>
+                <div className={styles.totalIcon}>{getStatIcon('comp_pct')}</div>
+                <div className={styles.totalValue}>{compPct}%</div>
+                <div className={styles.totalLabel}>Comp %</div>
+              </div>
+            )}
+            {Object.entries(totals).filter(([type]) => type !== 'completion' && type !== 'incomplete').map(([type, total]) => {
               const info = getStatInfo(type);
               return (
                 <div key={type} className={styles.totalCard}>

@@ -10,6 +10,8 @@ export const STAT_CATEGORIES = {
       { key: 'rushing_yds',    label: 'Rushing Yards',      icon: 'rushing_yds',    unit: 'yds',  description: 'Yards run',                             flag: true,  contact: true },
       { key: 'passing_yds',    label: 'Passing Yards',      icon: 'passing_yds',    unit: 'yds',  description: 'Yards thrown',                          flag: true,  contact: true },
       { key: 'reception',      label: 'Reception',          icon: 'reception',      unit: null,   description: 'Catch made',                            flag: true,  contact: true },
+      { key: 'incomplete',     label: 'Incomplete',         icon: 'incomplete',     unit: null,   description: 'Incomplete pass (QB)',                  flag: true,  contact: true },
+      { key: 'completion',     label: 'Completion',         icon: 'completion',     unit: null,   description: 'Completion (QB) — auto-logged',         flag: false, contact: false, hidden: true },
       { key: 'two_pt_pass',    label: '2PT Conv Pass',      icon: 'two_pt_pass',    unit: null,   description: '2-pt conversion pass (QB)',              flag: true,  contact: true },
       { key: 'two_pt_rec',     label: '2PT Conv Reception', icon: 'two_pt_rec',     unit: null,   description: '2-pt conversion catch',                 flag: true,  contact: true, excludeFromStatFirst: true },
       { key: 'two_pt_carry',   label: '2PT Conv Carry',     icon: 'two_pt_carry',   unit: null,   description: '2-pt conversion run',                   flag: true,  contact: true },
@@ -150,6 +152,10 @@ export function getStatNarrative(stat, allStats) {
       return `${name} ran in a 1PT conversion`;
     case 'reception':
       return `${name} made a reception`;
+    case 'incomplete':
+      return `${name} threw an incomplete pass`;
+    case 'completion':
+      return null;
     case 'passing_yds':
       return `${name} threw for ${val} yards`;
     case 'rushing_yds':

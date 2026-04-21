@@ -63,6 +63,8 @@ export function getStatIcon(key, size = 16) {
     case 'pat_kick':        return <svg {...p} strokeWidth="1.5"><path d="m4.75 2.5 0 12 13.5 0 0 -12"/><path d="m11.5 14.5 0 7.5"/><path d="M9.7871280824 8.9964371123a3.001 1.875 -52.882 1 0 3.6219580752 -4.7859611053 3.001 1.875 -52.882 1 0 -3.6219580752 4.7859611053Z"/></svg>;
     case 'field_goal':      return <svg {...p} strokeWidth="1.5"><path d="m4.75 2.5 0 12 13.5 0 0 -12"/><path d="m11.5 14.5 0 7.5"/><path d="M9.7871280824 8.9964371123a3.001 1.875 -52.882 1 0 3.6219580752 -4.7859611053 3.001 1.875 -52.882 1 0 -3.6219580752 4.7859611053Z"/></svg>;
 
+    case 'comp_pct':      return <svg {...p}><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>;
+
     // Default
     default: return <svg {...p}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>;
   }
