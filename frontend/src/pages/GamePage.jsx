@@ -436,6 +436,16 @@ function openStatModal(player) {
       if (s.our_score !== null && s.our_score !== undefined) {
         setGame(prev => ({ ...prev, our_score: s.our_score }));
       }
+      if (['td_receiving', 'receiving_yds', 'two_pt_rec', 'one_pt_rec'].includes(selectedStat)) {
+        await api.post('/stats', {
+          game_id: Number(gameId),
+          player_id: selectedPlayer.id,
+          stat_type: 'reception',
+          value: 1,
+          notes: null,
+          play_id: selectedPlay || null,
+        });
+      }
       setStatModal(false);
     } catch (err) { setAlertModal(err.message); }
     finally { setSaving(false); }
