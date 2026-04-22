@@ -96,8 +96,9 @@ export default function GamePage() {
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'one_pt_rec' });
       } else if (sfStat === 'interception') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'interception' });
-        if (sfPickSix && sfReturnPlayer) toLog.push({ player: sfReturnPlayer, stat_type: 'td_return' });
-        if (sfPickSix && sfReturnPlayer) toLog.push({ player: sfReturnPlayer, stat_type: 'interception' });
+        const returnPlayer = sfPickSix ? (sfReturnPlayer || sfPlayer) : null;
+        if (sfPickSix && returnPlayer) toLog.push({ player: returnPlayer, stat_type: 'td_return' });
+        if (sfPickSix && returnPlayer && returnPlayer !== sfPlayer) toLog.push({ player: returnPlayer, stat_type: 'interception' });
       } else if (sfStat === 'reception') {
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'completion' });
