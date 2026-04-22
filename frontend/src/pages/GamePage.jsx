@@ -87,6 +87,7 @@ export default function GamePage() {
       if (sfStat === 'td_passing') {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'td_passing' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'td_receiving' });
+        if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
       } else if (sfStat === 'two_pt_pass') {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'two_pt_pass' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'two_pt_rec' });
@@ -96,6 +97,7 @@ export default function GamePage() {
       } else if (sfStat === 'interception') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'interception' });
         if (sfPickSix && sfReturnPlayer) toLog.push({ player: sfReturnPlayer, stat_type: 'td_return' });
+        if (sfPickSix && sfReturnPlayer) toLog.push({ player: sfReturnPlayer, stat_type: 'interception' });
       } else if (sfStat === 'reception') {
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'completion' });
