@@ -352,8 +352,10 @@ async function loadMembers() {
   if (loading) return <div className="spinner" />;
   if (!team) return <div>Team not found</div>;
 
-  const wins = games.filter(g => g.status === 'completed' && g.game_type !== 'friendly' && g.our_score > g.opponent_score).length;
-  const losses = games.filter(g => g.status === 'completed' && g.game_type !== 'friendly' && g.our_score < g.opponent_score).length;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const wins = games.filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today && g.game_type !== 'friendly' && g.our_score > g.opponent_score; }).length;
+  const losses = games.filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today && g.game_type !== 'friendly' && g.our_score < g.opponent_score; }).length;
+  const ties = games.filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today && g.game_type !== 'friendly' && g.our_score === g.opponent_score && (g.our_score > 0 || g.opponent_score > 0); }).length;
 
   return (
     <div>
@@ -385,8 +387,8 @@ async function loadMembers() {
         </div>
 
         <div className={styles.record}>
-          <span className={styles.recordNum}>{wins}</span><span className={styles.recordSep}>-</span><span className={styles.recordNum}>{losses}</span>
-          <span className={styles.recordLabel}>W-L</span>
+          <span className={styles.recordNum}>{wins}</span><span className={styles.recordSep}>-</span><span className={styles.recordNum}>{losses}</span>{ties > 0 && <><span className={styles.recordSep}>-</span><span className={styles.recordNum}>{ties}</span></>}
+          <span className={styles.recordLabel}>W-L{ties > 0 ? '-T' : ''}</span>
         </div>
       </div>
 
