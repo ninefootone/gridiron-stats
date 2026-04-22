@@ -88,17 +88,19 @@ export default function GamePage() {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'td_passing' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'td_receiving' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
-      } else if (sfStat === 'two_pt_pass') {
+            } else if (sfStat === 'two_pt_pass') {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'two_pt_pass' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'two_pt_rec' });
+        if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
       } else if (sfStat === 'one_pt_pass') {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'one_pt_pass' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'one_pt_rec' });
-      } else if (sfStat === 'interception') {
+        if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
+      }
+      else if (sfStat === 'interception') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'interception' });
         const returnPlayer = sfPickSix ? (sfReturnPlayer || sfPlayer) : null;
         if (sfPickSix && returnPlayer) toLog.push({ player: returnPlayer, stat_type: 'td_return' });
-        if (sfPickSix && returnPlayer && returnPlayer !== sfPlayer) toLog.push({ player: returnPlayer, stat_type: 'interception' });
       } else if (sfStat === 'reception') {
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'completion' });
