@@ -353,9 +353,10 @@ async function loadMembers() {
   if (!team) return <div>Team not found</div>;
 
   const today = new Date(); today.setHours(0,0,0,0);
-  const wins = games.filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today && g.game_type !== 'friendly' && g.our_score > g.opponent_score; }).length;
-  const losses = games.filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today && g.game_type !== 'friendly' && g.our_score < g.opponent_score; }).length;
-  const ties = games.filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today && g.game_type !== 'friendly' && g.our_score === g.opponent_score && (g.our_score > 0 || g.opponent_score > 0); }).length;
+  const isComplete = g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today || g.game_status === 'ended'; };
+  const wins = games.filter(g => isComplete(g) && g.game_type !== 'friendly' && g.our_score > g.opponent_score).length;
+  const losses = games.filter(g => isComplete(g) && g.game_type !== 'friendly' && g.our_score < g.opponent_score).length;
+  const ties = games.filter(g => isComplete(g) && g.game_type !== 'friendly' && g.our_score === g.opponent_score && (g.our_score > 0 || g.opponent_score > 0)).length;
 
   return (
     <div>

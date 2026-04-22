@@ -508,7 +508,7 @@ function openStatModal(player) {
     <div>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/teams/${teamId}?tab=games`)}>← All Games</button>
-        {(isAdmin || teamRole === 'member') && isToday && (
+        {(isAdmin || teamRole === 'member') && (isToday || isPast) && (
           <button
             className={`btn btn-sm ${game.game_status === 'active' ? 'btn-danger' : 'btn-primary'}`}
             onClick={async () => {
@@ -517,7 +517,7 @@ function openStatModal(player) {
               setGame(g);
             }}
           >
-            {game.game_status === 'active' ? 'End Game' : game.game_status === 'ended' ? 'Restart Game' : 'Start Game'}
+            {game.game_status === 'active' ? 'End Game' : game.game_status === 'ended' ? 'Restart Game' : 'Mark Complete'}
           </button>
         )}
         {isAdmin && (
