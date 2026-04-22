@@ -994,7 +994,7 @@ function openStatModal(player) {
             <div>
               <button className="btn btn-ghost btn-sm" style={{ marginBottom: 16 }} onClick={() => setSfStep(1)}>← Back</button>
               <div style={{ marginBottom: 16, fontWeight: 700, fontSize: '1.1rem' }}>
-                {getStatInfo(sfStat).icon} {getStatInfo(sfStat).label}
+                {getStatIcon(getStatInfo(sfStat).icon)} {getStatInfo(sfStat).label}
               </div>
 
               {sfStat === 'reception' ? (
