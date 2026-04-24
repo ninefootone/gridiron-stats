@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-const WHISTLE_HOST = 'whistle-app.co';
+/* const WHISTLE_HOST = 'whistle-app.co'; */
+const WHISTLE_HOST = 'flag-production-d4bb.up.railway.app';
 
 export function useWhistleSocket(whistleGameId) {
   const [whistleState, setWhistleState] = useState(null);
