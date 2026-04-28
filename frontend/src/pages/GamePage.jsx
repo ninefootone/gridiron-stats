@@ -67,6 +67,7 @@ export default function GamePage() {
   const [sfQb, setSfQb] = useState(null);
   const [sfReturnPlayer, setSfReturnPlayer] = useState(null);
   const [sfNotes, setSfNotes] = useState('');
+  const [sfYards, setSfYards] = useState('');
   const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
 
   const [teamType, setTeamType] = useState(null);
@@ -76,7 +77,7 @@ export default function GamePage() {
   
   function openStatFirst() {
     setSfStat(null); setSfPlayer(null); setSfPasser(null); setSfReceiver(null);
-    setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfStep(1); setSfPlay(null); setSfQb(null);
+    setSfPickSix(false); setSfReturnPlayer(null); setSfNotes(''); setSfYards(''); setSfStep(1); setSfPlay(null); setSfQb(null);
     setStatFirstModal(true);
   }
 
@@ -88,6 +89,8 @@ export default function GamePage() {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'td_passing' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'td_receiving' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
+        if (sfYards && sfPasser) toLog.push({ player: sfPasser, stat_type: 'passing_yds', value: Number(sfYards) });
+        if (sfYards && sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'receiving_yds', value: Number(sfYards) });
             } else if (sfStat === 'two_pt_pass') {
         if (sfPasser) toLog.push({ player: sfPasser, stat_type: 'two_pt_pass' });
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'two_pt_rec' });
@@ -104,13 +107,15 @@ export default function GamePage() {
       } else if (sfStat === 'reception') {
         if (sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'reception' });
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'completion' });
+        if (sfYards && sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'receiving_yds', value: Number(sfYards) });
+        if (sfYards && sfQb) toLog.push({ player: sfQb, stat_type: 'passing_yds', value: Number(sfYards) });
       } else if (sfStat === 'incomplete') {
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'incomplete' });
       } else {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
       }
-      const results = await Promise.all(toLog.map(({ player, stat_type }) =>
-      api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: 1, notes: sfNotes || null, play_id: sfPlay || null })
+      const results = await Promise.all(toLog.map(({ player, stat_type, value }) =>
+      api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: value ?? 1, notes: sfNotes || null, play_id: sfPlay || null })
           .then(s => ({ ...s, player_name: player.name, player_number: player.number, play_name: plays.find(p => p.id === sfPlay)?.name || null }))
       ));
       const lastWithScore = results.slice().reverse().find(r => r.our_score !== null && r.our_score !== undefined);
@@ -1029,6 +1034,10 @@ function openStatModal(player) {
                       ))}
                     </select>
                   </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Yards (optional)</label>
+                    <input className="form-control" type="number" value={sfYards} onChange={e => setSfYards(e.target.value)} placeholder="e.g. 15" />
+                  </div>
                 </>
               ) : sfStat === 'incomplete' ? (
                 <div className="form-group" style={{ marginBottom: 14 }}>
@@ -1059,6 +1068,10 @@ function openStatModal(player) {
                         <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
                       ))}
                     </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Yards (optional)</label>
+                    <input className="form-control" type="number" value={sfYards} onChange={e => setSfYards(e.target.value)} placeholder="e.g. 25" />
                   </div>
                 </>
               ) : sfStat === 'interception' ? (
