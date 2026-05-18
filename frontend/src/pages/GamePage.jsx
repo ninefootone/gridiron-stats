@@ -102,6 +102,8 @@ export default function GamePage() {
       }
       else if (sfStat === 'interception') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'interception' });
+      } else if (sfStat === 'int_thrown') {
+        if (sfQb) toLog.push({ player: sfQb, stat_type: 'int_thrown' });
         const returnPlayer = sfPickSix ? (sfReturnPlayer || sfPlayer) : null;
         if (sfPickSix && returnPlayer) toLog.push({ player: returnPlayer, stat_type: 'td_return' });
       } else if (sfStat === 'reception') {
@@ -111,6 +113,10 @@ export default function GamePage() {
         if (sfYards && sfQb) toLog.push({ player: sfQb, stat_type: 'passing_yds', value: Number(sfYards) });
       } else if (sfStat === 'incomplete') {
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'incomplete' });
+      } else if (sfStat === 'int_thrown') {
+        if (sfQb) toLog.push({ player: sfQb, stat_type: 'int_thrown' });
+      } else if (sfStat === 'rushing_yds') {
+        if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'rushing_yds', value: sfYards ? Number(sfYards) : 1 });
       } else {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
       }
@@ -731,7 +737,7 @@ function openStatModal(player) {
       {opponentModal && (
         <Modal title="Log Opponent Score" onClose={() => setOpponentModal(false)}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-            {OPPONENT_SCORE_TYPES.map(type => (
+            {OPPONENT_SCORE_TYPES.filter(t => !(teamType === 'flag' && t.key === 'field_goal')).map(type => (
               <button
                 key={type.key}
                 className="btn btn-secondary"
@@ -972,7 +978,7 @@ function openStatModal(player) {
                 {(() => {
                   const allowed = getStatsForTeamType(teamType, showMoreStats);
                   return Object.entries(STAT_CATEGORIES).map(([catKey, cat]) => {
-                    const countingInCat = cat.stats.filter(s => s.unit === null && !s.excludeFromStatFirst && allowed.find(a => a.key === s.key));
+                    const countingInCat = cat.stats.filter(s => (s.unit === null || s.includeInStatFirst) && !s.excludeFromStatFirst && allowed.find(a => a.key === s.key));
                   if (!countingInCat.length) return null;
                   return (
                     <div key={catKey}>
@@ -1039,7 +1045,23 @@ function openStatModal(player) {
                     <input className="form-control" type="number" value={sfYards} onChange={e => setSfYards(e.target.value)} placeholder="e.g. 15" />
                   </div>
                 </>
-              ) : sfStat === 'incomplete' ? (
+              ) : sfStat === 'rushing_yds' ? (
+                <>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Player (optional)</label>
+                    <select className="form-control" value={sfPlayer?.id || ''} onChange={e => setSfPlayer(players.find(p => String(p.id) === e.target.value) || null)}>
+                      <option value="">— Select player —</option>
+                      {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Yards (optional)</label>
+                    <input className="form-control" type="number" value={sfYards} onChange={e => setSfYards(e.target.value)} placeholder="e.g. 8" />
+                  </div>
+                </>
+              ) : sfStat === 'incomplete' || sfStat === 'int_thrown' ? (
                 <div className="form-group" style={{ marginBottom: 14 }}>
                   <label>QB (optional)</label>
                   <select className="form-control" value={sfQb?.id || ''} onChange={e => setSfQb(players.find(p => String(p.id) === e.target.value) || null)}>
@@ -1142,7 +1164,7 @@ function openStatModal(player) {
                   className="btn btn-primary"
                   disabled={saving || (
                     sfStat === 'reception' ? (!sfQb && !sfReceiver) :
-                    sfStat === 'incomplete' ? !sfQb :
+                    sfStat === 'incomplete' || sfStat === 'int_thrown' || sfStat === 'rushing_yds' ? false :
                     ['td_passing', 'two_pt_pass', 'one_pt_pass'].includes(sfStat) ? (!sfPasser && !sfReceiver) :
                     sfStat === 'interception' ? !sfPlayer :
                     !sfPlayer

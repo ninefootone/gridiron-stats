@@ -7,10 +7,11 @@ export const STAT_CATEGORIES = {
       { key: 'td_receiving',   label: 'Receiving TD',       icon: 'td_receiving',   unit: null,   description: 'Touchdown catch (WR/TE/RB)',             flag: true,  contact: true, excludeFromStatFirst: true },
       { key: 'td_rushing',     label: 'Rushing TD',         icon: 'td_rushing',     unit: null,   description: 'Touchdown run (RB/QB)',                  flag: true,  contact: true },
       { key: 'receiving_yds',  label: 'Receiving Yards',    icon: 'receiving_yds',  unit: 'yds',  description: 'Yards after catch',                     flag: true,  contact: true },
-      { key: 'rushing_yds',    label: 'Rushing Yards',      icon: 'rushing_yds',    unit: 'yds',  description: 'Yards run',                             flag: true,  contact: true },
+      { key: 'rushing_yds',    label: 'Rushing Yards',      icon: 'rushing_yds',    unit: 'yds',  description: 'Yards run',                             flag: true,  contact: true, includeInStatFirst: true },
       { key: 'passing_yds',    label: 'Passing Yards',      icon: 'passing_yds',    unit: 'yds',  description: 'Yards thrown',                          flag: true,  contact: true },
       { key: 'reception',      label: 'Reception',          icon: 'reception',      unit: null,   description: 'Catch made',                            flag: true,  contact: true },
       { key: 'incomplete',     label: 'Incomplete',         icon: 'incomplete',     unit: null,   description: 'Incomplete pass (QB)',                  flag: true,  contact: true },
+      { key: 'int_thrown',     label: 'INT Thrown',         icon: 'int_thrown',     unit: null,   description: 'Interception thrown (QB)',               flag: true,  contact: true },
       { key: 'completion',     label: 'Completion',         icon: 'completion',     unit: null,   description: 'Completion (QB) — auto-logged',         flag: false, contact: false, hidden: true },
       { key: 'two_pt_pass',    label: '2PT Conv Pass',      icon: 'two_pt_pass',    unit: null,   description: '2-pt conversion pass (QB)',              flag: true,  contact: true },
       { key: 'two_pt_rec',     label: '2PT Conv Reception', icon: 'two_pt_rec',     unit: null,   description: '2-pt conversion catch',                 flag: true,  contact: true, excludeFromStatFirst: true },
@@ -154,6 +155,8 @@ export function getStatNarrative(stat, allStats) {
       return `${name} made a reception`;
     case 'incomplete':
       return `${name} threw an incomplete pass`;
+    case 'int_thrown':
+      return `${name} threw an interception`;
     case 'completion':
       return null;
     case 'passing_yds':
