@@ -83,37 +83,37 @@ export default function PublicPlayerPage() {
       </div>
 
       {/* Season Totals */}
-      <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
-        <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 14 }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>
           Season Totals
         </div>
         {visibleTotals.length === 0 && compPct === null ? (
           <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem' }}>No stats recorded yet.</div>
         ) : (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 10 }}>
+            {compPct !== null && (
+              <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, padding: '14px 12px', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'var(--font-display, sans-serif)', fontSize: '1.7rem', fontWeight: 900, color: '#f5a623', lineHeight: 1, marginBottom: 4 }}>
+                  {compPct}%
+                </div>
+                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Comp%
+                </div>
+              </div>
+            )}
             {visibleTotals.map(([type, total]) => {
               const info = getStatInfo(type);
               return (
-                <div key={type}>
-                  <div style={{ fontFamily: 'var(--font-display, sans-serif)', fontSize: '1.6rem', fontWeight: 900, color: '#f5a623', lineHeight: 1 }}>
-                    {total}{info.unit ? <span style={{ fontSize: '0.9rem', marginLeft: 2 }}>{info.unit}</span> : ''}
+                <div key={type} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, padding: '14px 12px', textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'var(--font-display, sans-serif)', fontSize: '1.7rem', fontWeight: 900, color: '#f5a623', lineHeight: 1, marginBottom: 4 }}>
+                    {total}{info.unit ? <span style={{ fontSize: '0.85rem', marginLeft: 2 }}>{info.unit}</span> : ''}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 2 }}>
+                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     {info.label}
                   </div>
                 </div>
               );
             })}
-            {compPct !== null && (
-              <div>
-                <div style={{ fontFamily: 'var(--font-display, sans-serif)', fontSize: '1.6rem', fontWeight: 900, color: '#f5a623', lineHeight: 1 }}>
-                  {compPct}<span style={{ fontSize: '0.9rem', marginLeft: 1 }}>%</span>
-                </div>
-                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 2 }}>
-                  Comp%
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>

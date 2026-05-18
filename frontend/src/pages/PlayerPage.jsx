@@ -287,7 +287,7 @@ export default function PlayerPage() {
       </div>
 
       {teamRole === 'admin' && (
-        <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button className="btn btn-secondary btn-sm" onClick={() => {
             const doc = new jsPDF();
             const pageWidth = doc.internal.pageSize.getWidth();
