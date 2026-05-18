@@ -221,10 +221,19 @@ export default function GamePage() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(60);
-      const statLine = Object.entries(totals).map(([type, total]) => {
-        const info = getStatInfo(type);
-        return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
-      }).join('  ·  ');
+      const gamePlayerCompletions = totals['completion'] || 0;
+      const gamePlayerIncompletes = totals['incomplete'] || 0;
+      const gamePlayerAttempts = gamePlayerCompletions + gamePlayerIncompletes;
+      const gamePlayerCompPct = gamePlayerAttempts > 0 ? Math.round((gamePlayerCompletions / gamePlayerAttempts) * 100) : null;
+      const statLine = [
+        ...Object.entries(totals)
+          .filter(([type]) => !getStatInfo(type).hidden)
+          .map(([type, total]) => {
+            const info = getStatInfo(type);
+            return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
+          }),
+        ...(gamePlayerCompPct !== null ? [`Comp%: ${gamePlayerCompPct}%`] : []),
+      ].join('  ·  ');
       const lines = doc.splitTextToSize(statLine, pageWidth - 28);
       doc.text(lines, 20, y);
       y += lines.length * 5 + 4;

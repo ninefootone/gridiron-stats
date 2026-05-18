@@ -326,10 +326,19 @@ export default function PlayerPage() {
               doc.text('No stats recorded yet.', 14, y);
               y += 8;
             } else {
-              const totalLine = Object.entries(totals).map(([type, total]) => {
-                const info = getStatInfo(type);
-                return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
-              }).join('  ·  ');
+              const pdfCompletions = totals['completion'] || 0;
+              const pdfIncompletes = totals['incomplete'] || 0;
+              const pdfAttempts = pdfCompletions + pdfIncompletes;
+              const pdfCompPct = pdfAttempts > 0 ? Math.round((pdfCompletions / pdfAttempts) * 100) : null;
+              const totalLine = [
+                ...Object.entries(totals)
+                  .filter(([type]) => !getStatInfo(type).hidden)
+                  .map(([type, total]) => {
+                    const info = getStatInfo(type);
+                    return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
+                  }),
+                ...(pdfCompPct !== null ? [`Comp%: ${pdfCompPct}%`] : []),
+              ].join('  ·  ');
               doc.setFontSize(10);
               doc.setFont('helvetica', 'normal');
               doc.setTextColor(60);
@@ -370,10 +379,19 @@ export default function PlayerPage() {
               doc.setFontSize(10);
               doc.setFont('helvetica', 'normal');
               doc.setTextColor(60);
-              const statLine = Object.entries(gameTotals).map(([type, total]) => {
-                const info = getStatInfo(type);
-                return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
-              }).join('  ·  ');
+              const gameCompletions = gameTotals['completion'] || 0;
+              const gameIncompletes = gameTotals['incomplete'] || 0;
+              const gameAttempts = gameCompletions + gameIncompletes;
+              const gameCompPct = gameAttempts > 0 ? Math.round((gameCompletions / gameAttempts) * 100) : null;
+              const statLine = [
+                ...Object.entries(gameTotals)
+                  .filter(([type]) => !getStatInfo(type).hidden)
+                  .map(([type, total]) => {
+                    const info = getStatInfo(type);
+                    return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
+                  }),
+                ...(gameCompPct !== null ? [`Comp%: ${gameCompPct}%`] : []),
+              ].join('  ·  ');
               const lines = doc.splitTextToSize(statLine, pageWidth - 28);
               doc.text(lines, 20, y);
               y += lines.length * 5 + 6;
