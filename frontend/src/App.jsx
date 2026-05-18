@@ -10,6 +10,7 @@ import GamePage from './pages/GamePage';
 import PlayerPage from './pages/PlayerPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import LivePage from './pages/LivePage';
+import PublicPlayerPage from './pages/PublicPlayerPage';
 import CookieBanner from './components/shared/CookieBanner';
 import OfflineBanner from './components/shared/OfflineBanner';
 
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/teams" replace />} />
         </Route>
         <Route path="/live/:gameId" element={<LivePage />} />
+        <Route path="/player/:token" element={<PublicPlayerPage />} />
       </Routes>
       <CookieBanner />
       <OfflineBanner />

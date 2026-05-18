@@ -47,6 +47,43 @@ router.get('/opponent-stats', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/public/players/:token — public player profile by share token
+router.get('/players/:token', async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT p.id, p.name, p.number, p.positions, p.active, t.name AS team_name
+       FROM players p
+       JOIN teams t ON t.id = p.team_id
+       WHERE p.share_token = $1`,
+      [req.params.token]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Player not found' });
+    res.json(rows[0]);
+  } catch (err) { next(err); }
+});
+
+// GET /api/public/players/:token/stats — public player stats by share token
+router.get('/players/:token/stats', async (req, res, next) => {
+  try {
+    const { rows: playerRows } = await pool.query(
+      `SELECT p.id FROM players p WHERE p.share_token = $1`,
+      [req.params.token]
+    );
+    if (!playerRows.length) return res.status(404).json({ error: 'Player not found' });
+    const playerId = playerRows[0].id;
+    const { rows } = await pool.query(
+      `SELECT ps.stat_type, ps.value, ps.logged_at, ps.game_id,
+              g.opponent_name, g.game_date, g.our_score, g.opponent_score
+       FROM player_stats ps
+       JOIN games g ON g.id = ps.game_id
+       WHERE ps.player_id = $1
+       ORDER BY g.game_date DESC, ps.logged_at DESC`,
+      [playerId]
+    );
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
 // GET /api/public/stats-summary — public platform stats for marketing site
 router.get('/stats-summary', async (req, res, next) => {
   try {

@@ -168,6 +168,7 @@ async function initDB() {
 
     // Player retirement
     await pool.query(`ALTER TABLE players ADD COLUMN IF NOT EXISTS retired_at TIMESTAMPTZ DEFAULT NULL`);
+    await pool.query(`ALTER TABLE players ADD COLUMN IF NOT EXISTS share_token VARCHAR(32) DEFAULT NULL`);
 
     // New stat types — add to existing player_stats table via application logic only, no schema change needed
 

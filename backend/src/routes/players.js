@@ -232,4 +232,40 @@ router.get('/:id/linked-stats', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/players/:id/share-token — generate (or return existing) share token
+router.post('/:id/share-token', requireAuth, async (req, res, next) => {
+  try {
+    // Verify this player belongs to a team the user has access to
+    const { rows: check } = await pool.query(
+      `SELECT p.id, p.share_token FROM players p
+       JOIN team_members tm ON tm.team_id = p.team_id
+       WHERE p.id = $1 AND tm.user_id = $2`,
+      [req.params.id, req.dbUser.id]
+    );
+    if (!check.length) return res.status(404).json({ error: 'Player not found or not authorised' });
+
+    // Return existing token or generate a new one
+    if (check[0].share_token) return res.json({ token: check[0].share_token });
+
+    const token = require('crypto').randomBytes(16).toString('hex');
+    await pool.query(`UPDATE players SET share_token = $1 WHERE id = $2`, [token, req.params.id]);
+    res.json({ token });
+  } catch (err) { next(err); }
+});
+
+// DELETE /api/players/:id/share-token — revoke share token
+router.delete('/:id/share-token', requireAuth, async (req, res, next) => {
+  try {
+    const { rows: check } = await pool.query(
+      `SELECT p.id FROM players p
+       JOIN team_members tm ON tm.team_id = p.team_id
+       WHERE p.id = $1 AND tm.user_id = $2`,
+      [req.params.id, req.dbUser.id]
+    );
+    if (!check.length) return res.status(404).json({ error: 'Player not found or not authorised' });
+    await pool.query(`UPDATE players SET share_token = NULL WHERE id = $1`, [req.params.id]);
+    res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
