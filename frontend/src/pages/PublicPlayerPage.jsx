@@ -69,6 +69,12 @@ export default function PublicPlayerPage() {
 
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <div style={{ marginBottom: 16 }}>
+          <a href="https://gridiron-stats.co.uk/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+            <img src="/football.svg" alt="" style={{ width: 24, height: 24 }} />
+            <span style={{ fontFamily: 'var(--font-display, sans-serif)', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#f5a623', lineHeight: 1 }}>Gridiron Stats</span>
+          </a>
+        </div>
         <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>
           Gridiron Stats · {player.team_name}
         </div>
@@ -168,8 +174,10 @@ export default function PublicPlayerPage() {
         </>
       )}
 
-      <div style={{ textAlign: 'center', marginTop: 40, fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>
-        Powered by Gridiron Stats · gridiron-stats.co
+      <div style={{ textAlign: 'center', marginTop: 40, fontSize: '0.75rem' }}>
+        <a href="https://gridiron-stats.co.uk/" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.2)', textDecoration: 'none' }}>
+          Powered by Gridiron Stats · gridiron-stats.co.uk
+        </a>
       </div>
     </div>
   );
