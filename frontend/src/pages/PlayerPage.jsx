@@ -266,11 +266,18 @@ export default function PlayerPage() {
         ) : (
           <div className={styles.totalsGrid}>
             {compPct !== null && (
-              <div key="comp_pct" className={styles.totalCard}>
-                <div className={styles.totalIcon}>{getStatIcon('comp_pct')}</div>
-                <div className={styles.totalValue}>{compPct}%</div>
-                <div className={styles.totalLabel}>Comp %</div>
-              </div>
+              <>
+                <div key="completions" className={styles.totalCard}>
+                  <div className={styles.totalIcon}>{getStatIcon('completion')}</div>
+                  <div className={styles.totalValue}>{completions}/{totalAttempts}</div>
+                  <div className={styles.totalLabel}>Completions</div>
+                </div>
+                <div key="comp_pct" className={styles.totalCard}>
+                  <div className={styles.totalIcon}>{getStatIcon('comp_pct')}</div>
+                  <div className={styles.totalValue}>{compPct}%</div>
+                  <div className={styles.totalLabel}>Comp %</div>
+                </div>
+              </>
             )}
             {Object.entries(totals).filter(([type]) => type !== 'completion' && type !== 'incomplete').map(([type, total]) => {
               const info = getStatInfo(type);
@@ -340,7 +347,7 @@ export default function PlayerPage() {
                     const info = getStatInfo(type);
                     return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
                   }),
-                ...(pdfCompPct !== null ? [`Comp%: ${pdfCompPct}%`] : []),
+                ...(pdfCompPct !== null ? [`Completions: ${pdfCompletions}/${pdfAttempts}`, `Comp%: ${pdfCompPct}%`] : []),
               ].join('  ·  ');
               doc.setFontSize(10);
               doc.setFont('helvetica', 'normal');
@@ -393,7 +400,7 @@ export default function PlayerPage() {
                     const info = getStatInfo(type);
                     return `${info.label}: ${total}${info.unit ? ' ' + info.unit : ''}`;
                   }),
-                ...(gameCompPct !== null ? [`Comp%: ${gameCompPct}%`] : []),
+                ...(gameCompPct !== null ? [`Completions: ${gameCompletions}/${gameAttempts}`, `Comp%: ${gameCompPct}%`] : []),
               ].join('  ·  ');
               const lines = doc.splitTextToSize(statLine, pageWidth - 28);
               doc.text(lines, 20, y);
@@ -449,14 +456,29 @@ export default function PlayerPage() {
                 <div className={styles.gameLogDate}>{format(new Date(game_date), 'd MMM yyyy')}</div>
               </div>
               <div className={styles.gameLogStats}>
-                {Object.entries(
-                  gs.reduce((acc, s) => { acc[s.stat_type] = (acc[s.stat_type] || 0) + Number(s.value); return acc; }, {})
-                ).map(([type, total]) => {
-                  const info = getStatInfo(type);
+                {(() => {
+                  const gt = gs.reduce((acc, s) => { acc[s.stat_type] = (acc[s.stat_type] || 0) + Number(s.value); return acc; }, {});
+                  const gc = gt['completion'] || 0;
+                  const gi = gt['incomplete'] || 0;
+                  const ga = gc + gi;
+                  const gp = ga > 0 ? Math.round((gc / ga) * 100) : null;
                   return (
-                    <span key={type} className="stat-badge">{getStatIcon(info.icon)} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}</span>
+                    <>
+                      {gp !== null && (
+                        <>
+                          <span className="stat-badge">{getStatIcon('completion')} Completions: {gc}/{ga}</span>
+                          <span className="stat-badge">{getStatIcon('comp_pct')} Comp%: {gp}%</span>
+                        </>
+                      )}
+                      {Object.entries(gt).filter(([type]) => !getStatInfo(type).hidden).map(([type, total]) => {
+                        const info = getStatInfo(type);
+                        return (
+                          <span key={type} className="stat-badge">{getStatIcon(info.icon)} {info.label}: {total}{info.unit ? ` ${info.unit}` : ''}</span>
+                        );
+                      })}
+                    </>
                   );
-                })}
+                })()}
               </div>
             </div>
           ))}
