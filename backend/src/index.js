@@ -18,6 +18,7 @@ const feedbackRouter = require('./routes/feedback');
 const playsRouter = require('./routes/plays');
 const opponentStatsRouter = require('./routes/opponentStats');
 const scoreAdjustmentsRouter = require('./routes/scoreAdjustments');
+const gameEventsRouter = require('./routes/gameEvents');
 const publicRouter = require('./routes/public');
 const billingRouter = require('./routes/billing');
 
@@ -52,6 +53,7 @@ app.use('/api/feedback', feedbackRouter);
 app.use('/api/plays', playsRouter);
 app.use('/api/opponent-stats', opponentStatsRouter);
 app.use('/api/score-adjustments', scoreAdjustmentsRouter);
+app.use('/api/game-events', gameEventsRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

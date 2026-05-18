@@ -59,6 +59,9 @@ export default function GamePage() {
 
   // Stat-first flow
   const [statFirstModal, setStatFirstModal] = useState(false);
+  const [gameEvents, setGameEvents] = useState([]);
+  const [gameEventModal, setGameEventModal] = useState(false);
+  const [gameEventSaving, setGameEventSaving] = useState(false);
   const [sfStat, setSfStat] = useState(null);
   const [sfPlayer, setSfPlayer] = useState(null);
   const [sfPasser, setSfPasser] = useState(null);
@@ -412,7 +415,8 @@ export default function GamePage() {
       api.get(`/plays?team_id=${teamId}`),
       api.get(`/opponent-stats?game_id=${gameId}`),
       api.get(`/score-adjustments?game_id=${gameId}`),
-    ]).then(([g, p, s, t, pl, os, sa]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setTeamType(t.team_type || null); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
+      api.get(`/game-events?game_id=${gameId}`),
+    ]).then(([g, p, s, t, pl, os, sa, ge]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setTeamType(t.team_type || null); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setGameEvents(ge); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -499,6 +503,7 @@ function openStatModal(player) {
   const mergedFeed = [
     ...stats.map(s => ({ ...s, _type: 'stat' })),
     ...opponentStats.map(s => ({ ...s, _type: 'opponent' })),
+    ...gameEvents.map(e => ({ ...e, _type: 'event' })),
   ].sort((a, b) => new Date(b.logged_at) - new Date(a.logged_at));
 
   // Group stats by player
@@ -600,7 +605,10 @@ function openStatModal(player) {
             )}
           </div>
           {isAdmin && (
-            <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>
+            <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => setGameEventModal(true)}>
+                + Game Event
+              </button>
+              <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 Adjust Score
             </button>
@@ -646,6 +654,31 @@ function openStatModal(player) {
           ) : (
             <div className={styles.statList}>
               {mergedFeed.map(item => {
+                if (item._type === 'event') {
+                  const EVENT_LABELS = {
+                    end_half: '— End of 1st Half —',
+                    end_regulation: '— End of Regulation —',
+                    start_ot: '— Start of OT —',
+                    turnover_on_downs: '— Turnover on Downs —',
+                  };
+                  return (
+                    <div key={`event-${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0' }}>
+                      <div style={{ flex: 1, height: 1, background: 'var(--gray-600)' }} />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--gray-400)', fontWeight: 600, letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+                        {EVENT_LABELS[item.event_type] || item.event_type}
+                      </span>
+                      <div style={{ flex: 1, height: 1, background: 'var(--gray-600)' }} />
+                      {isAdmin && (
+                        <button className={styles.statDel} onClick={async () => {
+                          try {
+                            await api.del(`/game-events/${item.id}`);
+                            setGameEvents(prev => prev.filter(e => e.id !== item.id));
+                          } catch (err) { setAlertModal(err.message); }
+                        }}>✕</button>
+                      )}
+                    </div>
+                  );
+                }
                 if (item._type === 'opponent') {
                   const type = OPPONENT_SCORE_TYPES.find(t => t.key === item.stat_type);
                   return (
@@ -967,6 +1000,39 @@ function openStatModal(player) {
       )}
 
       {/* Stat-First Modal */}
+      {gameEventModal && (
+        <Modal title="Log Game Event" onClose={() => setGameEventModal(false)}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            {[
+              { key: 'end_half', label: 'End of 1st Half' },
+              { key: 'end_regulation', label: 'End of Regulation' },
+              { key: 'start_ot', label: 'Start of OT' },
+              { key: 'turnover_on_downs', label: 'Turnover on Downs' },
+            ].map(evt => (
+              <button
+                key={evt.key}
+                className="btn btn-secondary"
+                style={{ padding: '14px 8px', fontWeight: 700 }}
+                disabled={gameEventSaving}
+                onClick={async () => {
+                  setGameEventSaving(true);
+                  try {
+                    const newEvent = await api.post('/game-events', { game_id: Number(gameId), event_type: evt.key });
+                    setGameEvents(prev => [newEvent, ...prev]);
+                    setGameEventModal(false);
+                  } catch (err) { setAlertModal(err.message); }
+                  finally { setGameEventSaving(false); }
+                }}
+              >
+                {evt.label}
+              </button>
+            ))}
+          </div>
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={() => setGameEventModal(false)}>Cancel</button>
+          </div>
+        </Modal>
+      )}
       {statFirstModal && (
         <Modal title="Log Stat" onClose={() => setStatFirstModal(false)} wide>
           {sfStep === 1 && (
