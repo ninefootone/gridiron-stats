@@ -605,13 +605,15 @@ function openStatModal(player) {
             )}
           </div>
           {isAdmin && (
-            <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => setGameEventModal(true)}>
+            <>
+              <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => setGameEventModal(true)}>
                 + Game Event
               </button>
               <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.adjustBtn}`} style={{ fontSize: '0.85rem', color: 'var(--gray-300)' }} onClick={() => { setAdjustForm({ team: 'ours', adjustment: '', reason: '' }); setAdjustModal(true); }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:6,verticalAlign:'middle'}}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 Adjust Score
-            </button>
+              </button>
+            </>
           )}
           {!isViewer && (
             <button className={`btn btn-ghost ${styles.logStatBtn} ${styles.whistleBtn}`} onClick={() => { setWhistleInput(whistleGameId || ''); setWhistleModal(true); }}>
