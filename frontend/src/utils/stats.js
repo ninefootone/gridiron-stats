@@ -10,6 +10,7 @@ export const STAT_CATEGORIES = {
       { key: 'rushing_yds',    label: 'Rushing Yards',      icon: 'rushing_yds',    unit: 'yds',  description: 'Yards run',                             flag: true,  contact: true, includeInStatFirst: true },
       { key: 'passing_yds',    label: 'Passing Yards',      icon: 'passing_yds',    unit: 'yds',  description: 'Yards thrown',                          flag: true,  contact: true },
       { key: 'reception',      label: 'Reception',          icon: 'reception',      unit: null,   description: 'Catch made',                            flag: true,  contact: true },
+      { key: 'first_down',     label: '1st Down',           icon: 'first_down',     unit: null,   description: 'Play resulted in a first down',         flag: true,  contact: true, excludeFromStatFirst: true },
       { key: 'incomplete',     label: 'Incomplete',         icon: 'incomplete',     unit: null,   description: 'Incomplete pass (QB)',                  flag: true,  contact: true },
       { key: 'int_thrown',     label: 'INT Thrown',         icon: 'int_thrown',     unit: null,   description: 'Interception thrown (QB)',               flag: true,  contact: true },
       { key: 'completion',     label: 'Completion',         icon: 'completion',     unit: null,   description: 'Completion (QB) — auto-logged',         flag: false, contact: false, hidden: true },
@@ -153,6 +154,8 @@ export function getStatNarrative(stat, allStats) {
       return `${name} ran in a 1PT conversion`;
     case 'reception':
       return `${name} made a reception`;
+    case 'first_down':
+      return `${name} converted a 1st down`;
     case 'incomplete':
       return `${name} threw an incomplete pass`;
     case 'int_thrown':

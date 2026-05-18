@@ -68,6 +68,7 @@ export default function GamePage() {
   const [sfReturnPlayer, setSfReturnPlayer] = useState(null);
   const [sfNotes, setSfNotes] = useState('');
   const [sfYards, setSfYards] = useState('');
+  const [sfFirstDown, setSfFirstDown] = useState(false);
   const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
 
   const [teamType, setTeamType] = useState(null);
@@ -111,12 +112,14 @@ export default function GamePage() {
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'completion' });
         if (sfYards && sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'receiving_yds', value: Number(sfYards) });
         if (sfYards && sfQb) toLog.push({ player: sfQb, stat_type: 'passing_yds', value: Number(sfYards) });
+        if (sfFirstDown && sfReceiver) toLog.push({ player: sfReceiver, stat_type: 'first_down' });
       } else if (sfStat === 'incomplete') {
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'incomplete' });
       } else if (sfStat === 'int_thrown') {
         if (sfQb) toLog.push({ player: sfQb, stat_type: 'int_thrown' });
       } else if (sfStat === 'rushing_yds') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'rushing_yds', value: sfYards ? Number(sfYards) : 1 });
+        if (sfFirstDown && sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'first_down' });
       } else {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
       }
@@ -990,7 +993,7 @@ function openStatModal(player) {
                             type="button"
                             className={`${statViewMode === 'list' ? styles.statBtnList : styles.statBtn} ${sfStat === s.key ? styles.statBtnActive : ''}`}
                             style={sfStat === s.key ? { borderColor: cat.color, background: `${cat.color}22` } : {}}
-                            onClick={() => { setSfStat(s.key); setSfStep(2); setSfPlayer(null); setSfPasser(null); setSfReceiver(null); setSfPickSix(false); setSfReturnPlayer(null); setSfQb(null); }}
+                            onClick={() => { setSfStat(s.key); setSfStep(2); setSfPlayer(null); setSfPasser(null); setSfReceiver(null); setSfPickSix(false); setSfReturnPlayer(null); setSfQb(null); setSfFirstDown(false); }}
                           >
                             <span className={styles.statBtnIcon}>{getStatIcon(s.icon)}</span>
                             <span className={styles.statBtnLabel}>{s.label}</span>
@@ -1044,6 +1047,12 @@ function openStatModal(player) {
                     <label>Yards (optional)</label>
                     <input className="form-control" type="number" value={sfYards} onChange={e => setSfYards(e.target.value)} placeholder="e.g. 15" />
                   </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={sfFirstDown} onChange={e => setSfFirstDown(e.target.checked)} />
+                      Resulted in a 1st Down?
+                    </label>
+                  </div>
                 </>
               ) : sfStat === 'rushing_yds' ? (
                 <>
@@ -1059,6 +1068,12 @@ function openStatModal(player) {
                   <div className="form-group" style={{ marginBottom: 14 }}>
                     <label>Yards (optional)</label>
                     <input className="form-control" type="number" value={sfYards} onChange={e => setSfYards(e.target.value)} placeholder="e.g. 8" />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                      <input type="checkbox" checked={sfFirstDown} onChange={e => setSfFirstDown(e.target.checked)} />
+                      Resulted in a 1st Down?
+                    </label>
                   </div>
                 </>
               ) : sfStat === 'incomplete' || sfStat === 'int_thrown' ? (
