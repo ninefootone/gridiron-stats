@@ -62,6 +62,9 @@ export default function GamePage() {
   const [gameEvents, setGameEvents] = useState([]);
   const [gameEventModal, setGameEventModal] = useState(false);
   const [gameEventSaving, setGameEventSaving] = useState(false);
+  const [gameAwards, setGameAwards] = useState([]);
+  const [awardSaving, setAwardSaving] = useState(false);
+  const [awardSelections, setAwardSelections] = useState({ mvp_offense: '', mvp_defense: '', coaches_award: '', honourable_mention: '' });
   const [sfStat, setSfStat] = useState(null);
   const [sfPlayer, setSfPlayer] = useState(null);
   const [sfPasser, setSfPasser] = useState(null);
@@ -425,7 +428,8 @@ export default function GamePage() {
       api.get(`/opponent-stats?game_id=${gameId}`),
       api.get(`/score-adjustments?game_id=${gameId}`),
       api.get(`/game-events?game_id=${gameId}`),
-    ]).then(([g, p, s, t, pl, os, sa, ge]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setTeamType(t.team_type || null); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setGameEvents(ge); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
+      api.get(`/game-awards?game_id=${gameId}`),
+    ]).then(([g, p, s, t, pl, os, sa, ge, gaw]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setTeamType(t.team_type || null); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setGameEvents(ge); setGameAwards(gaw); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -777,6 +781,123 @@ function openStatModal(player) {
               ))}
             </div>
           )}
+        {/* Game Awards — only shown once game is ended */}
+          {game.game_status === 'ended' && (
+            <div style={{ marginTop: 24 }}>
+              <div className="section-label" style={{ marginBottom: 12 }}>Game Awards</div>
+
+              {[
+                { key: 'mvp_offense', label: 'Offensive MVP', emoji: '🏆' },
+                { key: 'mvp_defense', label: 'Defensive MVP', emoji: '🛡️' },
+                { key: 'coaches_award', label: "Coach's Award", emoji: '⭐' },
+              ].map(({ key, label, emoji }) => {
+                const winner = gameAwards.find(a => a.award_type === key);
+                return (
+                  <div key={key} className={styles.summaryCard} style={{ marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                      <div style={{ fontWeight: 700, color: 'var(--gray-100)' }}>
+                        {emoji} {label}
+                      </div>
+                      {winner ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span className="stat-badge">#{winner.player_number} {winner.player_name}</span>
+                          {isAdmin && (
+                            <button className={styles.statDel} onClick={async () => {
+                              await api.del(`/game-awards/${winner.id}`);
+                              setGameAwards(prev => prev.filter(a => a.id !== winner.id));
+                            }}>✕</button>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }}>Not assigned</span>
+                      )}
+                    </div>
+                    {isAdmin && (
+                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                        <select
+                          className="form-control"
+                          style={{ flex: 1 }}
+                          value={awardSelections[key]}
+                          onChange={e => setAwardSelections(prev => ({ ...prev, [key]: e.target.value }))}
+                        >
+                          <option value="">— Select player —</option>
+                          {[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                            <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
+                          ))}
+                        </select>
+                        <button
+                          className="btn btn-primary btn-sm"
+                          disabled={!awardSelections[key] || awardSaving}
+                          onClick={async () => {
+                            setAwardSaving(true);
+                            try {
+                              const updated = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections[key]), award_type: key });
+                              setGameAwards(prev => [...prev.filter(a => a.award_type !== key), updated]);
+                              setAwardSelections(prev => ({ ...prev, [key]: '' }));
+                            } finally { setAwardSaving(false); }
+                          }}
+                        >
+                          {winner ? 'Reassign' : 'Assign'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Honourable Mentions — multiple allowed */}
+              <div className={styles.summaryCard} style={{ marginBottom: 8 }}>
+                <div style={{ fontWeight: 700, color: 'var(--gray-100)', marginBottom: 8 }}>🎖️ Honourable Mention</div>
+                {gameAwards.filter(a => a.award_type === 'honourable_mention').length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: isAdmin ? 10 : 0 }}>
+                    {gameAwards.filter(a => a.award_type === 'honourable_mention').map(a => (
+                      <span key={a.id} className="stat-badge" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        #{a.player_number} {a.player_name}
+                        {isAdmin && (
+                          <button style={{ background: 'none', border: 'none', color: 'var(--gray-400)', cursor: 'pointer', padding: 0, lineHeight: 1 }} onClick={async () => {
+                            await api.del(`/game-awards/${a.id}`);
+                            setGameAwards(prev => prev.filter(aw => aw.id !== a.id));
+                          }}>✕</button>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ color: 'var(--gray-500)', fontSize: '0.85rem', marginBottom: isAdmin ? 10 : 0 }}>None assigned</div>
+                )}
+                {isAdmin && (
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <select
+                      className="form-control"
+                      style={{ flex: 1 }}
+                      value={awardSelections.honourable_mention}
+                      onChange={e => setAwardSelections(prev => ({ ...prev, honourable_mention: e.target.value }))}
+                    >
+                      <option value="">— Select player —</option>
+                      {[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={!awardSelections.honourable_mention || awardSaving}
+                      onClick={async () => {
+                        setAwardSaving(true);
+                        try {
+                          const newAward = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections.honourable_mention), award_type: 'honourable_mention' });
+                          setGameAwards(prev => [...prev, newAward]);
+                          setAwardSelections(prev => ({ ...prev, honourable_mention: '' }));
+                        } finally { setAwardSaving(false); }
+                      }}
+                    >
+                      Add
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 
