@@ -1,5 +1,5 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireGameAccess } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
 const { broadcast } = require('../ws');
@@ -13,7 +13,7 @@ const SCORE_VALUES = {
 };
 
 // GET /api/opponent-stats?game_id=X
-router.get('/', requireAuth, async (req, res, next) => {
+router.get('/', requireAuth, requireGameAccess, async (req, res, next) => {
   const { game_id } = req.query;
   if (!game_id) return res.status(400).json({ error: 'game_id required' });
   try {
@@ -26,7 +26,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/opponent-stats
-router.post('/', requireAuth, async (req, res, next) => {
+router.post('/', requireAuth, requireGameAccess, async (req, res, next) => {
   const { game_id, stat_type } = req.body;
   if (!game_id || !stat_type) return res.status(400).json({ error: 'game_id and stat_type required' });
   const value = SCORE_VALUES[stat_type];
@@ -55,8 +55,15 @@ router.post('/', requireAuth, async (req, res, next) => {
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
-      `DELETE FROM opponent_stats WHERE id = $1 RETURNING game_id`,
-      [req.params.id]
+      `DELETE FROM opponent_stats
+       WHERE id = $1
+         AND game_id IN (
+           SELECT g.id FROM games g
+           WHERE g.team_id IN (SELECT id FROM teams WHERE created_by = $2)
+              OR g.team_id IN (SELECT team_id FROM team_members WHERE user_id = $2)
+         )
+       RETURNING game_id`,
+      [req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     const game_id = rows[0].game_id;
