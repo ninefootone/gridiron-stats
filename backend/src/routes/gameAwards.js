@@ -1,5 +1,5 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireGameAccess } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
 
@@ -7,7 +7,7 @@ const VALID_TYPES = ['mvp_offense', 'mvp_defense', 'coaches_award', 'honourable_
 const SINGLE_WINNER_TYPES = ['mvp_offense', 'mvp_defense', 'coaches_award'];
 
 // GET /api/game-awards?game_id=X
-router.get('/', requireAuth, async (req, res, next) => {
+router.get('/', requireAuth, requireGameAccess, async (req, res, next) => {
   const { game_id } = req.query;
   if (!game_id) return res.status(400).json({ error: 'game_id required' });
   try {
@@ -24,7 +24,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/game-awards
-router.post('/', requireAuth, async (req, res, next) => {
+router.post('/', requireAuth, requireGameAccess, async (req, res, next) => {
   const { game_id, player_id, award_type, notes } = req.body;
   if (!game_id || !player_id || !award_type) {
     return res.status(400).json({ error: 'game_id, player_id and award_type required' });
@@ -69,8 +69,15 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
   const { notes } = req.body;
   try {
     const { rows } = await pool.query(
-      `UPDATE game_awards SET notes = $1 WHERE id = $2 RETURNING *`,
-      [notes || null, req.params.id]
+      `UPDATE game_awards SET notes = $1
+       WHERE id = $2
+         AND game_id IN (
+           SELECT g.id FROM games g
+           WHERE g.team_id IN (SELECT id FROM teams WHERE created_by = $3)
+              OR g.team_id IN (SELECT team_id FROM team_members WHERE user_id = $3)
+         )
+       RETURNING *`,
+      [notes || null, req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Award not found' });
     res.json(rows[0]);
@@ -80,7 +87,17 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
 // DELETE /api/game-awards/:id
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
-    await pool.query(`DELETE FROM game_awards WHERE id = $1`, [req.params.id]);
+    const { rowCount } = await pool.query(
+      `DELETE FROM game_awards
+       WHERE id = $1
+         AND game_id IN (
+           SELECT g.id FROM games g
+           WHERE g.team_id IN (SELECT id FROM teams WHERE created_by = $2)
+              OR g.team_id IN (SELECT team_id FROM team_members WHERE user_id = $2)
+         )`,
+      [req.params.id, req.dbUser.id]
+    );
+    if (!rowCount) return res.status(403).json({ error: 'Not authorised' });
     res.json({ success: true });
   } catch (err) { next(err); }
 });
