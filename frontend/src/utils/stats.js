@@ -34,7 +34,7 @@ export const STAT_CATEGORIES = {
       { key: 'pbu',            label: 'PBU',                icon: 'pbu',            unit: null,   description: 'Pass break-up',                         flag: true,  contact: true },
       { key: 'td_return',      label: 'Return TD',          icon: 'td_return',      unit: null,   description: 'Defensive/special teams return TD',     flag: true,  contact: true },
       { key: 'return_2pt',     label: 'Return 2PT Conv',    icon: 'return_2pt',     unit: null,   description: 'Defensive return 2PT conversion',       flag: true,  contact: true },
-      { key: 'return_1pt',     label: 'Return 1PT Conv',    icon: 'return_1pt',     unit: null,   description: 'Defensive return 1PT conversion',       flag: false, contact: true },
+      { key: 'return_1pt',     label: 'Return 1PT Conv',    icon: 'return_1pt',     unit: null,   description: 'Defensive return 1PT conversion',       flag: false, contact: false },
       { key: 'fumble_rec',     label: 'Fumble Recovery',    icon: 'fumble_rec',     unit: null,   description: 'Fumble recovered',                      flag: false, contact: true, show_more: true },
       { key: 'forced_fumble',  label: 'Forced Fumble',      icon: 'forced_fumble',  unit: null,   description: 'Fumble forced',                         flag: false, contact: true, show_more: true },
     ]
