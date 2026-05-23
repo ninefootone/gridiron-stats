@@ -35,13 +35,16 @@ export default function PlayerPage() {
   const [linkResults, setLinkResults] = useState([]);
   const [linkSaving, setLinkSaving] = useState(false);
 
+  const [playerAwards, setPlayerAwards] = useState([]);
+
   useEffect(() => {
     Promise.all([
       api.get(`/players?team_id=${teamId}`),
       api.get(`/stats?player_id=${playerId}`),
       api.get(`/teams/${teamId}`),
       api.get(`/players/${playerId}/linked-stats`),
-    ]).then(([players, s, t, linked]) => {
+      api.get(`/players/${playerId}/awards`),
+    ]).then(([players, s, t, linked, awards]) => {
       setTeamRole(t.my_role);
       setTeam(t);
       const p = players.find(p => String(p.id) === String(playerId));
@@ -49,6 +52,7 @@ export default function PlayerPage() {
       if (p) setEditForm({ name: p.name, number: p.number || '', positions: p.positions || [] });
       setStats(s);
       setLinkedStats(linked);
+      setPlayerAwards(awards);
     }).catch(console.error).finally(() => setLoading(false));
   }, [playerId, teamId]);
 
@@ -255,6 +259,30 @@ export default function PlayerPage() {
           >
             {player.active ? 'Active' : 'Restore'}
           </button>
+        </div>
+      )}
+
+      {/* Honours */}
+      {playerAwards.length > 0 && (
+        <div className={styles.section}>
+          <div className="section-label">Honours</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {[
+              { key: 'mvp_offense', label: 'Offensive MVP', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
+              { key: 'mvp_defense', label: 'Defensive MVP', icon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></> },
+              { key: 'coaches_award', label: "Coach's Award", icon: <><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></> },
+              { key: 'honourable_mention', label: 'Honourable Mention', icon: <><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></> },
+            ].map(({ key, label, icon }) => {
+              const count = playerAwards.filter(a => a.award_type === key).length;
+              if (!count) return null;
+              return (
+                <div key={key} className="stat-badge" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
+                  {label}{count > 1 ? ` ×${count}` : ''}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

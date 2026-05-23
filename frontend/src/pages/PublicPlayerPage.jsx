@@ -12,14 +12,18 @@ export default function PublicPlayerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [playerAwards, setPlayerAwards] = useState([]);
+
   useEffect(() => {
     Promise.all([
       fetch(`${API_URL}/api/public/players/${token}`).then(r => r.json()),
       fetch(`${API_URL}/api/public/players/${token}/stats`).then(r => r.json()),
-    ]).then(([p, s]) => {
+      fetch(`${API_URL}/api/public/players/${token}/awards`).then(r => r.json()),
+    ]).then(([p, s, awards]) => {
       if (p.error) { setError('Player not found'); return; }
       setPlayer(p);
       setStats(s);
+      setPlayerAwards(Array.isArray(awards) ? awards : []);
     }).catch(() => setError('Failed to load player'))
       .finally(() => setLoading(false));
   }, [token]);
@@ -87,6 +91,31 @@ export default function PublicPlayerPage() {
           </div>
         )}
       </div>
+
+      {/* Honours */}
+      {playerAwards.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>
+            Honours
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {[
+              { key: 'mvp_offense', label: 'Offensive MVP' },
+              { key: 'mvp_defense', label: 'Defensive MVP' },
+              { key: 'coaches_award', label: "Coach's Award" },
+              { key: 'honourable_mention', label: 'Honourable Mention' },
+            ].map(({ key, label }) => {
+              const count = playerAwards.filter(a => a.award_type === key).length;
+              if (!count) return null;
+              return (
+                <div key={key} style={{ background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.25)', borderRadius: 20, padding: '5px 12px', fontSize: '0.82rem', fontWeight: 600, color: '#f5a623', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  {label}{count > 1 ? ` ×${count}` : ''}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Season Totals */}
       <div style={{ marginBottom: 24 }}>
