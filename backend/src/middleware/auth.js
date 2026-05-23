@@ -69,4 +69,23 @@ async function requireAuth(req, res, next) {
   }
 }
 
-module.exports = { clerkAuth, requireAuth };
+async function requireTeamAccess(req, res, next) {
+  const teamId = req.params.teamId || req.params.id || req.query.team_id;
+  if (!teamId) return res.status(400).json({ error: 'Team ID required' });
+  try {
+    const { rows } = await pool.query(
+      `SELECT t.id FROM teams t
+       WHERE t.id = $1
+         AND (t.created_by = $2 OR t.id IN (
+           SELECT team_id FROM team_members WHERE user_id = $2
+         ))`,
+      [teamId, req.dbUser.id]
+    );
+    if (!rows.length) return res.status(403).json({ error: 'Not authorised' });
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { clerkAuth, requireAuth, requireTeamAccess };

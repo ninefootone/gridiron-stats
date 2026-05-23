@@ -3,9 +3,10 @@ const { requireAuth } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
 const { checkTeamRestricted } = require('../middleware/checkRestricted');
+const { requireTeamAccess } = require('../middleware/auth');
 
 // GET /api/players?team_id=X
-router.get('/', requireAuth, async (req, res, next) => {
+router.get('/', requireAuth, requireTeamAccess, async (req, res, next) => {
   const { team_id } = req.query;
   if (!team_id) return res.status(400).json({ error: 'team_id required' });
   try {

@@ -163,7 +163,10 @@ router.get('/:id', requireAuth, async (req, res, next) => {
        FROM teams t
        LEFT JOIN users u ON u.id = t.created_by
        LEFT JOIN team_members tm ON tm.team_id = t.id AND tm.user_id = $2
-       WHERE t.id = $1`,
+       WHERE t.id = $1
+         AND (t.created_by = $2 OR t.id IN (
+           SELECT team_id FROM team_members WHERE user_id = $2
+         ))`,
       [req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Team not found' });

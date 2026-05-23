@@ -1,5 +1,5 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireTeamAccess } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const { broadcast } = require('../ws');
 const { checkTeamRestricted } = require('../middleware/checkRestricted');
@@ -7,7 +7,7 @@ const { checkTeamRestricted } = require('../middleware/checkRestricted');
 const router = express.Router();
 
 // GET /api/games?team_id=X
-router.get('/', requireAuth, async (req, res, next) => {
+router.get('/', requireAuth, requireTeamAccess, async (req, res, next) => {
   const { team_id } = req.query;
   if (!team_id) return res.status(400).json({ error: 'team_id required' });
   try {
@@ -47,7 +47,13 @@ router.post('/', requireAuth, checkGameLimit, checkTeamRestricted, async (req, r
 // GET /api/games/:id
 router.get('/:id', requireAuth, async (req, res, next) => {
   try {
-    const { rows } = await pool.query(`SELECT * FROM games WHERE id = $1`, [req.params.id]);
+    const { rows } = await pool.query(
+      `SELECT g.* FROM games g
+       WHERE g.id = $1
+         AND (g.team_id IN (SELECT id FROM teams WHERE created_by = $2)
+           OR g.team_id IN (SELECT team_id FROM team_members WHERE user_id = $2))`,
+      [req.params.id, req.dbUser.id]
+    );
     if (!rows.length) return res.status(404).json({ error: 'Game not found' });
     res.json(rows[0]);
   } catch (err) {
