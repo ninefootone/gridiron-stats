@@ -1,12 +1,12 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireGameAccess } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const { recalculateOurScore } = require('../utils/scoring');
 const router = express.Router();
 const { broadcast } = require('../ws');
 
 // GET /api/score-adjustments?game_id=X
-router.get('/', requireAuth, async (req, res, next) => {
+router.get('/', requireAuth, requireGameAccess, async (req, res, next) => {
   const { game_id } = req.query;
   if (!game_id) return res.status(400).json({ error: 'game_id required' });
   try {
@@ -23,7 +23,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 });
 
 // POST /api/score-adjustments
-router.post('/', requireAuth, async (req, res, next) => {
+router.post('/', requireAuth, requireGameAccess, async (req, res, next) => {
   const { game_id, team, adjustment, reason } = req.body;
   if (!game_id || !team || adjustment === undefined || !reason?.trim()) {
     return res.status(400).json({ error: 'game_id, team, adjustment and reason required' });
@@ -64,8 +64,15 @@ router.post('/', requireAuth, async (req, res, next) => {
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
-      `DELETE FROM score_adjustments WHERE id = $1 RETURNING game_id, team`,
-      [req.params.id]
+      `DELETE FROM score_adjustments
+       WHERE id = $1
+         AND game_id IN (
+           SELECT g.id FROM games g
+           WHERE g.team_id IN (SELECT id FROM teams WHERE created_by = $2)
+              OR g.team_id IN (SELECT team_id FROM team_members WHERE user_id = $2)
+         )
+       RETURNING game_id, team`,
+      [req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     const { game_id, team } = rows[0];
@@ -93,7 +100,7 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
 });
 
 // PUT /api/score-adjustments/lock/:game_id — lock/unlock score
-router.put('/lock/:game_id', requireAuth, async (req, res, next) => {
+router.put('/lock/:game_id', requireAuth, requireGameAccess, async (req, res, next) => {
   const { score_locked } = req.body;
   try {
     const { rows } = await pool.query(
