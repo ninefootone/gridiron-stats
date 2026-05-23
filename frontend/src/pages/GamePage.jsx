@@ -671,10 +671,10 @@ function openStatModal(player) {
                     <div style={{ color: 'var(--gray-500)', fontSize: '0.85rem', marginTop: 6 }}>Not assigned</div>
                   )}
                   {isAdmin && (!winner || isExpanded) && (
-                    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
                       <select
                         className="form-control"
-                        style={{ flex: 1 }}
+                        style={{ width: '100%' }}
                         value={awardSelections[key]}
                         onChange={e => setAwardSelections(prev => ({ ...prev, [key]: e.target.value }))}
                       >
@@ -683,9 +683,10 @@ function openStatModal(player) {
                           <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
                         ))}
                       </select>
+                      <div style={{ display: 'flex', gap: 8 }}>
                       <button
-                        className="btn btn-primary btn-sm"
-                        disabled={!awardSelections[key] || awardSaving}
+                          className="btn btn-primary btn-sm"
+                          disabled={!awardSelections[key] || awardSaving}
                         onClick={async () => {
                           setAwardSaving(true);
                           try {
@@ -701,6 +702,7 @@ function openStatModal(player) {
                       {winner && isExpanded && (
                         <button className="btn btn-secondary btn-sm" onClick={toggleExpand}>Cancel</button>
                       )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -741,10 +743,10 @@ function openStatModal(player) {
                     <div style={{ color: 'var(--gray-500)', fontSize: '0.85rem', marginTop: 6 }}>None assigned</div>
                   )}
                   {isAdmin && (!mentions.length || isExpanded) && (
-                    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
                       <select
                         className="form-control"
-                        style={{ flex: 1 }}
+                        style={{ width: '100%' }}
                         value={awardSelections.honourable_mention}
                         onChange={e => setAwardSelections(prev => ({ ...prev, honourable_mention: e.target.value }))}
                       >
@@ -753,6 +755,7 @@ function openStatModal(player) {
                           <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
                         ))}
                       </select>
+                      <div style={{ display: 'flex', gap: 8 }}>
                       <button
                         className="btn btn-primary btn-sm"
                         disabled={!awardSelections.honourable_mention || awardSaving}
@@ -770,6 +773,7 @@ function openStatModal(player) {
                       {mentions.length > 0 && isExpanded && (
                         <button className="btn btn-secondary btn-sm" onClick={toggleExpand}>Done</button>
                       )}
+                      </div>
                     </div>
                   )}
                 </div>
