@@ -1,5 +1,5 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireTeamAccess, requireGameAccess } = require('../middleware/auth');
 const { pool } = require('../db/init');
 const router = express.Router();
 const { recalculateOurScore } = require('../utils/scoring');
@@ -12,6 +12,15 @@ router.get('/', requireAuth, async (req, res, next) => {
   try {
     let query, params;
     if (game_id) {
+      // Check user has access to this game's team
+      const { rows: access } = await pool.query(
+        `SELECT g.id FROM games g
+         WHERE g.id = $1
+           AND (g.team_id IN (SELECT id FROM teams WHERE created_by = $2)
+             OR g.team_id IN (SELECT team_id FROM team_members WHERE user_id = $2))`,
+        [game_id, req.dbUser.id]
+      );
+      if (!access.length) return res.status(403).json({ error: 'Not authorised' });
       query = `
         SELECT ps.*, p.name AS player_name, p.number AS player_number, p.position AS player_position,
                u.name AS logged_by_name, pl.name AS play_name, pl.type AS play_type
@@ -23,6 +32,15 @@ router.get('/', requireAuth, async (req, res, next) => {
         ORDER BY ps.logged_at DESC`;
       params = [game_id];
     } else if (player_id) {
+      // Check user has access to this player's team
+      const { rows: access } = await pool.query(
+        `SELECT p.id FROM players p
+         WHERE p.id = $1
+           AND (p.team_id IN (SELECT id FROM teams WHERE created_by = $2)
+             OR p.team_id IN (SELECT team_id FROM team_members WHERE user_id = $2))`,
+        [player_id, req.dbUser.id]
+      );
+      if (!access.length) return res.status(403).json({ error: 'Not authorised' });
       query = `
         SELECT ps.*, g.opponent_name, g.game_date, g.game_type,
                pl.name AS play_name, pl.type AS play_type
@@ -43,7 +61,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 });
 
 // GET /api/stats/summary?team_id=X — season leaderboard + play breakdowns
-router.get('/summary', requireAuth, async (req, res, next) => {
+router.get('/summary', requireAuth, requireTeamAccess, async (req, res, next) => {
   const { team_id } = req.query;
   if (!team_id) return res.status(400).json({ error: 'team_id required' });
   try {
@@ -121,8 +139,15 @@ router.post('/', requireAuth, checkTeamRestricted, async (req, res, next) => {
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
-      `DELETE FROM player_stats WHERE id = $1 RETURNING game_id`,
-      [req.params.id]
+      `DELETE FROM player_stats
+       WHERE id = $1
+         AND game_id IN (
+           SELECT g.id FROM games g
+           WHERE g.team_id IN (SELECT id FROM teams WHERE created_by = $2)
+              OR g.team_id IN (SELECT team_id FROM team_members WHERE user_id = $2)
+         )
+       RETURNING game_id`,
+      [req.params.id, req.dbUser.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
     const game_id = rows[0].game_id;
