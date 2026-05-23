@@ -64,6 +64,19 @@ router.post('/', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// PATCH /api/game-awards/:id — update notes only
+router.patch('/:id', requireAuth, async (req, res, next) => {
+  const { notes } = req.body;
+  try {
+    const { rows } = await pool.query(
+      `UPDATE game_awards SET notes = $1 WHERE id = $2 RETURNING *`,
+      [notes || null, req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Award not found' });
+    res.json(rows[0]);
+  } catch (err) { next(err); }
+});
+
 // DELETE /api/game-awards/:id
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {

@@ -652,7 +652,19 @@ function openStatModal(player) {
             ].map(({ key, label, icon }) => {
               const winner = gameAwards.find(a => a.award_type === key);
               const isExpanded = awardExpandedKeys.includes(key);
-              const toggleExpand = () => setAwardExpandedKeys(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+              const toggleExpand = () => {
+                if (!awardExpandedKeys.includes(key)) {
+                  if (winner) {
+                    setAwardSelections(prev => ({ ...prev, [key]: String(winner.player_id) }));
+                    setAwardNotes(prev => ({ ...prev, [key]: winner.notes || '' }));
+                  }
+                  setAwardExpandedKeys(prev => [...prev, key]);
+                } else {
+                  setAwardSelections(prev => ({ ...prev, [key]: '' }));
+                  setAwardNotes(prev => ({ ...prev, [key]: '' }));
+                  setAwardExpandedKeys(prev => prev.filter(k => k !== key));
+                }
+              };
               return (
                 <div key={key} className={styles.summaryCard}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -726,7 +738,17 @@ function openStatModal(player) {
             {(() => {
               const mentions = gameAwards.filter(a => a.award_type === 'honourable_mention');
               const isExpanded = awardExpandedKeys.includes('honourable_mention');
-              const toggleExpand = () => setAwardExpandedKeys(prev => prev.includes('honourable_mention') ? prev.filter(k => k !== 'honourable_mention') : [...prev, 'honourable_mention']);
+              const sharedNote = mentions.length > 0 ? mentions[0].notes : null;
+              const toggleExpand = () => {
+                if (!awardExpandedKeys.includes('honourable_mention')) {
+                  setAwardNotes(prev => ({ ...prev, honourable_mention: sharedNote || '' }));
+                  setAwardExpandedKeys(prev => [...prev, 'honourable_mention']);
+                } else {
+                  setAwardSelections(prev => ({ ...prev, honourable_mention: '' }));
+                  setAwardNotes(prev => ({ ...prev, honourable_mention: '' }));
+                  setAwardExpandedKeys(prev => prev.filter(k => k !== 'honourable_mention'));
+                }
+              };
               return (
                 <div className={styles.summaryCard}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -755,10 +777,77 @@ function openStatModal(player) {
                   ) : (
                     <div style={{ color: 'var(--gray-500)', fontSize: '0.85rem', marginTop: 6 }}>None assigned</div>
                   )}
-                  {mentions.length > 0 && mentions[0].notes && !isExpanded && (
-                    <p style={{ margin: '6px 0 0', fontSize: '0.82rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>{mentions[0].notes}</p>
+                  {sharedNote && !isExpanded && (
+                    <p style={{ margin: '6px 0 0', fontSize: '0.82rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>{sharedNote}</p>
                   )}
-                  {isAdmin && (!mentions.length || isExpanded) && (
+                  {isAdmin && isExpanded && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+                      {/* Note editing — always shown when expanded */}
+                      <textarea
+                        className="form-control"
+                        style={{ width: '100%', resize: 'vertical', fontSize: '0.85rem' }}
+                        rows={2}
+                        placeholder="Add a shared note (optional)"
+                        value={awardNotes.honourable_mention}
+                        onChange={e => setAwardNotes(prev => ({ ...prev, honourable_mention: e.target.value }))}
+                      />
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        disabled={awardSaving}
+                        onClick={async () => {
+                          if (!mentions.length) return;
+                          setAwardSaving(true);
+                          try {
+                            // PATCH note on all existing mention rows
+                            await Promise.all(mentions.map(a =>
+                              api.patch(`/game-awards/${a.id}`, { notes: awardNotes.honourable_mention || null })
+                            ));
+                            setGameAwards(prev => prev.map(a =>
+                              a.award_type === 'honourable_mention'
+                                ? { ...a, notes: awardNotes.honourable_mention || null }
+                                : a
+                            ));
+                          } finally { setAwardSaving(false); }
+                        }}
+                        style={{ alignSelf: 'flex-start' }}
+                      >
+                        Save Note
+                      </button>
+                      {/* Add another player */}
+                      <div style={{ borderTop: '1px solid var(--gray-700)', paddingTop: 8 }}>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--gray-400)', marginBottom: 6 }}>Add player</div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <select
+                            className="form-control"
+                            style={{ flex: 1 }}
+                            value={awardSelections.honourable_mention}
+                            onChange={e => setAwardSelections(prev => ({ ...prev, honourable_mention: e.target.value }))}
+                          >
+                            <option value="">— Select player —</option>
+                            {[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                              <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
+                            ))}
+                          </select>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            disabled={!awardSelections.honourable_mention || awardSaving}
+                            onClick={async () => {
+                              setAwardSaving(true);
+                              try {
+                                const newAward = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections.honourable_mention), award_type: 'honourable_mention', notes: awardNotes.honourable_mention || null });
+                                setGameAwards(prev => [...prev, newAward]);
+                                setAwardSelections(prev => ({ ...prev, honourable_mention: '' }));
+                              } finally { setAwardSaving(false); }
+                            }}
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                      <button className="btn btn-secondary btn-sm" onClick={toggleExpand} style={{ alignSelf: 'flex-start' }}>Done</button>
+                    </div>
+                  )}
+                  {isAdmin && !mentions.length && !isExpanded && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
                       <select
                         className="form-control"
@@ -775,30 +864,26 @@ function openStatModal(player) {
                         className="form-control"
                         style={{ width: '100%', resize: 'vertical', fontSize: '0.85rem' }}
                         rows={2}
-                        placeholder="Add a note (optional)"
+                        placeholder="Add a shared note (optional)"
                         value={awardNotes.honourable_mention}
                         onChange={e => setAwardNotes(prev => ({ ...prev, honourable_mention: e.target.value }))}
                       />
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                          className="btn btn-primary btn-sm"
-                          disabled={!awardSelections.honourable_mention || awardSaving}
-                          onClick={async () => {
-                            setAwardSaving(true);
-                            try {
-                              const newAward = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections.honourable_mention), award_type: 'honourable_mention', notes: awardNotes.honourable_mention || null });
-                              setGameAwards(prev => [...prev, newAward]);
-                              setAwardSelections(prev => ({ ...prev, honourable_mention: '' }));
-                              setAwardNotes(prev => ({ ...prev, honourable_mention: '' }));
-                            } finally { setAwardSaving(false); }
-                          }}
-                        >
-                          Add
-                        </button>
-                        {mentions.length > 0 && isExpanded && (
-                          <button className="btn btn-secondary btn-sm" onClick={toggleExpand}>Done</button>
-                        )}
-                      </div>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={!awardSelections.honourable_mention || awardSaving}
+                        onClick={async () => {
+                          setAwardSaving(true);
+                          try {
+                            const newAward = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections.honourable_mention), award_type: 'honourable_mention', notes: awardNotes.honourable_mention || null });
+                            setGameAwards(prev => [...prev, newAward]);
+                            setAwardSelections(prev => ({ ...prev, honourable_mention: '' }));
+                            setAwardNotes(prev => ({ ...prev, honourable_mention: '' }));
+                          } finally { setAwardSaving(false); }
+                        }}
+                        style={{ alignSelf: 'flex-start' }}
+                      >
+                        Add
+                      </button>
                     </div>
                   )}
                 </div>
