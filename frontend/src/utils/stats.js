@@ -7,7 +7,7 @@ export const STAT_CATEGORIES = {
       { key: 'td_receiving',   label: 'Receiving TD',       icon: 'td_receiving',   unit: null,   description: 'Touchdown catch (WR/TE/RB)',             flag: true,  contact: true, excludeFromStatFirst: true },
       { key: 'td_rushing',     label: 'Rushing TD',         icon: 'td_rushing',     unit: null,   description: 'Touchdown run (RB/QB)',                  flag: true,  contact: true },
       { key: 'receiving_yds',  label: 'Receiving Yards',    icon: 'receiving_yds',  unit: 'yds',  description: 'Yards after catch',                     flag: true,  contact: true },
-      { key: 'rushing_yds',    label: 'Rushing Yards',      icon: 'rushing_yds',    unit: 'yds',  description: 'Yards run',                             flag: true,  contact: true, includeInStatFirst: true },
+      { key: 'rushing_yds',    label: 'Rush Yards',         icon: 'rushing_yds',    unit: 'yds',  description: 'Yards run',                             flag: true,  contact: true, includeInStatFirst: true },
       { key: 'passing_yds',    label: 'Passing Yards',      icon: 'passing_yds',    unit: 'yds',  description: 'Yards thrown',                          flag: true,  contact: true },
       { key: 'reception',      label: 'Reception',          icon: 'reception',      unit: null,   description: 'Catch made',                            flag: true,  contact: true },
       { key: 'first_down',     label: '1st Down',           icon: 'first_down',     unit: null,   description: 'Play resulted in a first down',         flag: true,  contact: true, excludeFromStatFirst: true },
@@ -34,7 +34,7 @@ export const STAT_CATEGORIES = {
       { key: 'pbu',            label: 'PBU',                icon: 'pbu',            unit: null,   description: 'Pass break-up',                         flag: true,  contact: true },
       { key: 'td_return',      label: 'Return TD',          icon: 'td_return',      unit: null,   description: 'Defensive/special teams return TD',     flag: true,  contact: true },
       { key: 'return_2pt',     label: 'Return 2PT Conv',    icon: 'return_2pt',     unit: null,   description: 'Defensive return 2PT conversion',       flag: true,  contact: true },
-      { key: 'return_1pt',     label: 'Return 1PT Conv',    icon: 'return_1pt',     unit: null,   description: 'Defensive return 1PT conversion',       flag: true,  contact: true },
+      { key: 'return_1pt',     label: 'Return 1PT Conv',    icon: 'return_1pt',     unit: null,   description: 'Defensive return 1PT conversion',       flag: false, contact: true },
       { key: 'fumble_rec',     label: 'Fumble Recovery',    icon: 'fumble_rec',     unit: null,   description: 'Fumble recovered',                      flag: false, contact: true, show_more: true },
       { key: 'forced_fumble',  label: 'Forced Fumble',      icon: 'forced_fumble',  unit: null,   description: 'Fumble forced',                         flag: false, contact: true, show_more: true },
     ]
