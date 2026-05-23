@@ -65,6 +65,7 @@ export default function GamePage() {
   const [gameAwards, setGameAwards] = useState([]);
   const [awardSaving, setAwardSaving] = useState(false);
   const [awardSelections, setAwardSelections] = useState({ mvp_offense: '', mvp_defense: '', coaches_award: '', honourable_mention: '' });
+  const [awardExpandedKeys, setAwardExpandedKeys] = useState([]);
   const [sfStat, setSfStat] = useState(null);
   const [sfPlayer, setSfPlayer] = useState(null);
   const [sfPasser, setSfPasser] = useState(null);
@@ -637,8 +638,147 @@ function openStatModal(player) {
         </div>
       )}
 
+      {/* Game Awards — only shown once game is ended */}
+      {game.game_status === 'ended' && (
+        <div style={{ margin: '0 0 16px 0' }}>
+          <div className="section-label" style={{ marginBottom: 10 }}>Game Awards</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 8 }}>
 
+            {[
+              { key: 'mvp_offense', label: 'Offensive MVP', icon: <><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></> },
+              { key: 'mvp_defense', label: 'Defensive MVP', icon: <><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></> },
+              { key: 'coaches_award', label: "Coach's Award", icon: <><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></> },
+            ].map(({ key, label, icon }) => {
+              const winner = gameAwards.find(a => a.award_type === key);
+              const isExpanded = awardExpandedKeys.includes(key);
+              const toggleExpand = () => setAwardExpandedKeys(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+              return (
+                <div key={key} className={styles.summaryCard}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: 'var(--gray-100)', fontSize: '0.9rem' }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{icon}</svg>
+                      {label}
+                    </div>
+                    {isAdmin && winner && !isExpanded && (
+                      <button onClick={toggleExpand} style={{ background: 'none', border: 'none', color: 'var(--gray-400)', cursor: 'pointer', fontSize: '0.78rem', padding: 0 }}>Change</button>
+                    )}
+                  </div>
+                  {winner ? (
+                    <div style={{ marginTop: 6 }}>
+                      <span className="stat-badge">#{winner.player_number} {winner.player_name}</span>
+                    </div>
+                  ) : (
+                    <div style={{ color: 'var(--gray-500)', fontSize: '0.85rem', marginTop: 6 }}>Not assigned</div>
+                  )}
+                  {isAdmin && (!winner || isExpanded) && (
+                    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                      <select
+                        className="form-control"
+                        style={{ flex: 1 }}
+                        value={awardSelections[key]}
+                        onChange={e => setAwardSelections(prev => ({ ...prev, [key]: e.target.value }))}
+                      >
+                        <option value="">— Select player —</option>
+                        {[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                          <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={!awardSelections[key] || awardSaving}
+                        onClick={async () => {
+                          setAwardSaving(true);
+                          try {
+                            const updated = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections[key]), award_type: key });
+                            setGameAwards(prev => [...prev.filter(a => a.award_type !== key), updated]);
+                            setAwardSelections(prev => ({ ...prev, [key]: '' }));
+                            setAwardExpandedKeys(prev => prev.filter(k => k !== key));
+                          } finally { setAwardSaving(false); }
+                        }}
+                      >
+                        {winner ? 'Reassign' : 'Assign'}
+                      </button>
+                      {winner && isExpanded && (
+                        <button className="btn btn-secondary btn-sm" onClick={toggleExpand}>Cancel</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
+            {/* Honourable Mentions — multiple allowed */}
+            {(() => {
+              const mentions = gameAwards.filter(a => a.award_type === 'honourable_mention');
+              const isExpanded = awardExpandedKeys.includes('honourable_mention');
+              const toggleExpand = () => setAwardExpandedKeys(prev => prev.includes('honourable_mention') ? prev.filter(k => k !== 'honourable_mention') : [...prev, 'honourable_mention']);
+              return (
+                <div className={styles.summaryCard}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: 'var(--gray-100)', fontSize: '0.9rem' }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+                      Honourable Mention
+                    </div>
+                    {isAdmin && mentions.length > 0 && !isExpanded && (
+                      <button onClick={toggleExpand} style={{ background: 'none', border: 'none', color: 'var(--gray-400)', cursor: 'pointer', fontSize: '0.78rem', padding: 0 }}>Add / Edit</button>
+                    )}
+                  </div>
+                  {mentions.length > 0 ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                      {mentions.map(a => (
+                        <span key={a.id} className="stat-badge" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          #{a.player_number} {a.player_name}
+                          {isAdmin && isExpanded && (
+                            <button style={{ background: 'none', border: 'none', color: 'var(--gray-400)', cursor: 'pointer', padding: 0, lineHeight: 1 }} onClick={async () => {
+                              await api.del(`/game-awards/${a.id}`);
+                              setGameAwards(prev => prev.filter(aw => aw.id !== a.id));
+                            }}>✕</button>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ color: 'var(--gray-500)', fontSize: '0.85rem', marginTop: 6 }}>None assigned</div>
+                  )}
+                  {isAdmin && (!mentions.length || isExpanded) && (
+                    <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                      <select
+                        className="form-control"
+                        style={{ flex: 1 }}
+                        value={awardSelections.honourable_mention}
+                        onChange={e => setAwardSelections(prev => ({ ...prev, honourable_mention: e.target.value }))}
+                      >
+                        <option value="">— Select player —</option>
+                        {[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                          <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        disabled={!awardSelections.honourable_mention || awardSaving}
+                        onClick={async () => {
+                          setAwardSaving(true);
+                          try {
+                            const newAward = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections.honourable_mention), award_type: 'honourable_mention' });
+                            setGameAwards(prev => [...prev, newAward]);
+                            setAwardSelections(prev => ({ ...prev, honourable_mention: '' }));
+                          } finally { setAwardSaving(false); }
+                        }}
+                      >
+                        Add
+                      </button>
+                      {mentions.length > 0 && isExpanded && (
+                        <button className="btn btn-secondary btn-sm" onClick={toggleExpand}>Done</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+          </div>
+        </div>
+      )}
 
       <div className={styles.layout}>
         {/* Player roster */}
@@ -781,123 +921,6 @@ function openStatModal(player) {
               ))}
             </div>
           )}
-        {/* Game Awards — only shown once game is ended */}
-          {game.game_status === 'ended' && (
-            <div style={{ marginTop: 24 }}>
-              <div className="section-label" style={{ marginBottom: 12 }}>Game Awards</div>
-
-              {[
-                { key: 'mvp_offense', label: 'Offensive MVP', emoji: '🏆' },
-                { key: 'mvp_defense', label: 'Defensive MVP', emoji: '🛡️' },
-                { key: 'coaches_award', label: "Coach's Award", emoji: '⭐' },
-              ].map(({ key, label, emoji }) => {
-                const winner = gameAwards.find(a => a.award_type === key);
-                return (
-                  <div key={key} className={styles.summaryCard} style={{ marginBottom: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                      <div style={{ fontWeight: 700, color: 'var(--gray-100)' }}>
-                        {emoji} {label}
-                      </div>
-                      {winner ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span className="stat-badge">#{winner.player_number} {winner.player_name}</span>
-                          {isAdmin && (
-                            <button className={styles.statDel} onClick={async () => {
-                              await api.del(`/game-awards/${winner.id}`);
-                              setGameAwards(prev => prev.filter(a => a.id !== winner.id));
-                            }}>✕</button>
-                          )}
-                        </div>
-                      ) : (
-                        <span style={{ color: 'var(--gray-500)', fontSize: '0.85rem' }}>Not assigned</span>
-                      )}
-                    </div>
-                    {isAdmin && (
-                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                        <select
-                          className="form-control"
-                          style={{ flex: 1 }}
-                          value={awardSelections[key]}
-                          onChange={e => setAwardSelections(prev => ({ ...prev, [key]: e.target.value }))}
-                        >
-                          <option value="">— Select player —</option>
-                          {[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
-                            <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
-                          ))}
-                        </select>
-                        <button
-                          className="btn btn-primary btn-sm"
-                          disabled={!awardSelections[key] || awardSaving}
-                          onClick={async () => {
-                            setAwardSaving(true);
-                            try {
-                              const updated = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections[key]), award_type: key });
-                              setGameAwards(prev => [...prev.filter(a => a.award_type !== key), updated]);
-                              setAwardSelections(prev => ({ ...prev, [key]: '' }));
-                            } finally { setAwardSaving(false); }
-                          }}
-                        >
-                          {winner ? 'Reassign' : 'Assign'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-
-              {/* Honourable Mentions — multiple allowed */}
-              <div className={styles.summaryCard} style={{ marginBottom: 8 }}>
-                <div style={{ fontWeight: 700, color: 'var(--gray-100)', marginBottom: 8 }}>🎖️ Honourable Mention</div>
-                {gameAwards.filter(a => a.award_type === 'honourable_mention').length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: isAdmin ? 10 : 0 }}>
-                    {gameAwards.filter(a => a.award_type === 'honourable_mention').map(a => (
-                      <span key={a.id} className="stat-badge" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        #{a.player_number} {a.player_name}
-                        {isAdmin && (
-                          <button style={{ background: 'none', border: 'none', color: 'var(--gray-400)', cursor: 'pointer', padding: 0, lineHeight: 1 }} onClick={async () => {
-                            await api.del(`/game-awards/${a.id}`);
-                            setGameAwards(prev => prev.filter(aw => aw.id !== a.id));
-                          }}>✕</button>
-                        )}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ color: 'var(--gray-500)', fontSize: '0.85rem', marginBottom: isAdmin ? 10 : 0 }}>None assigned</div>
-                )}
-                {isAdmin && (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <select
-                      className="form-control"
-                      style={{ flex: 1 }}
-                      value={awardSelections.honourable_mention}
-                      onChange={e => setAwardSelections(prev => ({ ...prev, honourable_mention: e.target.value }))}
-                    >
-                      <option value="">— Select player —</option>
-                      {[...players].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
-                        <option key={p.id} value={p.id}>#{p.number} {p.name}</option>
-                      ))}
-                    </select>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      disabled={!awardSelections.honourable_mention || awardSaving}
-                      onClick={async () => {
-                        setAwardSaving(true);
-                        try {
-                          const newAward = await api.post('/game-awards', { game_id: Number(gameId), player_id: Number(awardSelections.honourable_mention), award_type: 'honourable_mention' });
-                          setGameAwards(prev => [...prev, newAward]);
-                          setAwardSelections(prev => ({ ...prev, honourable_mention: '' }));
-                        } finally { setAwardSaving(false); }
-                      }}
-                    >
-                      Add
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
         </div>
       </div>
 
