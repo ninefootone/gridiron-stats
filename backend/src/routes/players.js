@@ -268,4 +268,22 @@ router.delete('/:id/share-token', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/players/:id/awards
+router.get('/:id/awards', requireAuth, async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT ga.id, ga.award_type, ga.notes, ga.logged_at,
+              g.id AS game_id, g.opponent, g.game_date
+       FROM game_awards ga
+       JOIN games g ON g.id = ga.game_id
+       JOIN players p ON p.id = ga.player_id
+       JOIN team_members tm ON tm.team_id = p.team_id
+       WHERE ga.player_id = $1 AND tm.user_id = $2
+       ORDER BY g.game_date DESC`,
+      [req.params.id, req.dbUser.id]
+    );
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
 module.exports = router;

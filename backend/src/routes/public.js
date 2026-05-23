@@ -84,6 +84,28 @@ router.get('/players/:token/stats', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/public/players/:token/awards — public player awards by share token
+router.get('/players/:token/awards', async (req, res, next) => {
+  try {
+    const { rows: playerRows } = await pool.query(
+      `SELECT p.id FROM players p WHERE p.share_token = $1`,
+      [req.params.token]
+    );
+    if (!playerRows.length) return res.status(404).json({ error: 'Player not found' });
+    const playerId = playerRows[0].id;
+    const { rows } = await pool.query(
+      `SELECT ga.id, ga.award_type, ga.notes, ga.logged_at,
+              g.id AS game_id, g.opponent_name, g.game_date
+       FROM game_awards ga
+       JOIN games g ON g.id = ga.game_id
+       WHERE ga.player_id = $1
+       ORDER BY g.game_date DESC`,
+      [playerId]
+    );
+    res.json(rows);
+  } catch (err) { next(err); }
+});
+
 // GET /api/public/stats-summary — public platform stats for marketing site
 router.get('/stats-summary', async (req, res, next) => {
   try {

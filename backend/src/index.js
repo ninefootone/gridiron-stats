@@ -19,6 +19,7 @@ const playsRouter = require('./routes/plays');
 const opponentStatsRouter = require('./routes/opponentStats');
 const scoreAdjustmentsRouter = require('./routes/scoreAdjustments');
 const gameEventsRouter = require('./routes/gameEvents');
+const gameAwardsRouter = require('./routes/gameAwards');
 const publicRouter = require('./routes/public');
 const billingRouter = require('./routes/billing');
 
@@ -54,6 +55,7 @@ app.use('/api/plays', playsRouter);
 app.use('/api/opponent-stats', opponentStatsRouter);
 app.use('/api/score-adjustments', scoreAdjustmentsRouter);
 app.use('/api/game-events', gameEventsRouter);
+app.use('/api/game-awards', gameAwardsRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
