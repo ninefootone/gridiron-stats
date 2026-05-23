@@ -273,7 +273,7 @@ router.get('/:id/awards', requireAuth, async (req, res, next) => {
   try {
     const { rows } = await pool.query(
       `SELECT ga.id, ga.award_type, ga.notes, ga.logged_at,
-              g.id AS game_id, g.opponent, g.game_date
+              g.id AS game_id, g.opponent_name, g.game_date
        FROM game_awards ga
        JOIN games g ON g.id = ga.game_id
        JOIN players p ON p.id = ga.player_id
