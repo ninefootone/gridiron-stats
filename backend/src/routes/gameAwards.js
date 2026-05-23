@@ -39,7 +39,7 @@ router.post('/', requireAuth, async (req, res, next) => {
       ({ rows } = await pool.query(
         `INSERT INTO game_awards (game_id, player_id, award_type, notes, logged_by)
          VALUES ($1, $2, $3, $4, $5)
-         ON CONFLICT ON CONSTRAINT game_awards_single_winner
+         ON CONFLICT (game_id, award_type) WHERE award_type IN ('mvp_offense', 'mvp_defense', 'coaches_award')
          DO UPDATE SET player_id = EXCLUDED.player_id, notes = EXCLUDED.notes, logged_by = EXCLUDED.logged_by, logged_at = NOW()
          RETURNING *`,
         [game_id, player_id, award_type, notes || null, req.dbUser.id]
