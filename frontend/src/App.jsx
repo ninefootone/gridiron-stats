@@ -48,7 +48,7 @@ export default function App() {
           <Route path="admin" element={<AdminPage />} />
           <Route path="*" element={<Navigate to="/teams" replace />} />
         </Route>
-        <Route path="/live/:gameId" element={<LivePage />} />
+        <Route path="/live/:viewCode/:gameId" element={<LivePage />} />
         <Route path="/player/:token" element={<PublicPlayerPage />} />
       </Routes>
       <CookieBanner />

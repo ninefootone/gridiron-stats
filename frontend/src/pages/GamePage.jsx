@@ -80,6 +80,7 @@ export default function GamePage() {
   const [sfStep, setSfStep] = useState(1); // 1 = pick stat, 2 = pick player(s)
 
   const [teamType, setTeamType] = useState(null);
+  const [viewCode, setViewCode] = useState(null);
   const [showMoreStats, setShowMoreStats] = useState(false);
   const [statViewMode, setStatViewMode] = useState(() => localStorage.getItem('statViewMode') || 'grid');
   const [liveViewModal, setLiveViewModal] = useState(false);
@@ -431,7 +432,7 @@ export default function GamePage() {
       api.get(`/score-adjustments?game_id=${gameId}`),
       api.get(`/game-events?game_id=${gameId}`),
       api.get(`/game-awards?game_id=${gameId}`),
-    ]).then(([g, p, s, t, pl, os, sa, ge, gaw]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setTeamType(t.team_type || null); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setGameEvents(ge); setGameAwards(gaw); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
+    ]).then(([g, p, s, t, pl, os, sa, ge, gaw]) => { setGame(g); setPlayers(p); setStats(s); setTeamRole(t.my_role); setTeamType(t.team_type || null); setViewCode(t.view_code || null); setPlays(pl); setOpponentStats(os); setScoreAdjustments(sa); setGameEvents(ge); setGameAwards(gaw); setScoreForm({ our_score: g.our_score ?? '', opponent_score: g.opponent_score ?? '', game_type: g.game_type || 'regular' }); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [gameId, teamId]);
@@ -1576,7 +1577,7 @@ function openStatModal(player) {
         />
       )}
       {liveViewModal && (
-        <LiveViewModal gameId={gameId} onClose={() => setLiveViewModal(false)} />
+        <LiveViewModal gameId={gameId} viewCode={viewCode} onClose={() => setLiveViewModal(false)} />
       )}
 
       {gameMoreModal && (

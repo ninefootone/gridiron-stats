@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import Modal from './Modal';
 
-export default function LiveViewModal({ gameId, onClose }) {
-  const url = `https://app.gridiron-stats.co/live/${gameId}`;
+export default function LiveViewModal({ gameId, viewCode, onClose }) {
+  const url = `https://app.gridiron-stats.co/live/${viewCode}/${gameId}`;
   const [copied, setCopied] = useState(false);
 
   function copyUrl() {

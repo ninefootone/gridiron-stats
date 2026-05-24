@@ -2,46 +2,54 @@ const express = require('express');
 const { pool } = require('../db/init');
 const router = express.Router();
 
-// GET /api/public/games/:id
-router.get('/games/:id', async (req, res, next) => {
+// GET /api/public/games/:viewCode/:id
+router.get('/games/:viewCode/:id', async (req, res, next) => {
   try {
     const { rows } = await pool.query(
-      `SELECT id, opponent_name, game_date, game_time, home_away,
-              our_score, opponent_score, game_type, location, game_status, whistle_game_id
-       FROM games WHERE id = $1`,
-      [req.params.id]
+      `SELECT g.id, g.opponent_name, g.game_date, g.game_time, g.home_away,
+              g.our_score, g.opponent_score, g.game_type, g.location, g.game_status, g.whistle_game_id
+       FROM games g
+       JOIN teams t ON t.id = g.team_id
+       WHERE g.id = $1 AND UPPER(t.view_code) = UPPER($2)`,
+      [req.params.id, req.params.viewCode]
     );
     if (!rows.length) return res.status(404).json({ error: 'Game not found' });
     res.json(rows[0]);
   } catch (err) { next(err); }
 });
 
-// GET /api/public/stats?game_id=X
+// GET /api/public/stats?game_id=X&view_code=Y
 router.get('/stats', async (req, res, next) => {
-  const { game_id } = req.query;
-  if (!game_id) return res.status(400).json({ error: 'game_id required' });
+  const { game_id, view_code } = req.query;
+  if (!game_id || !view_code) return res.status(400).json({ error: 'game_id and view_code required' });
   try {
     const { rows } = await pool.query(
       `SELECT ps.id, ps.stat_type, ps.value, ps.notes, ps.logged_at, ps.game_id,
               p.name AS player_name, p.number AS player_number
        FROM player_stats ps
        JOIN players p ON p.id = ps.player_id
-       WHERE ps.game_id = $1
+       JOIN games g ON g.id = ps.game_id
+       JOIN teams t ON t.id = g.team_id
+       WHERE ps.game_id = $1 AND UPPER(t.view_code) = UPPER($2)
        ORDER BY ps.logged_at DESC`,
-      [game_id]
+      [game_id, view_code]
     );
     res.json(rows);
   } catch (err) { next(err); }
 });
 
-// GET /api/public/opponent-stats?game_id=X
+// GET /api/public/opponent-stats?game_id=X&view_code=Y
 router.get('/opponent-stats', async (req, res, next) => {
-  const { game_id } = req.query;
-  if (!game_id) return res.status(400).json({ error: 'game_id required' });
+  const { game_id, view_code } = req.query;
+  if (!game_id || !view_code) return res.status(400).json({ error: 'game_id and view_code required' });
   try {
     const { rows } = await pool.query(
-      `SELECT * FROM opponent_stats WHERE game_id = $1 ORDER BY logged_at DESC`,
-      [game_id]
+      `SELECT os.* FROM opponent_stats os
+       JOIN games g ON g.id = os.game_id
+       JOIN teams t ON t.id = g.team_id
+       WHERE os.game_id = $1 AND UPPER(t.view_code) = UPPER($2)
+       ORDER BY os.logged_at DESC`,
+      [game_id, view_code]
     );
     res.json(rows);
   } catch (err) { next(err); }

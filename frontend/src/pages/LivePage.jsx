@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function LivePage() {
-  const { gameId } = useParams();
+  const { gameId, viewCode } = useParams();
   const [game, setGame] = useState(null);
   const [stats, setStats] = useState([]);
   const [opponentStats, setOpponentStats] = useState([]);
@@ -18,9 +18,9 @@ export default function LivePage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/api/public/games/${gameId}`).then(r => r.json()),
-      fetch(`${API_URL}/api/public/stats?game_id=${gameId}`).then(r => r.json()),
-      fetch(`${API_URL}/api/public/opponent-stats?game_id=${gameId}`).then(r => r.json()),
+      fetch(`${API_URL}/api/public/games/${viewCode}/${gameId}`).then(r => r.json()),
+      fetch(`${API_URL}/api/public/stats?game_id=${gameId}&view_code=${viewCode}`).then(r => r.json()),
+      fetch(`${API_URL}/api/public/opponent-stats?game_id=${gameId}&view_code=${viewCode}`).then(r => r.json()),
     ]).then(([g, s, os]) => {
       if (g.error) { setError('Game not found'); return; }
       setGame(g);
