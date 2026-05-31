@@ -9,9 +9,9 @@ const SCORING_STATS = {
   two_pt_carry: 2,
   return_2pt: 2,
   safety: 2,
+  pat_kick: 1,
+  field_goal: 3,
 };
-
-
 
 async function recalculateOurScore(pool, game_id) {
   // Sum scoring stats
