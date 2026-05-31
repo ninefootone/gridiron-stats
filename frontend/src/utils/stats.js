@@ -33,6 +33,7 @@ export const STAT_CATEGORIES = {
       { key: 'interception',   label: 'Interception',       icon: 'interception',   unit: null,   description: 'INT',                                   flag: true,  contact: true },
       { key: 'pbu',            label: 'PBU',                icon: 'pbu',            unit: null,   description: 'Pass break-up',                         flag: true,  contact: true },
       { key: 'td_return',      label: 'Return TD',          icon: 'td_return',      unit: null,   description: 'Defensive/special teams return TD',     flag: true,  contact: true },
+      { key: 'safety',         label: 'Safety',             icon: 'safety',         unit: null,   description: 'Defense scores a safety (+2)',          flag: true,  contact: true },
       { key: 'return_2pt',     label: 'Return 2PT Conv',    icon: 'return_2pt',     unit: null,   description: 'Defensive return 2PT conversion',       flag: true,  contact: true },
       { key: 'return_1pt',     label: 'Return 1PT Conv',    icon: 'return_1pt',     unit: null,   description: 'Defensive return 1PT conversion',       flag: false, contact: false },
       { key: 'fumble_rec',     label: 'Fumble Recovery',    icon: 'fumble_rec',     unit: null,   description: 'Fumble recovered',                      flag: false, contact: true, show_more: true },
@@ -176,6 +177,8 @@ export function getStatNarrative(stat, allStats) {
       return `${name} made a tackle for loss`;
     case 'sack':
       return `${name} sacked the quarterback`;
+    case 'safety':
+      return `${name} recorded a safety`;
     case 'interception':
       return `${name} picked off the pass`;
     case 'pbu':
