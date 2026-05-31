@@ -570,6 +570,9 @@ function openStatModal(player) {
   const gameDate = new Date(game.game_date); gameDate.setHours(0,0,0,0);
   const isToday = gameDate.getTime() === today.getTime();
   const isPast = gameDate < today;
+  const isEnded = game.game_status === 'ended';
+  const kickoffPassed = !!game.game_time && new Date().toTimeString().slice(0, 5) >= game.game_time;
+  const isLiveNow = !isEnded && (game.game_status === 'active' || (isToday && kickoffPassed));
 
   return (
     <div>
@@ -577,14 +580,14 @@ function openStatModal(player) {
         <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/teams/${teamId}?tab=games`)}>← All Games</button>
         {(isAdmin || teamRole === 'member') && (isToday || isPast) && (
           <button
-            className={`btn btn-sm ${game.game_status === 'active' ? 'btn-danger' : 'btn-primary'}`}
+            className={`btn btn-sm ${isLiveNow ? 'btn-danger' : 'btn-primary'}`}
             onClick={async () => {
-              const newStatus = game.game_status === 'active' ? 'ended' : game.game_status === 'ended' ? 'active' : 'active';
+              const newStatus = isEnded ? 'active' : isLiveNow ? 'ended' : 'active';
               const g = await api.patch(`/games/${gameId}/status`, { status: newStatus });
               setGame(g);
             }}
           >
-            {game.game_status === 'active' ? 'End Game' : game.game_status === 'ended' ? 'Restart Game' : 'Mark Complete'}
+            {isEnded ? 'Reopen Game' : isLiveNow ? 'End Game' : 'Go Live Now'}
           </button>
         )}
         {isAdmin && (
@@ -622,8 +625,8 @@ function openStatModal(player) {
             <div className={styles.scoreDash}>–</div>
             <div className={styles.scoreNum}>{game.opponent_score}</div>
           </div>
-          <span className={`tag ${game.game_status === 'active' ? 'tag-gold' : isPast || game.game_status === 'ended' ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
-            {game.game_status === 'active' ? '🟢 Live' : game.game_status === 'ended' ? 'Final' : isToday ? `Today${game.game_time ? ' · ' + game.game_time : ''}` : isPast ? 'Final' : 'Scheduled'}
+          <span className={`tag ${isLiveNow ? 'tag-gold' : isEnded || isPast ? 'tag-green' : 'tag-gray'}`} style={{ marginTop: 4 }}>
+            {isLiveNow ? '🟢 Live' : isEnded || isPast ? 'Final' : isToday ? `Today${game.game_time ? ' · ' + game.game_time : ''}` : 'Scheduled'}
           </span>
         </div>
       </div>   

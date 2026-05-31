@@ -82,6 +82,9 @@ export default function LivePage() {
   const gameDate = new Date(game.game_date); gameDate.setHours(0,0,0,0);
   const isToday = gameDate.getTime() === today.getTime();
   const isPast = gameDate < today;
+  const isEnded = game.game_status === 'ended';
+  const kickoffPassed = !!game.game_time && new Date().toTimeString().slice(0, 5) >= game.game_time;
+  const isLiveNow = !isEnded && (game.game_status === 'active' || (isToday && kickoffPassed));
 
   if (!isToday && !isPast && game.game_status === 'scheduled') {
     return (
@@ -137,9 +140,9 @@ export default function LivePage() {
         </div>
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            {game.game_status === 'ended' || isPast ? 'Final Score' : game.game_status === 'active' ? '🟢 Live' : `Today${game.game_time ? ' · ' + game.game_time : ''}`}
+            {isEnded || isPast ? 'Final Score' : isLiveNow ? '🟢 Live' : `Today${game.game_time ? ' · ' + game.game_time : ''}`}
           </span>
-          {game.game_status === 'active' && (
+          {isLiveNow && (
             <span style={{ fontSize: '0.75rem', background: 'rgba(100,220,100,0.15)', color: '#6edb8a', padding: '1px 8px', borderRadius: 99, border: '1px solid rgba(100,220,100,0.3)' }}>In Progress</span>
           )}
           {game.game_status === 'ended' && (
