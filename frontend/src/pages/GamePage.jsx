@@ -129,6 +129,9 @@ export default function GamePage() {
       } else if (sfStat === 'rushing_yds') {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'rushing_yds', value: sfYards ? Number(sfYards) : 1 });
         if (sfFirstDown && sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'first_down' });
+      } else if (sfStat === 'td_rushing') {
+        if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'td_rushing' });
+        if (sfYards && sfPlayer) toLog.push({ player: sfPlayer, stat_type: 'rushing_yds', value: Number(sfYards) });
       } else {
         if (sfPlayer) toLog.push({ player: sfPlayer, stat_type: sfStat });
       }
@@ -1439,6 +1442,22 @@ function openStatModal(player) {
                       <input type="checkbox" checked={sfFirstDown} onChange={e => setSfFirstDown(e.target.checked)} />
                       Resulted in a 1st Down?
                     </label>
+                  </div>
+                </>
+              ) : sfStat === 'td_rushing' ? (
+                <>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Player</label>
+                    <select className="form-control" value={sfPlayer?.id || ''} onChange={e => setSfPlayer(players.find(p => String(p.id) === e.target.value) || null)}>
+                      <option value="">— Select player —</option>
+                      {[...players.filter(p => p.active)].sort((a, b) => (a.number ?? 999) - (b.number ?? 999)).map(p => (
+                        <option key={p.id} value={p.id}>#{p.number ?? '—'} {p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 14 }}>
+                    <label>Yards (optional)</label>
+                    <input className="form-control" type="number" value={sfYards} onChange={e => setSfYards(e.target.value)} placeholder="e.g. 12" />
                   </div>
                 </>
               ) : sfStat === 'incomplete' || sfStat === 'int_thrown' ? (
