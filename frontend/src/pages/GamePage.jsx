@@ -136,6 +136,11 @@ export default function GamePage() {
       api.post('/stats', { game_id: Number(gameId), player_id: player.id, stat_type, value: value ?? 1, notes: sfNotes || null, play_id: sfPlay || null })
           .then(s => ({ ...s, player_name: player.name, player_number: player.number, play_name: plays.find(p => p.id === sfPlay)?.name || null }))
       ));
+      setStats(prev => {
+        const existing = new Set(prev.map(x => Number(x.id)));
+        const fresh = results.filter(r => !existing.has(Number(r.id)));
+        return [...fresh, ...prev];
+      });
       const lastWithScore = results.slice().reverse().find(r => r.our_score !== null && r.our_score !== undefined);
       if (lastWithScore) setGame(prev => ({ ...prev, our_score: lastWithScore.our_score }));
       setStatFirstModal(false);
@@ -396,7 +401,8 @@ export default function GamePage() {
   async function logOpponentScore(stat_type) {
     setOpponentSaving(true);
     try {
-      const { opponent_score } = await api.post('/opponent-stats', { game_id: Number(gameId), stat_type });
+      const { stat, opponent_score } = await api.post('/opponent-stats', { game_id: Number(gameId), stat_type });
+      if (stat) setOpponentStats(prev => prev.find(x => Number(x.id) === Number(stat.id)) ? prev : [stat, ...prev]);
       setGame(prev => ({ ...prev, opponent_score }));
     } catch (err) { setAlertModal(err.message); }
     finally { setOpponentSaving(false); setOpponentModal(false); }
@@ -461,6 +467,9 @@ function openStatModal(player) {
     try {
       const statDef = getStatInfo(selectedStat);
       const val = statDef.unit ? (Number(statValue) || 0) : 1;
+      const playName = plays.find(p => p.id === selectedPlay)?.name || null;
+      const enrich = st => ({ ...st, player_name: selectedPlayer.name, player_number: selectedPlayer.number, play_name: playName });
+      const addToFeed = st => setStats(prev => prev.find(x => Number(x.id) === Number(st.id)) ? prev : [enrich(st), ...prev]);
       const s = await api.post('/stats', {
         game_id: Number(gameId),
         player_id: selectedPlayer.id,
@@ -469,11 +478,12 @@ function openStatModal(player) {
         notes: statNotes || null,
         play_id: selectedPlay || null,
       });
+      addToFeed(s);
       if (s.our_score !== null && s.our_score !== undefined) {
         setGame(prev => ({ ...prev, our_score: s.our_score }));
       }
       if (['td_receiving', 'receiving_yds', 'two_pt_rec', 'one_pt_rec'].includes(selectedStat)) {
-        await api.post('/stats', {
+        const rec = await api.post('/stats', {
           game_id: Number(gameId),
           player_id: selectedPlayer.id,
           stat_type: 'reception',
@@ -481,6 +491,7 @@ function openStatModal(player) {
           notes: null,
           play_id: selectedPlay || null,
         });
+        addToFeed(rec);
       }
       setStatModal(false);
     } catch (err) { setAlertModal(err.message); }
