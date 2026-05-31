@@ -6,15 +6,23 @@ const WS_URL = import.meta.env.VITE_API_URL
 
 export function useGameSocket(gameId, handlers) {
   const wsRef = useRef(null);
+  const hasConnected = useRef(false);
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;
 
   useEffect(() => {
     if (!gameId) return;
+    hasConnected.current = false;
 
     function connect() {
       const ws = new WebSocket(`${WS_URL}?game_id=${gameId}`);
       wsRef.current = ws;
+
+      ws.onopen = () => {
+        // On reconnect (not the first connect), refetch to recover anything missed while disconnected
+        if (hasConnected.current) handlersRef.current.onReconnect?.();
+        hasConnected.current = true;
+      };
 
       ws.onmessage = (e) => {
         try {

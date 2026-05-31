@@ -148,6 +148,23 @@ export default function GamePage() {
     finally { setSaving(false); }
   }
 
+  async function resyncGameData() {
+    try {
+      const [g, s, os, sa, ge] = await Promise.all([
+        api.get(`/games/${gameId}`),
+        api.get(`/stats?game_id=${gameId}`),
+        api.get(`/opponent-stats?game_id=${gameId}`),
+        api.get(`/score-adjustments?game_id=${gameId}`),
+        api.get(`/game-events?game_id=${gameId}`),
+      ]);
+      setGame(prev => ({ ...prev, ...g }));
+      setStats(s);
+      setOpponentStats(os);
+      setScoreAdjustments(sa);
+      setGameEvents(ge);
+    } catch (err) { console.error('Resync failed', err); }
+  }
+
   useGameSocket(gameId, {
     stat_added: ({ stat }) => {
       setStats(prev => {
@@ -191,6 +208,7 @@ export default function GamePage() {
     game_status_changed: ({ game_status }) => {
       setGame(prev => ({ ...prev, game_status }));
     },
+    onReconnect: () => { resyncGameData(); },
   });
 
   const { whistleState, connected: whistleConnected } = useWhistleSocket(whistleGameId);
