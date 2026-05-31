@@ -497,12 +497,26 @@ async function loadMembers() {
             <div className={styles.gameList}>
               {(() => {
                 const today = new Date(); today.setHours(0,0,0,0);
+                const byTimeThenName = (a, b) => {
+                  const ta = (a.game_time || '').trim();
+                  const tb = (b.game_time || '').trim();
+                  if (ta && tb) { if (ta !== tb) return ta < tb ? -1 : 1; }
+                  else if (ta) return -1;
+                  else if (tb) return 1;
+                  return (a.opponent_name || '').localeCompare(b.opponent_name || '', undefined, { sensitivity: 'base' });
+                };
                 const upcoming = [...games]
                   .filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d >= today; })
-                  .sort((a, b) => new Date(a.game_date) - new Date(b.game_date));
+                  .sort((a, b) => {
+                    const d = new Date(a.game_date) - new Date(b.game_date);
+                    return d !== 0 ? d : byTimeThenName(a, b);
+                  });
                 const completed = [...games]
                   .filter(g => { const d = new Date(g.game_date); d.setHours(0,0,0,0); return d < today; })
-                  .sort((a, b) => new Date(b.game_date) - new Date(a.game_date));
+                  .sort((a, b) => {
+                    const d = new Date(b.game_date) - new Date(a.game_date);
+                    return d !== 0 ? d : byTimeThenName(a, b);
+                  });
 
                 const renderGame = g => {
                   const gameDate = new Date(g.game_date); gameDate.setHours(0,0,0,0);

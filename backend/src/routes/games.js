@@ -16,7 +16,7 @@ router.get('/', requireAuth, requireTeamAccess, async (req, res, next) => {
               (SELECT COUNT(*) FROM player_stats ps WHERE ps.game_id = g.id) AS stat_count
        FROM games g
        WHERE g.team_id = $1
-       ORDER BY g.game_date DESC`,
+       ORDER BY g.game_date DESC, NULLIF(g.game_time, '') ASC NULLS LAST, LOWER(g.opponent_name) ASC`,
       [team_id]
     );
     res.json(rows);
