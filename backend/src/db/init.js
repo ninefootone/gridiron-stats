@@ -133,8 +133,6 @@ async function initDB() {
 
 // score_locked on games
     await pool.query(`ALTER TABLE games ADD COLUMN IF NOT EXISTS score_locked BOOLEAN DEFAULT false`);
-    // Lock all existing games so their manual scores are preserved
-    await pool.query(`UPDATE games SET score_locked = true WHERE score_locked = false AND (our_score > 0 OR opponent_score > 0)`);
     // score_adjustments table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS score_adjustments (
