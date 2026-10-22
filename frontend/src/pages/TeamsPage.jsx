@@ -35,6 +35,7 @@ export default function TeamsPage() {
   const location = useLocation();
   const { openUpgrade } = useUpgrade();
   const [showChooseTeamModal, setShowChooseTeamModal] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     api.get('/teams').then(data => {
@@ -43,7 +44,7 @@ export default function TeamsPage() {
       const hasRestricted = adminTeams.some(t => t.restricted);
       const hasActive = adminTeams.some(t => !t.restricted);
       if (hasRestricted && !hasActive && adminTeams.length > 1) setShowChooseTeamModal(true);
-    }).catch(console.error).finally(() => setLoading(false));
+    }).catch(err => { console.error(err); setLoadError(true); }).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -153,7 +154,13 @@ export default function TeamsPage() {
         </div>
       )}
 
-      {teams.length === 0 ? (
+      {loadError ? (
+        <div className="empty-state">
+          <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: 'uppercase', fontSize: '1.5rem', marginBottom: 8, color: '#ffffff' }}>We can't load your teams right now</p>
+          <p style={{ color: 'var(--gray-300)', marginBottom: 24 }}>Your teams, players and stats are safe. Our hosting provider is having a temporary problem, so Gridiron Stats can't reach its database at the moment. Please try again later.</p>
+          <button className="btn btn-primary" onClick={() => window.location.reload()}>Try again</button>
+        </div>
+      ) : teams.length === 0 ? (
         <div className="empty-state">
           <div className="icon" style={{ filter: 'none', opacity: 1 }}>
 	  	<img src="/football.svg" alt="" style={{ width: 48, height: 48 }} />
