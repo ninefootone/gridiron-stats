@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.railway.app/railpack.json",
   "build": {
-    "builder": "NIXPACKS",
+    "builder": "RAILPACK",
     "buildCommand": "cd backend && npm install"
   },
   "deploy": {
