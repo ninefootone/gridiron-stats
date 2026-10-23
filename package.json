@@ -2,6 +2,7 @@
   "name": "gridiron-stats",
   "version": "1.0.0",
   "private": true,
+  "engines": { "node": ">=22.23.4 <23" },
   "scripts": {
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",

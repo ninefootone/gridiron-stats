@@ -65,7 +65,7 @@ app.use((err, req, res, next) => {
 initDB().then(() => {
   setupWebSocket(server);
   server.listen(PORT, () => {
-    console.log(`🏈 Gridiron Stats API running on port ${PORT}`);
+    console.log(`🏈 Gridiron Stats API running on port ${PORT} on Node ${process.version}`);
   });
 }).catch(err => {
   console.error('Failed to initialise database:', err);
