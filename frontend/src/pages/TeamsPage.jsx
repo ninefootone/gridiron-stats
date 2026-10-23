@@ -157,7 +157,7 @@ export default function TeamsPage() {
       {loadError ? (
         <div className="empty-state">
           <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, textTransform: 'uppercase', fontSize: '1.5rem', marginBottom: 8, color: '#ffffff' }}>We can't load your teams right now</p>
-          <p style={{ color: 'var(--gray-300)', marginBottom: 24 }}>Your teams, players and stats are safe. Our hosting provider is having a temporary problem, so Gridiron Stats can't reach its database at the moment. Please try again later.</p>
+          <p style={{ color: 'var(--gray-300)', marginBottom: 24 }}>Your teams, players and stats are safe — we just couldn't reach the server. Please check your connection and try again in a few minutes.</p>
           <button className="btn btn-primary" onClick={() => window.location.reload()}>Try again</button>
         </div>
       ) : teams.length === 0 ? (
